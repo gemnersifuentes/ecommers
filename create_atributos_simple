@@ -1,0 +1,76 @@
+<?php
+require_once __DIR__ . '/backend/config/conexion.php';
+
+try {
+    $database = new Database();
+    $db = $database->getConnection();
+    
+    echo "Creando tablas de atributos...\n\n";
+    
+    // 1. Crear tabla atributos SIN foreign keys primero
+    $sql1 = "CREATE TABLE IF NOT EXISTS atributos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nombre VARCHAR(50) NOT NULL,
+        activo BOOLEAN DEFAULT 1
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    
+    $db->exec($sql1);
+    echo "✓ Tabla atributos creada\n";
+    
+    // 2. Crear tabla atributo_valores
+    $sql2 = "CREATE TABLE IF NOT EXISTS atributo_valores (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        atributo_id INT NOT NULL,
+        valor VARCHAR(50) NOT NULL,
+        color_hex VARCHAR(20) DEFAULT NULL,
+        activo BOOLEAN DEFAULT 1
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    
+    $db->exec($sql2);
+    echo "✓ Tabla atributo_valores creada\n";
+    
+    // 3. Crear tabla producto_variantes
+    $sql3 = "CREATE TABLE IF NOT EXISTS producto_variantes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        producto_id INT NOT NULL,
+        precio DECIMAL(10, 2) DEFAULT NULL,
+        stock INT DEFAULT 0,
+        sku VARCHAR(50) DEFAULT NULL,
+        activo BOOLEAN DEFAULT 1
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    
+    $db->exec($sql3);
+    echo "✓ Tabla producto_variantes creada\n";
+    
+    // 4. Crear tabla variante_valores
+    $sql4 = "CREATE TABLE IF NOT EXISTS variante_valores (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        variante_id INT NOT NULL,
+        atributo_valor_id INT NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    
+    $db->exec($sql4);
+    echo "✓ Tabla variante_valores creada\n";
+    
+    // 5. Insertar atributos base si no existen
+    $checkAttr = $db->query("SELECT COUNT(*) FROM atributos")->fetchColumn();
+    if ($checkAttr == 0) {
+        $db->exec("INSERT INTO atributos (nombre) VALUES ('Color'), ('Almacenamiento'), ('Talla')");
+        echo "✓ Atributos base insertados\n";
+    } else {
+        echo "✓ Atributos ya existen ($checkAttr registros)\n";
+    }
+    
+    echo "\n=== VERIFICACIÓN ===\n";
+    $tables = ['atributos', 'atributo_valores', 'producto_variantes', 'variante_valores'];
+    foreach ($tables as $table) {
+        $count = $db->query("SELECT COUNT(*) FROM `$table`")->fetchColumn();
+        echo "$table: $count registros\n";
+    }
+    
+    echo "\n✓  Migración completada exitosamente!\n";
+    
+} catch (Exception $e) {
+    echo "ERROR: " . $e->getMessage() . "\n";
+    echo "Trace: " . $e->getTraceAsString() . "\n";
+}

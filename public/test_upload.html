@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Upload</title>
+</head>
+
+<body>
+    <h1>Test de Subida de Archivos</h1>
+    <form id="uploadForm">
+        <input type="file" id="fileInput" accept="image/*" required>
+        <button type="submit">Subir Archivo</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Selecciona un archivo');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('imagen_file', file);
+            formData.append('test', 'true');
+
+            console.log('Enviando archivo:', file.name, file.size, 'bytes');
+            console.log('FormData:', formData);
+
+            try {
+                const response = await fetch('http://localhost:8000/test_upload.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const text = await response.text();
+                document.getElementById('result').innerHTML = '<pre>' + text + '</pre>';
+                console.log('Respuesta:', text);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = '<pre>Error: ' + error.message + '</pre>';
+            }
+        });
+    </script>
+</body>
+
+</html>

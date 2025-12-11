@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Permitir acceso directo a archivos PHP específicos (upload.php)
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^upload\.php$ - [L]
+
+# Todas las demás solicitudes van al index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ index.php [QSA,L]

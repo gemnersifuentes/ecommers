@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover { background: #0056b3; }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Test de Login</h1>
+        
+        <div>
+            <div class="form-group">
+                <label>Correo:</label>
+                <input type="email" id="correo" placeholder="ejemplo@correo.com" value="admin@tiendatec.com">
+            </div>
+            <div class="form-group">
+                <label>Contraseña:</label>
+                <input type="password" id="clave" placeholder="Tu contraseña" value="admin123">
+            </div>
+            <button onclick="login()">Iniciar Sesión</button>
+            <button onclick="clearFields()">Limpiar</button>
+        </div>
+
+        <div id="result"></div>
+
+        <h2 style="margin-top: 30px;">Estado Actual</h2>
+        <button onclick="checkStatus()">Verificar Estado</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+
+        function login() {
+            const correo = document.getElementById('correo').value;
+            const clave = document.getElementById('clave').value;
+            const resultDiv = document.getElementById('result');
+
+            if (!correo || !clave) {
+                resultDiv.innerHTML = '<div class="result error"><pre>Error: Llenar todos los campos</pre></div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="result"><pre>Iniciando sesión...</pre></div>';
+
+            fetch(`${API_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ correo, clave })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.token) {
+                    // Guardar en localStorage
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('usuario', JSON.stringify(data.usuario));
+                    
+                    const html = `<div class="result success">
+                        <pre>✓ Login exitoso!
+                        
+Token guardado: ${data.token.substring(0, 20)}...
+Usuario: ${JSON.stringify(data.usuario, null, 2)}
+
+Ahora puedes:
+1. Cerrar esta ventana
+2. Volver a la tienda
+3. Intentar agregar un producto al carrito
+4. El carrito debería funcionar ahora</pre>
+                    </div>`;
+                    resultDiv.innerHTML = html;
+                    setTimeout(() => checkStatus(), 1000);
+                } else {
+                    resultDiv.innerHTML = `<div class="result error"><pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                }
+            })
+            .catch(err => {
+                resultDiv.innerHTML = `<div class="result error"><pre>Error: ${err.message}\n\nVerifica que:
+1. El servidor backend está corriendo en puerto 8000
+2. El correo y contraseña son correctos</pre></div>`;
+            });
+        }
+
+        function checkStatus() {
+            const token = localStorage.getItem('token');
+            const usuario = localStorage.getItem('usuario');
+            const statusDiv = document.getElementById('status');
+
+            let html = '<div class="result">';
+            
+            if (token) {
+                html += `<div style="color: green;"><pre>✓ Token encontrado: ${token.substring(0, 20)}...</pre></div>`;
+            } else {
+                html += `<div style="color: red;"><pre>✗ No hay token</pre></div>`;
+            }
+            
+            if (usuario) {
+                html += `<div style="color: green;"><pre>✓ Usuario: ${usuario.substring(0, 100)}...</pre></div>`;
+            } else {
+                html += `<div style="color: red;"><pre>✗ No hay usuario</pre></div>`;
+            }
+            
+            html += '</div>';
+            statusDiv.innerHTML = html;
+        }
+
+        function clearFields() {
+            document.getElementById('correo').value = '';
+            document.getElementById('clave').value = '';
+            document.getElementById('result').innerHTML = '';
+        }
+
+        // Verificar estado al cargar
+        checkStatus();
+    </script>
+</body>
+</html>

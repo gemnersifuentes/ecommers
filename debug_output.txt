@@ -1,0 +1,6 @@
+Order 13 Method: [domicilio]
+Order 13 Status: [En Preparación]
+
+Recent STORE Orders:
+ID: 15
+ID: 14

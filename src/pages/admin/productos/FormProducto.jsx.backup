@@ -1,0 +1,349 @@
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import Swal from 'sweetalert2';
+import { categoriasService, marcasService, productosService } from '../../../services';
+import Breadcrumb from '../../../components/Breadcrumb';
+import GestionVariantes from '../../../components/GestionVariantes';
+
+const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = 'Guardar', breadcrumbItems }) => {
+    const [formData, setFormData] = useState({
+        // Campos básicos
+        nombre: '',
+        descripcion: '',
+        imagen: '',
+        categoria_id: '',
+        marca_id: '',
+        precio_base: '',
+        stock: '',
+
+        // SEO & Marketing
+        meta_titulo: '',
+        meta_descripcion: '',
+        palabras_clave: '',
+        slug: '',
+        destacado: false,
+        nuevo: false,
+        activo: true,
+        etiquetas: '',
+
+        // Logística
+        sku: '',
+        peso: '',
+        largo: '',
+        ancho: '',
+        alto: '',
+        envio_gratis: false,
+        stock_minimo: 5,
+
+        // Info Producto
+        condicion: 'nuevo',
+        garantia_meses: 12,
+        marca_fabricante: '',
+        modelo: '',
+        video_url: '',
+
+        // Otros
+        politica_devolucion_dias: 30
+    });
+
+    const [categorias, setCategorias] = useState([]);
+    const [marcas, setMarcas] = useState([]);
+    const [imagenPreview, setImagenPreview] = useState('');
+    const [imagenesGaleria, setImagenesGaleria] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    // Update form when initialData changes (for edit mode)
+    checked = { formData.nuevo }
+    onChange = { handleChange }
+    className = "w-4 h-4 text-blue-600 rounded"
+        />
+        <span className="text-sm text-gray-700">Nuevo</span>
+                                    </label >
+                                </div >
+                            </div >
+                        </div >
+
+    {/* Logistics */ }
+    < div className = "bg-white rounded-xl p-6 shadow-sm border border-gray-200" >
+                            <h3 className="text-base font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200 flex items-center gap-2">
+                                <i className="fas fa-truck text-blue-600"></i> Logística
+                            </h3>
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">SKU</label>
+                                        <input
+                                            type="text"
+                                            name="sku"
+                                            value={formData.sku}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Peso (kg)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            name="peso"
+                                            value={formData.peso}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Stock Mín.</label>
+                                        <input
+                                            type="number"
+                                            name="stock_minimo"
+                                            value={formData.stock_minimo}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Largo (cm)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            name="largo"
+                                            value={formData.largo}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Ancho (cm)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            name="ancho"
+                                            value={formData.ancho}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Alto (cm)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            name="alto"
+                                            value={formData.alto}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                </div>
+                                <label className="flex items-center gap-2 cursor-pointer pt-2">
+                                    <input
+                                        type="checkbox"
+                                        name="envio_gratis"
+                                        checked={formData.envio_gratis}
+                                        onChange={handleChange}
+                                        className="w-4 h-4 text-blue-600 rounded"
+                                    />
+                                    <span className="text-sm text-gray-700">Envío Gratis</span>
+                                </label>
+                            </div>
+                        </div >
+                    </div >
+
+    {/* Right Column - Images and Additional Info */ }
+    < div className = "space-y-6" >
+        {/* Main Image */ }
+        < div className = "bg-white rounded-xl p-6 shadow-sm border border-gray-200" >
+                            <h3 className="text-base font-bold text-gray-900 mb-4">Imagen Principal</h3>
+                            <div className="relative border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-500 transition-colors bg-gray-50">
+                                {imagenPreview ? (
+                                    <div className="relative">
+                                        <img src={imagenPreview} alt="Preview" className="max-h-64 mx-auto rounded-lg" />
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setImagenPreview('');
+                                                setFormData(prev => ({ ...prev, imagen: '' }));
+                                            }}
+                                            className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 z-10"
+                                        >
+                                            <i className="fas fa-times text-xs"></i>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="py-12">
+                                        <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <i className="fas fa-cloud-upload-alt text-blue-600 text-2xl"></i>
+                                        </div>
+                                        <p className="text-gray-600 font-medium mb-1">Suelta tu imagen aquí</p>
+                                        <p className="text-blue-600 font-semibold">o haz clic para buscar</p>
+                                    </div>
+                                )}
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImagenChange}
+                                    className="absolute inset-0 opacity-0 cursor-pointer"
+                                />
+                            </div>
+                        </div >
+
+    {/* Gallery */ }
+    < div className = "bg-white rounded-xl p-6 shadow-sm border border-gray-200" >
+                            <h3 className="text-base font-bold text-gray-900 mb-4">Galería de Imágenes</h3>
+                            <div className="grid grid-cols-3 gap-3">
+                                {imagenesGaleria.map((img, idx) => (
+                                    <div key={idx} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group">
+                                        <img src={img} alt={`Galería ${idx}`} className="w-full h-full object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={() => eliminarImagenGaleria(idx)}
+                                            className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            <i className="fas fa-times text-xs"></i>
+                                        </button>
+                                        {idx === 0 && (
+                                            <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded">
+                                                +{imagenesGaleria.length}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                                <label className="aspect-square bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all">
+                                    <i className="fas fa-plus text-xl text-gray-400 mb-1"></i>
+                                    <span className="text-xs text-gray-500">Agregar</span>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={handleImagenesGaleriaChange}
+                                        className="hidden"
+                                    />
+                                </label>
+                            </div>
+                        </div >
+
+    {/* Additional Info */ }
+    < div className = "bg-white rounded-xl p-6 shadow-sm border border-gray-200" >
+                            <h3 className="text-base font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200 flex items-center gap-2">
+                                <i className="fas fa-info-circle text-blue-600"></i> Información Adicional
+                            </h3>
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Condición</label>
+                                        <select
+                                            name="condicion"
+                                            value={formData.condicion}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 bg-white"
+                                        >
+                                            <option value="nuevo">Nuevo</option>
+                                            <option value="usado">Usado</option>
+                                            <option value="reacondicionado">Reacondicionado</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Garantía (meses)</label>
+                                        <input
+                                            type="number"
+                                            name="garantia_meses"
+                                            value={formData.garantia_meses}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Modelo</label>
+                                        <input
+                                            type="text"
+                                            name="modelo"
+                                            value={formData.modelo}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Fabricante</label>
+                                        <input
+                                            type="text"
+                                            name="marca_fabricante"
+                                            value={formData.marca_fabricante}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">URL Video</label>
+                                        <input
+                                            type="text"
+                                            name="video_url"
+                                            value={formData.video_url}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Política Devolución (días)</label>
+                                        <input
+                                            type="number"
+                                            name="politica_devolucion_dias"
+                                            value={formData.politica_devolucion_dias}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div >
+                    </div >
+                </div >
+
+    {/* Gestión de Variantes (Solo si estamos editando un producto existente) */ }
+{
+    initialData && initialData.id && (
+        <div className="mt-8">
+            <GestionVariantes
+                productoId={initialData.id}
+                embedded={true}
+                onSave={() => {
+                    // Opcional: Recargar datos si fuera necesario, pero GestionVariantes ya actualiza su propia lista
+                }}
+            />
+        </div>
+    )
+}
+
+{/* Action Buttons */ }
+<div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+    <button
+        type="button"
+        onClick={() => window.history.back()}
+        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-700 border-2 border-gray-300 font-semibold rounded-xl hover:bg-gray-50 transition-all duration-200"
+    >
+        <i className="fas fa-times"></i>
+        <span>Cancelar</span>
+    </button>
+    <button
+        type="submit"
+        disabled={loading}
+        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white border-2 border-blue-600 font-semibold rounded-xl hover:bg-blue-700 hover:border-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+        {loading ? (
+            <>
+                <i className="fas fa-spinner fa-spin"></i>
+                <span>Guardando...</span>
+            </>
+        ) : (
+            <>
+                <i className="fas fa-save"></i>
+                <span>{buttonText}</span>
+            </>
+        )}
+    </button>
+</div>
+            </form >
+        </div >
+    );
+};
+
+export default FormProducto;

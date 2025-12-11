@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Imágenes</title>
+</head>
+<body>
+    <h1>Test de Imágenes</h1>
+    
+    <h2>Imagen directa:</h2>
+    <img src="http://localhost:8000/uploads/691f38117898d_1763651649.png" style="max-width: 300px; border: 2px solid red;" alt="Test imagen">
+    
+    <h2>Estado:</h2>
+    <div id="status"></div>
+    
+    <script>
+        // Test de carga
+        const img = new Image();
+        img.onload = () => {
+            document.getElementById('status').innerHTML = '<p style="color: green;">✅ Imagen cargada correctamente</p>';
+        };
+        img.onerror = () => {
+            document.getElementById('status').innerHTML = '<p style="color: red;">❌ Error al cargar imagen</p>';
+        };
+        img.src = 'http://localhost:8000/uploads/691f38117898d_1763651649.png';
+    </script>
+</body>
+</html>

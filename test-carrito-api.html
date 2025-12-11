@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Carrito API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            background: #f9f9f9;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        .error {
+            border-color: #f5c6cb;
+            background: #f8d7da;
+        }
+        pre {
+            margin: 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛒 Test API Carrito</h1>
+        
+        <div class="section">
+            <h3>1. Obtener Carrito (GET)</h3>
+            <button onclick="testGetCarrito()">Obtener Carrito</button>
+            <div id="getResult" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h3>2. Agregar Producto (POST)</h3>
+            <p>Producto ID: <input type="number" id="productoId" value="1" style="width: 100px;"></p>
+            <p>Cantidad: <input type="number" id="cantidad" value="1" style="width: 100px;"></p>
+            <button onclick="testAddItem()">Agregar al Carrito</button>
+            <div id="addResult" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h3>3. Headers que se envían</h3>
+            <button onclick="showHeaders()">Mostrar Headers</button>
+            <div id="headersResult" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h3>4. Info de Autenticación</h3>
+            <button onclick="showAuthInfo()">Mostrar Info</button>
+            <div id="authResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        function getHeaders() {
+            const token = getToken();
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': token ? `Bearer ${token}` : ''
+            };
+        }
+
+        function testGetCarrito() {
+            const resultDiv = document.getElementById('getResult');
+            const token = getToken();
+
+            if (!token) {
+                resultDiv.innerHTML = '<div class="result error"><pre>✗ No hay token en localStorage</pre></div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="result"><pre>⏳ Cargando...</pre></div>';
+
+            const headers = getHeaders();
+            console.log('GET /api/carrito con headers:', headers);
+
+            fetch(`${API_URL}/api/carrito`, {
+                method: 'GET',
+                headers: headers
+            })
+            .then(r => {
+                console.log('Response status:', r.status);
+                console.log('Response headers:', {
+                    'content-type': r.headers.get('content-type'),
+                    'authorization': r.headers.get('authorization')
+                });
+                return r.json().then(data => ({ status: r.status, data }));
+            })
+            .then(({ status, data }) => {
+                let html = '';
+                if (status === 200) {
+                    html = `<div class="result success"><pre>✓ Carrito obtenido (${status})\n\n${JSON.stringify(data, null, 2)}</pre></div>`;
+                } else {
+                    html = `<div class="result error"><pre>✗ Error ${status}\n\n${JSON.stringify(data, null, 2)}</pre></div>`;
+                }
+                resultDiv.innerHTML = html;
+            })
+            .catch(err => {
+                resultDiv.innerHTML = `<div class="result error"><pre>✗ Error en la petición:\n${err.message}\n${err.stack}</pre></div>`;
+            });
+        }
+
+        function testAddItem() {
+            const resultDiv = document.getElementById('addResult');
+            const token = getToken();
+            const productoId = document.getElementById('productoId').value;
+            const cantidad = document.getElementById('cantidad').value;
+
+            if (!token) {
+                resultDiv.innerHTML = '<div class="result error"><pre>✗ No hay token en localStorage</pre></div>';
+                return;
+            }
+
+            if (!productoId || !cantidad) {
+                resultDiv.innerHTML = '<div class="result error"><pre>✗ Completa producto ID y cantidad</pre></div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="result"><pre>⏳ Agregando al carrito...</pre></div>';
+
+            const body = {
+                producto_id: parseInt(productoId),
+                cantidad: parseInt(cantidad)
+            };
+
+            console.log('POST /api/carrito con body:', body);
+            console.log('Headers:', getHeaders());
+
+            fetch(`${API_URL}/api/carrito`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify(body)
+            })
+            .then(r => {
+                console.log('Response status:', r.status);
+                return r.json().then(data => ({ status: r.status, data }));
+            })
+            .then(({ status, data }) => {
+                let html = '';
+                if (status === 200 || status === 201) {
+                    html = `<div class="result success"><pre>✓ Item agregado (${status})\n\n${JSON.stringify(data, null, 2)}</pre></div>`;
+                } else {
+                    html = `<div class="result error"><pre>✗ Error ${status}\n\n${JSON.stringify(data, null, 2)}</pre></div>`;
+                }
+                resultDiv.innerHTML = html;
+                if (status === 200 || status === 201) {
+                    setTimeout(() => testGetCarrito(), 500);
+                }
+            })
+            .catch(err => {
+                resultDiv.innerHTML = `<div class="result error"><pre>✗ Error en la petición:\n${err.message}</pre></div>`;
+            });
+        }
+
+        function showHeaders() {
+            const resultDiv = document.getElementById('headersResult');
+            const headers = getHeaders();
+            const token = getToken();
+            
+            resultDiv.innerHTML = `<div class="result"><pre>Headers que se envían:
+${JSON.stringify(headers, null, 2)}
+
+Token en localStorage:
+${token ? token.substring(0, 40) + '...' : 'NO PRESENTE'}
+
+Token completo:
+${token || 'NO PRESENTE'}</pre></div>`;
+        }
+
+        function showAuthInfo() {
+            const resultDiv = document.getElementById('authResult');
+            const token = localStorage.getItem('token');
+            const usuario = localStorage.getItem('usuario');
+            
+            resultDiv.innerHTML = `<div class="result"><pre>Token: ${token ? '✓ PRESENTE' : '✗ NO PRESENTE'}
+Usuario: ${usuario ? '✓ PRESENTE' : '✗ NO PRESENTE'}
+
+localStorage.token = ${token || 'null'}
+
+localStorage.usuario = ${usuario ? usuario.substring(0, 100) + '...' : 'null'}</pre></div>`;
+        }
+
+        // Mostrar info al cargar
+        window.onload = () => {
+            showAuthInfo();
+            showHeaders();
+        };
+    </script>
+</body>
+</html>

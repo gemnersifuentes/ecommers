@@ -1,0 +1,150 @@
+╔════════════════════════════════════════════════════════════════╗
+║         SOLUCIÓN DE PROBLEMAS - TIENDATEC                      ║
+╚════════════════════════════════════════════════════════════════╝
+
+ERROR: "No se puede iniciar sesión / Error de conexión"
+
+═══════════════════════════════════════════════════════════════════
+  PASO 1: VERIFICAR XAMPP
+═══════════════════════════════════════════════════════════════════
+
+1. Abre XAMPP Control Panel
+2. Verifica que estos servicios estén CORRIENDO (color verde):
+   [✓] Apache - debe estar en verde
+   [✓] MySQL  - debe estar en verde
+
+Si no están corriendo:
+   - Haz clic en "Start" junto a Apache
+   - Haz clic en "Start" junto a MySQL
+
+═══════════════════════════════════════════════════════════════════
+  PASO 2: VERIFICAR LA BASE DE DATOS
+═══════════════════════════════════════════════════════════════════
+
+1. Abre tu navegador
+2. Ve a: http://localhost/phpmyadmin
+3. En el menú lateral izquierdo, busca la base de datos: "db_tienda_tec"
+
+¿NO VES LA BASE DE DATOS?
+   → Debes importarla:
+   
+   a) En phpMyAdmin, haz clic en "Nueva" (arriba a la izquierda)
+   b) Nombre: db_tienda_tec
+   c) Cotejamiento: utf8mb4_unicode_ci
+   d) Haz clic en "Crear"
+   e) Selecciona la base de datos creada
+   f) Haz clic en "Importar" (arriba)
+   g) Haz clic en "Seleccionar archivo"
+   h) Navega a: C:\Users\ASUS\Documents\proyectos\tienda-tec\database.sql
+   i) Haz clic en "Continuar"
+   j) ¡Listo! Deberías ver 9 tablas creadas
+
+═══════════════════════════════════════════════════════════════════
+  PASO 3: PROBAR LA CONEXIÓN
+═══════════════════════════════════════════════════════════════════
+
+1. Abre tu navegador
+2. Ve a: http://localhost/api-tienda-tec/test-conexion.php
+3. Deberías ver:
+   ✓ PHP Version
+   ✓ PDO MySQL: Habilitado
+   ✓ Conexión a MySQL: EXITOSA
+   ✓ Base de datos: db_tienda_tec
+   ✓ Tablas encontradas (9 tablas)
+   ✓ Total de usuarios: 2
+   ✓ Total de productos: 5
+
+SI VES ERRORES:
+   → El problema está en MySQL o la base de datos
+   → Repite el PASO 1 y PASO 2
+
+SI TODO ESTÁ BIEN:
+   → Continúa al PASO 4
+
+═══════════════════════════════════════════════════════════════════
+  PASO 4: VERIFICAR LA API
+═══════════════════════════════════════════════════════════════════
+
+1. Abre tu navegador
+2. Ve a: http://localhost/api-tienda-tec/productos
+3. Deberías ver un JSON con productos
+
+Ejemplo:
+[{"id":"1","nombre":"Memoria RAM DDR4"...}]
+
+SI VES UN ERROR O PÁGINA EN BLANCO:
+   → Verifica que la carpeta backend esté en: C:\xampp\htdocs\api-tienda-tec
+   → Ejecuta de nuevo: instalar-backend.bat
+
+═══════════════════════════════════════════════════════════════════
+  PASO 5: VERIFICAR EL FRONTEND
+═══════════════════════════════════════════════════════════════════
+
+1. Abre una terminal PowerShell
+2. Navega al proyecto:
+   cd C:\Users\ASUS\Documents\proyectos\tienda-tec
+
+3. Inicia el servidor:
+   npm run dev
+
+4. Abre tu navegador en: http://localhost:5173
+
+5. Intenta hacer login con:
+   Email: admin@tiendatec.com
+   Password: admin123
+
+═══════════════════════════════════════════════════════════════════
+  PASO 6: SI SIGUE SIN FUNCIONAR
+═══════════════════════════════════════════════════════════════════
+
+Abre la Consola del Navegador (F12) y busca errores:
+
+ERROR COMÚN 1: "CORS error"
+   → Solución: Verifica que Apache esté corriendo
+   → La configuración CORS ya está en el backend
+
+ERROR COMÚN 2: "Network Error" o "Failed to fetch"
+   → Solución: Verifica la URL en src/services/api.js
+   → Debe ser: http://localhost/api-tienda-tec
+
+ERROR COMÚN 3: "Credenciales incorrectas"
+   → Solución: Verifica que la base de datos tenga usuarios
+   → Ejecuta en phpMyAdmin:
+     SELECT * FROM usuarios;
+   → Deberías ver 2 usuarios (admin y empleado)
+
+═══════════════════════════════════════════════════════════════════
+  COMANDOS RÁPIDOS PARA VERIFICAR
+═══════════════════════════════════════════════════════════════════
+
+Test 1: http://localhost/phpmyadmin
+        → Debe abrir phpMyAdmin
+
+Test 2: http://localhost/api-tienda-tec/test-conexion.php
+        → Debe mostrar conexión exitosa
+
+Test 3: http://localhost/api-tienda-tec/productos
+        → Debe mostrar JSON con productos
+
+Test 4: http://localhost:5173
+        → Debe mostrar la tienda TiendaTEC
+
+═══════════════════════════════════════════════════════════════════
+  RESETEAR TODO (SI NADA FUNCIONA)
+═══════════════════════════════════════════════════════════════════
+
+1. En phpMyAdmin, elimina la base de datos db_tienda_tec
+2. Ejecuta: instalar-backend.bat
+3. Importa de nuevo database.sql en phpMyAdmin
+4. Reinicia Apache y MySQL en XAMPP
+5. Ejecuta: npm run dev
+6. Intenta de nuevo
+
+═══════════════════════════════════════════════════════════════════
+
+¿NECESITAS MÁS AYUDA?
+
+Proporciona esta información:
+1. ¿Qué dice en: http://localhost/api-tienda-tec/test-conexion.php
+2. ¿Qué error ves en la consola del navegador (F12)?
+3. ¿Están corriendo Apache y MySQL en XAMPP?

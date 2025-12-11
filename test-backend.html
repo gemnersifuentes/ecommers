@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Backend</title>
+</head>
+<body>
+    <h1>Test Conexión Backend</h1>
+    <button onclick="test()">Hacer Ping al Backend</button>
+    <div id="result"></div>
+    <script>
+        function test() {
+            fetch('http://localhost:8000/', {
+                headers: {'Content-Type': 'application/json'}
+            })
+            .then(r => r.json())
+            .then(d => {
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(d, null, 2) + '</pre>';
+            })
+            .catch(e => {
+                document.getElementById('result').innerHTML = '<pre style="color:red">ERROR: ' + e + '</pre>';
+            });
+        }
+    </script>
+</body>
+</html>

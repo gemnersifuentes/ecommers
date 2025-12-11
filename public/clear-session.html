@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpiar Sesión</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 500px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .success {
+            background: #4caf50;
+        }
+        .success:hover {
+            background: #45a049;
+        }
+        .danger {
+            background: #f44336;
+        }
+        .danger:hover {
+            background: #da190b;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .status.show {
+            display: block;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Herramienta de Limpieza de Sesión</h1>
+        
+        <div class="info">
+            <h3>Estado Actual:</h3>
+            <p><strong>Token guardado:</strong> <span id="tokenStatus">Verificando...</span></p>
+            <p><strong>Usuario:</strong> <span id="userStatus">Verificando...</span></p>
+        </div>
+
+        <button onclick="clearSession()" class="danger">
+            🗑️ Limpiar Sesión Completa
+        </button>
+
+        <button onclick="goToLogin()" class="success">
+            🔐 Ir a Login
+        </button>
+
+        <button onclick="checkStatus()">
+            🔄 Verificar Estado
+        </button>
+
+        <div id="status" class="status"></div>
+
+        <div style="margin-top: 30px; font-size: 14px; color: #666;">
+            <p><strong>Instrucciones:</strong></p>
+            <ol style="text-align: left;">
+                <li>Haz clic en "Limpiar Sesión Completa"</li>
+                <li>Haz clic en "Ir a Login"</li>
+                <li>Inicia sesión nuevamente</li>
+                <li>Intenta usar los banners</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status show ' + type;
+            setTimeout(() => {
+                statusDiv.classList.remove('show');
+            }, 3000);
+        }
+
+        function checkStatus() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            document.getElementById('tokenStatus').textContent = token ? 
+                token.substring(0, 20) + '... (presente)' : 
+                'No hay token';
+            
+            document.getElementById('userStatus').textContent = user ? 
+                JSON.parse(user).nombre || 'Usuario sin nombre' : 
+                'No hay usuario';
+        }
+
+        function clearSession() {
+            // Limpiar todo el localStorage
+            localStorage.clear();
+            
+            // También limpiar sessionStorage por si acaso
+            sessionStorage.clear();
+            
+            showStatus('✅ Sesión limpiada exitosamente. Ahora ve a Login.', 'success');
+            checkStatus();
+        }
+
+        function goToLogin() {
+            window.location.href = '/login';
+        }
+
+        // Verificar estado al cargar la página
+        checkStatus();
+    </script>
+</body>
+</html>

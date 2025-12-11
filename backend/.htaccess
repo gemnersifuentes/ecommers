@@ -1,0 +1,23 @@
+RewriteEngine On
+
+# Aumentar límite de subida a 20MB
+php_value upload_max_filesize 20M
+php_value post_max_size 20M
+
+# Permitir header Authorization
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+
+# Permitir acceso directo a archivos en uploads
+RewriteCond %{REQUEST_URI} ^/uploads/
+RewriteRule ^(.*)$ $1 [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^tienda/productos/?$ api/tienda/productos.php [L,QSA]
+RewriteRule ^tienda/productos/([0-9]+)/?$ api/tienda/productos.php?id=$1 [L,QSA]
+RewriteRule ^tienda/resenas/?$ api/tienda/resenas.php [L,QSA]
+RewriteRule ^tienda/favoritos/?$ api/tienda/favoritos.php [L,QSA]
+RewriteRule ^tienda/usuarios/?$ api/tienda/usuarios.php [L,QSA]
+RewriteRule ^tienda/banners/?$ api/tienda/banners.php [L,QSA]
+
+RewriteRule ^api/(.*)$ api/$1.php [L]

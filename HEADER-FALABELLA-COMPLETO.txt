@@ -1,0 +1,15 @@
+Este archivo contiene el código completo del header estilo Falabella que se debe implementar.
+
+El diseño incluye:
+1. Top bar gris con ubicación y links
+2. Logo verde simple "tiendatec.com"
+3. Barra de búsqueda prominente con botón circular
+4. Iconos: Hola/Inicia sesión, Mis compras, Favoritos, Carrito
+5. Navegación simple debajo
+
+Características:
+- Diseño limpio y minimalista
+- Colores: Verde (#4ade80), Gris, Blanco
+- Sin animaciones excesivas
+- Enfoque en usabilidad
+- Responsive
