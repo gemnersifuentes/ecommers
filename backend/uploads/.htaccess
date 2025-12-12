@@ -1,5 +1,5 @@
 # Permitir acceso a imágenes
-<FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|avif|svg|bmp)$">
     Order Allow,Deny
     Allow from all
 </FilesMatch>
@@ -20,4 +20,7 @@ Options -Indexes
     ExpiresByType image/png "access plus 1 year"
     ExpiresByType image/gif "access plus 1 year"
     ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/avif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/bmp "access plus 1 year"
 </IfModule>

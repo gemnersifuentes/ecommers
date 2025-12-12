@@ -68,10 +68,14 @@ const MiCuenta = () => {
         }
     };
 
+
     // Fetch pedidos when tab changes to pedidos
     useEffect(() => {
         if (activeTab === 'pedidos' && usuario?.id) {
             fetchPedidos();
+        }
+        if (activeTab === 'perfil' && usuario?.id) {
+            fetchDirecciones();
         }
     }, [activeTab, usuario?.id]);
 
@@ -162,14 +166,14 @@ const MiCuenta = () => {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8  min-h-screen max-w-5xl">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Mi Cuenta</h1>
+        <div className="container mx-auto px-4 pb-8 min-h-screen max-w-5xl pt-44 md:pt-60">
+            <h1 className="text-lg md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Mi Cuenta</h1>
 
             {/* Tabs Navigation */}
-            <div className="flex items-center gap-8 border-b border-gray-200 mb-6">
+            <div className="flex items-center gap-4 md:gap-8 border-b border-gray-200 mb-4 md:mb-6 overflow-x-auto hide-scrollbar pb-1">
                 <button
                     onClick={() => handleTabChange('perfil')}
-                    className={`flex items-center gap-2 pb-3 text-sm font-medium transition-colors relative ${activeTab === 'perfil'
+                    className={`flex items-center gap-2 pb-2 md:pb-3 text-xs md:text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'perfil'
                         ? 'text-orange-500'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
@@ -183,7 +187,7 @@ const MiCuenta = () => {
 
                 <button
                     onClick={() => handleTabChange('pedidos')}
-                    className={`flex items-center gap-2 pb-3 text-sm font-medium transition-colors relative ${activeTab === 'pedidos'
+                    className={`flex items-center gap-2 pb-2 md:pb-3 text-xs md:text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'pedidos'
                         ? 'text-orange-500'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
@@ -197,7 +201,7 @@ const MiCuenta = () => {
 
                 <button
                     onClick={() => handleTabChange('deseos')}
-                    className={`flex items-center gap-2 pb-3 text-sm font-medium transition-colors relative ${activeTab === 'deseos'
+                    className={`flex items-center gap-2 pb-2 md:pb-3 text-xs md:text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'deseos'
                         ? 'text-orange-500'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
@@ -209,23 +213,10 @@ const MiCuenta = () => {
                     )}
                 </button>
 
-                <button
-                    onClick={() => handleTabChange('direcciones')}
-                    className={`flex items-center gap-2 pb-3 text-sm font-medium transition-colors relative ${activeTab === 'direcciones'
-                        ? 'text-orange-500'
-                        : 'text-gray-500 hover:text-gray-700'
-                        }`}
-                >
-                    <MapPin size={18} />
-                    Mis Direcciones
-                    {activeTab === 'direcciones' && (
-                        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 rounded-t-full" />
-                    )}
-                </button>
             </div>
 
             {/* Content Area */}
-            <div className=" rounded-xl shadow-sm  min-h-[400px] p-8">
+            <div className="md:rounded-xl md:shadow-sm md:min-h-[400px] md:p-8">
 
                 {/* Profile Tab Content */}
                 {activeTab === 'perfil' && (
@@ -234,142 +225,147 @@ const MiCuenta = () => {
                             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
                                 <User size={48} />
                             </div>
-                            <h2 className="text-xl font-bold text-gray-900">{usuario?.nombre}</h2>
-                            <p className="text-gray-500">{usuario?.email}</p>
+                            <h2 className="text-base md:text-xl font-bold text-gray-900">{usuario?.nombre}</h2>
+                            <p className="text-gray-500 text-xs md:text-base">{usuario?.email}</p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="p-4 border border-gray-100 rounded-lg">
-                                <label className="block text-xs text-gray-500 mb-1">Nombre Completo</label>
-                                <p className="font-medium text-gray-900">{usuario?.nombre}</p>
+                            <div className="p-3 md:p-4 border border-gray-100 rounded-lg">
+                                <label className="block text-[10px] md:text-xs text-gray-500 mb-1">Nombre Completo</label>
+                                <p className="font-medium text-xs md:text-base text-gray-900">{usuario?.nombre}</p>
                             </div>
-                            <div className="p-4 border border-gray-100 rounded-lg">
-                                <label className="block text-xs text-gray-500 mb-1">Correo Electrónico</label>
-                                <p className="font-medium text-gray-900">{usuario?.email}</p>
+                            <div className="p-3 md:p-4 border border-gray-100 rounded-lg">
+                                <label className="block text-[10px] md:text-xs text-gray-500 mb-1">Correo Electrónico</label>
+                                <p className="font-medium text-xs md:text-base text-gray-900">{usuario?.email}</p>
                             </div>
-                            <div className="p-4 border border-gray-100 rounded-lg">
-                                <label className="block text-xs text-gray-500 mb-1">Rol de Cuenta</label>
-                                <p className="font-medium text-gray-900 capitalize">{usuario?.rol}</p>
+                            <div className="p-3 md:p-4 border border-gray-100 rounded-lg">
+                                <label className="block text-[10px] md:text-xs text-gray-500 mb-1">Rol de Cuenta</label>
+                                <p className="font-medium text-xs md:text-base text-gray-900 capitalize">{usuario?.rol}</p>
                             </div>
-                            <div className="p-4 border border-gray-100 rounded-lg">
-                                <label className="block text-xs text-gray-500 mb-1">Estado</label>
+                            <div className="p-3 md:p-4 border border-gray-100 rounded-lg">
+                                <label className="block text-[10px] md:text-xs text-gray-500 mb-1">Estado</label>
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     Activo
                                 </span>
                             </div>
                         </div>
-                    </div>
-                )}
-
-                {/* Orders Tab Content */}
-                {activeTab === 'pedidos' && (
-                    <div className="w-full space-y-6">
-                        {loadingPedidos ? (
-                            <div className="flex justify-center items-center py-20">
-                                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-                            </div>
-                        ) : pedidos.length > 0 ? (
-                            pedidos.map((pedido) => (
-                                <OrderCard key={pedido.id} pedido={pedido} />
-                            ))
-                        ) : (
-                            <div className="flex flex-col items-center justify-center min-h-[336px] text-center">
-                                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Box size={40} className="text-gray-300" strokeWidth={1.5} />
-                                </div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay pedidos aún</h3>
-                                <p className="text-gray-500 text-sm mb-6">
-                                    Empieza a comprar para ver tus pedidos aquí.
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Wishlist Tab Content */}
-                {activeTab === 'deseos' && (
-                    <div className={favoritos.length > 0 ? "" : "flex flex-col items-center justify-center min-h-[336px] text-center"}>
-                        {loadingFavoritos ? (
-                            <div className="flex justify-center items-center py-20">
-                                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-                            </div>
-                        ) : favoritos.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {favoritos.map((producto) => (
-                                    <ProductCard key={producto.id} producto={{ ...producto, es_favorito: true }} />
-                                ))}
-                            </div>
-                        ) : (
-                            <div>
-                                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Heart size={40} className="text-gray-300" strokeWidth={1.5} />
-                                </div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">Tu lista de deseos está vacía</h3>
-                                <p className="text-gray-500 text-sm mb-6">
-                                    Guarda los productos que más te gusten para comprarlos después.
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Direcciones Tab Content */}
-                {activeTab === 'direcciones' && (
-                    <div>
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold text-gray-900">Mis Direcciones</h2>
-                            <button
-                                onClick={() => {
-                                    setSelectedDireccion(null);
-                                    setIsFormOpen(true);
-                                }}
-                                className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
-                            >
-                                <MapPin size={18} />
-                                Agregar Nueva Dirección
-                            </button>
-                        </div>
-
-                        {loadingDirecciones ? (
-                            <div className="flex justify-center items-center py-20">
-                                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-                            </div>
-                        ) : direcciones.length > 0 ? (
-                            <div className="space-y-4">
-                                {direcciones.map(direccion => (
-                                    <DireccionCard
-                                        key={direccion.id}
-                                        direccion={direccion}
-                                        onEdit={handleEditDireccion}
-                                        onDelete={handleDeleteDireccion}
-                                        onSetDefault={handleSetDefaultDireccion}
-                                    />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-12 text-center">
-                                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <MapPin size={40} className="text-gray-300" strokeWidth={1.5} />
-                                </div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">No tienes direcciones guardadas</h3>
-                                <p className="text-gray-500 text-sm mb-6">
-                                    Agrega tus direcciones de envío para hacer tus compras más rápidas.
-                                </p>
+                        {/* Integrated Addresses Section */}
+                        <div className="mt-12 pt-8 border-t border-gray-100">
+                            <div className="flex items-center justify-between mb-4 md:mb-6">
+                                <h2 className="text-base md:text-xl font-bold text-gray-900">Mis Direcciones</h2>
                                 <button
-                                    onClick={() => setIsFormOpen(true)}
-                                    className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors"
+                                    onClick={() => {
+                                        setSelectedDireccion(null);
+                                        setIsFormOpen(true);
+                                    }}
+                                    className="px-3 py-1.5 md:px-4 md:py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium text-xs md:text-sm rounded-lg transition-colors flex items-center gap-2"
                                 >
-                                    Agregar Mi Primera Dirección
+                                    <MapPin size={16} />
+                                    Agregar Dirección
                                 </button>
                             </div>
-                        )}
-                    </div>
-                )}
 
-            </div>
+                            {loadingDirecciones ? (
+                                <div className="flex justify-center items-center py-10">
+                                    <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+                                </div>
+                            ) : direcciones.length > 0 ? (
+                                <div className="space-y-4">
+                                    {direcciones.map(direccion => (
+                                        <DireccionCard
+                                            key={direccion.id}
+                                            direccion={direccion}
+                                            onEdit={handleEditDireccion}
+                                            onDelete={handleDeleteDireccion}
+                                            onSetDefault={handleSetDefaultDireccion}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-8 text-center bg-gray-50 rounded-xl border border-gray-100">
+                                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
+                                        <MapPin size={24} className="text-gray-400" strokeWidth={1.5} />
+                                    </div>
+                                    <h3 className="text-sm font-semibold text-gray-900 mb-1">No tienes direcciones</h3>
+                                    <p className="text-gray-500 text-xs mb-4 max-w-xs mx-auto">
+                                        Agrega una dirección para facilitar tus compras.
+                                    </p>
+                                    <button
+                                        onClick={() => setIsFormOpen(true)}
+                                        className="px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium text-xs rounded-lg transition-colors"
+                                    >
+                                        Agregar Dirección
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )
+                }
+
+                {/* Orders Tab Content */}
+                {
+                    activeTab === 'pedidos' && (
+                        <div className="w-full space-y-6">
+                            {loadingPedidos ? (
+                                <div className="flex justify-center items-center py-20">
+                                    <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+                                </div>
+                            ) : pedidos.length > 0 ? (
+                                pedidos.map((pedido) => (
+                                    <OrderCard key={pedido.id} pedido={pedido} />
+                                ))
+                            ) : (
+                                <div className="flex flex-col items-center justify-center min-h-[336px] text-center">
+                                    <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Box size={40} className="text-gray-300" strokeWidth={1.5} />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay pedidos aún</h3>
+                                    <p className="text-gray-500 text-sm mb-6">
+                                        Empieza a comprar para ver tus pedidos aquí.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )
+                }
+
+                {/* Wishlist Tab Content */}
+                {
+                    activeTab === 'deseos' && (
+                        <div className={favoritos.length > 0 ? "" : "flex flex-col items-center justify-center min-h-[336px] text-center"}>
+                            {loadingFavoritos ? (
+                                <div className="flex justify-center items-center py-20">
+                                    <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+                                </div>
+                            ) : favoritos.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {favoritos.map((producto) => (
+                                        <ProductCard key={producto.id} producto={{ ...producto, es_favorito: true }} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div>
+                                    <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Heart size={40} className="text-gray-300" strokeWidth={1.5} />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Tu lista de deseos está vacía</h3>
+                                    <p className="text-gray-500 text-sm mb-6">
+                                        Guarda los productos que más te gusten para comprarlos después.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )
+                }
+
+                {/* Direcciones Tab Content */}
+
+
+            </div >
 
             {/* Modal Form */}
-            <DireccionForm
+            < DireccionForm
                 isOpen={isFormOpen}
                 onClose={() => {
                     setIsFormOpen(false);
@@ -379,7 +375,7 @@ const MiCuenta = () => {
                 direccion={selectedDireccion}
                 usuarioId={usuario?.id}
             />
-        </div>
+        </div >
     );
 };
 

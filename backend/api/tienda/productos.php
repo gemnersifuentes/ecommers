@@ -72,9 +72,29 @@ function listProducts($db, $userId) {
 
         // 2. Busqueda
         if ($busqueda) {
-            $whereClauses[] = "(p.nombre LIKE ? OR p.descripcion LIKE ?)";
-            $params[] = "%$busqueda%";
-            $params[] = "%$busqueda%";
+            // Dividir la búsqueda en palabras individuales
+            $terminos = preg_split('/\s+/', trim($busqueda), -1, PREG_SPLIT_NO_EMPTY);
+            
+            if (empty($terminos)) {
+                $terminos = [$busqueda];
+            }
+
+            $orClauses = [];
+            
+            foreach ($terminos as $term) {
+                // Para cada palabra, buscar coincidencia en cualquiera de los campos
+                $orClauses[] = "(p.nombre LIKE ? OR p.descripcion LIKE ? OR m.nombre LIKE ? OR c.nombre LIKE ?)";
+                $params[] = "%$term%";
+                $params[] = "%$term%";
+                $params[] = "%$term%";
+                $params[] = "%$term%";
+            }
+
+            // Unir todas las cláusulas de palabras con OR
+            // ( (busqueda1) OR (busqueda2) OR ... )
+            if (!empty($orClauses)) {
+                $whereClauses[] = "(" . implode(" OR ", $orClauses) . ")";
+            }
         }
 
         // 3. Marcas
@@ -90,10 +110,26 @@ function listProducts($db, $userId) {
 
         // 4. Condicion
         if (!empty($condicion)) {
-            // La columna 'condicion' NO EXISTE en la tabla productos según database.sql
-            // Deshabilitamos este filtro temporalmente para evitar error 500
-            // $condicionArray = is_array($condicion) ? $condicion : explode(',', $condicion);
-            // ...
+            $condicionArray = is_array($condicion) ? $condicion : explode(',', $condicion);
+            if (count($condicionArray) > 0) {
+                $placeholders = str_repeat('?,', count($condicionArray) - 1) . '?';
+                $whereClauses[] = "p.condicion IN ($placeholders)";
+                $params = array_merge($params, $condicionArray);
+            }
+        }
+
+        // 5. Envio Gratis
+        $envioGratis = isset($_GET['envio_gratis']) ? filter_var($_GET['envio_gratis'], FILTER_VALIDATE_BOOLEAN) : false;
+        if ($envioGratis) {
+            $whereClauses[] = "p.envio_gratis = 1";
+        }
+
+        // 6. Calificación (Rating)
+        $calificacion = isset($_GET['calificacion']) ? intval($_GET['calificacion']) : null;
+        if ($calificacion) {
+             // Subconsulta para filtrar por promedio de calificación
+             $whereClauses[] = "(SELECT COALESCE(AVG(calificacion), 0) FROM resenas WHERE producto_id = p.id) >= ?";
+             $params[] = $calificacion;
         }
 
         // 5. Ofertas Flash
@@ -121,6 +157,20 @@ function listProducts($db, $userId) {
             if (strpos($key, 'attr_') === 0 && !empty($value)) {
                 $filtrosAtributos[] = $value;
             }
+        }
+
+        // 7. Precio Min
+        $precioMin = isset($_GET['precio_min']) && is_numeric($_GET['precio_min']) ? floatval($_GET['precio_min']) : null;
+        if ($precioMin !== null) {
+            $whereClauses[] = "p.precio_base >= ?";
+            $params[] = $precioMin;
+        }
+
+        // 8. Precio Max
+        $precioMax = isset($_GET['precio_max']) && is_numeric($_GET['precio_max']) ? floatval($_GET['precio_max']) : null;
+        if ($precioMax !== null) {
+            $whereClauses[] = "p.precio_base <= ?";
+            $params[] = $precioMax;
         }
 
         if (!empty($filtrosAtributos)) {
@@ -154,6 +204,7 @@ function listProducts($db, $userId) {
         $countSql = "SELECT COUNT(*) 
                      FROM productos p 
                      LEFT JOIN categorias c ON p.categoria_id = c.id 
+                     LEFT JOIN marcas m ON p.marca_id = m.id
                      $whereSql";
         
         $stmtCount = $db->prepare($countSql);
@@ -167,6 +218,8 @@ function listProducts($db, $userId) {
             case 'precio_desc': $orderSql = "ORDER BY p.precio_base DESC"; break;
             case 'nombre_asc': $orderSql = "ORDER BY p.nombre ASC"; break;
             case 'nombre_desc': $orderSql = "ORDER BY p.nombre DESC"; break;
+            case 'mas_vendidos': $orderSql = "ORDER BY vendidos DESC"; break;
+            case 'mejor_calificados': $orderSql = "ORDER BY promedio_calificacion DESC"; break;
         }
 
         // --- MAIN SELECT ---

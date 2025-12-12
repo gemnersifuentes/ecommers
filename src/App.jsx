@@ -11,6 +11,7 @@ import Servicios from './pages/Servicios'
 import Carrito from './pages/Carrito'
 import MiCuenta from './pages/MiCuenta'
 import Checkout from './pages/Checkout'
+import Chatbot from './components/Chatbot'
 import AdminLayout from './pages/admin/AdminLayout'
 import Dashboard from './pages/admin/Dashboard'
 import ProductosIndex from './pages/admin/productos/index'
@@ -65,150 +66,153 @@ function App() {
   }
 
   return (
-    <Routes>
-      {/* Rutas públicas con header/footer */}
-      <Route path="/" element={
-        <>
-          <Header />
-          <Home />
-          <Footer />
-        </>
-      } />
+    <>
+      <Routes>
+        {/* Rutas públicas con header/footer */}
+        <Route path="/" element={
+          <>
+            <Header />
+            <Home />
+            <Footer />
+          </>
+        } />
 
-      <Route path="/login" element={
-        <>
-          <Header />
-          <Login />
-          <Footer />
-        </>
-      } />
+        <Route path="/login" element={
+          <>
+            <Header />
+            <Login />
+            <Footer />
+          </>
+        } />
 
-      <Route path="/register" element={
-        <>
-          <Header />
-          <Register />
-          <Footer />
-        </>
-      } />
+        <Route path="/register" element={
+          <>
+            <Header />
+            <Register />
+            <Footer />
+          </>
+        } />
 
-      <Route path="/productos" element={
-        <>
-          <Header />
-          <Productos />
-          <Footer />
-        </>
-      } />
+        <Route path="/productos" element={
+          <>
+            <Header />
+            <Productos />
+            <Footer />
+          </>
+        } />
 
-      <Route path="/producto/:id" element={
-        <>
-          <Header />
-          <ProductoDetalle />
-          <Footer />
-        </>
-      } />
+        <Route path="/producto/:id" element={
+          <>
+            <Header />
+            <ProductoDetalle />
+            <Footer />
+          </>
+        } />
 
-      <Route path="/servicios" element={
-        <>
-          <Header />
-          <Servicios />
-          <Footer />
-        </>
-      } />
+        <Route path="/servicios" element={
+          <>
+            <Header />
+            <Servicios />
+            <Footer />
+          </>
+        } />
 
-      <Route path="/carrito" element={
-        <>
-          <Header />
-          <Carrito />
-          <Footer />
-        </>
-      } />
+        <Route path="/carrito" element={
+          <>
+            <Header />
+            <Carrito />
+            <Footer />
+          </>
+        } />
 
-      <Route path="/perfil" element={
-        <ProtectedRoute>
-          <Header />
-          <MiCuenta />
-          <Footer />
-        </ProtectedRoute>
-      } />
+        <Route path="/perfil" element={
+          <ProtectedRoute>
+            <Header />
+            <MiCuenta />
+            <Footer />
+          </ProtectedRoute>
+        } />
 
-      <Route path="/mis-pedidos" element={
-        <ProtectedRoute>
-          <Header />
-          <MiCuenta />
-          <Footer />
-        </ProtectedRoute>
-      } />
+        <Route path="/mis-pedidos" element={
+          <ProtectedRoute>
+            <Header />
+            <MiCuenta />
+            <Footer />
+          </ProtectedRoute>
+        } />
 
-      <Route path="/lista-deseos" element={
-        <ProtectedRoute>
-          <Header />
-          <MiCuenta />
-          <Footer />
-        </ProtectedRoute>
-      } />
+        <Route path="/lista-deseos" element={
+          <ProtectedRoute>
+            <Header />
+            <MiCuenta />
+            <Footer />
+          </ProtectedRoute>
+        } />
 
-      <Route path="/checkout" element={
-        <ProtectedRoute>
-          <Header />
-          <Checkout />
-          <Footer />
-        </ProtectedRoute>
-      } />
+        <Route path="/checkout" element={
+          <ProtectedRoute>
+            <Header />
+            <Checkout />
+            <Footer />
+          </ProtectedRoute>
+        } />
 
-      {/* Rutas del panel admin */}
-      <Route path="/admin" element={
-        <AdminRoute>
-          <AdminLayout />
-        </AdminRoute>
-      }>
-        <Route index element={<Dashboard />} />
-        <Route path="productos">
-          <Route index element={<ProductosIndex />} />
-          <Route path="nuevo" element={<ProductosNew />} />
-          <Route path="editar/:id" element={<ProductosEdit />} />
-          <Route path="ver/:id" element={<ProductosShow />} />
+        {/* Rutas del panel admin */}
+        <Route path="/admin" element={
+          <AdminRoute>
+            <AdminLayout />
+          </AdminRoute>
+        }>
+          <Route index element={<Dashboard />} />
+          <Route path="productos">
+            <Route index element={<ProductosIndex />} />
+            <Route path="nuevo" element={<ProductosNew />} />
+            <Route path="editar/:id" element={<ProductosEdit />} />
+            <Route path="ver/:id" element={<ProductosShow />} />
+          </Route>
+          <Route path="categorias">
+            <Route index element={<CategoriasIndex />} />
+            <Route path="nuevo" element={<CategoriasNew />} />
+            <Route path="editar/:id" element={<CategoriasEdit />} />
+            <Route path="ver/:id" element={<CategoriasShow />} />
+          </Route>
+          <Route path="marcas">
+            <Route index element={<MarcasIndex />} />
+            <Route path="nuevo" element={<MarcasNew />} />
+            <Route path="editar/:id" element={<MarcasEdit />} />
+            <Route path="ver/:id" element={<MarcasShow />} />
+          </Route>
+          <Route path="descuentos">
+            <Route index element={<DescuentosIndex />} />
+            <Route path="nuevo" element={<DescuentosNew />} />
+            <Route path="editar/:id" element={<DescuentosEdit />} />
+            <Route path="ver/:id" element={<DescuentosShow />} />
+          </Route>
+          <Route path="servicios">
+            <Route index element={<ServiciosIndex />} />
+            <Route path="nuevo" element={<ServiciosNew />} />
+            <Route path="editar/:id" element={<ServiciosEdit />} />
+            <Route path="ver/:id" element={<ServiciosShow />} />
+          </Route>
+          <Route path="pedidos">
+            <Route index element={<PedidosIndex />} />
+            <Route path="ver/:id" element={<PedidosShow />} />
+            <Route path="editar/:id" element={<PedidosEdit />} />
+          </Route>
+          <Route path="clientes">
+            <Route index element={<ClientesIndex />} />
+          </Route>
+          <Route path="usuarios">
+            <Route index element={<UsuariosIndex />} />
+            <Route path="nuevo" element={<UsuariosNew />} />
+            <Route path="editar/:id" element={<UsuariosEdit />} />
+          </Route>
+          <Route path="banners" element={<AdminBanners />} />
+          <Route path="reportes" element={<AdminReportes />} />
         </Route>
-        <Route path="categorias">
-          <Route index element={<CategoriasIndex />} />
-          <Route path="nuevo" element={<CategoriasNew />} />
-          <Route path="editar/:id" element={<CategoriasEdit />} />
-          <Route path="ver/:id" element={<CategoriasShow />} />
-        </Route>
-        <Route path="marcas">
-          <Route index element={<MarcasIndex />} />
-          <Route path="nuevo" element={<MarcasNew />} />
-          <Route path="editar/:id" element={<MarcasEdit />} />
-          <Route path="ver/:id" element={<MarcasShow />} />
-        </Route>
-        <Route path="descuentos">
-          <Route index element={<DescuentosIndex />} />
-          <Route path="nuevo" element={<DescuentosNew />} />
-          <Route path="editar/:id" element={<DescuentosEdit />} />
-          <Route path="ver/:id" element={<DescuentosShow />} />
-        </Route>
-        <Route path="servicios">
-          <Route index element={<ServiciosIndex />} />
-          <Route path="nuevo" element={<ServiciosNew />} />
-          <Route path="editar/:id" element={<ServiciosEdit />} />
-          <Route path="ver/:id" element={<ServiciosShow />} />
-        </Route>
-        <Route path="pedidos">
-          <Route index element={<PedidosIndex />} />
-          <Route path="ver/:id" element={<PedidosShow />} />
-          <Route path="editar/:id" element={<PedidosEdit />} />
-        </Route>
-        <Route path="clientes">
-          <Route index element={<ClientesIndex />} />
-        </Route>
-        <Route path="usuarios">
-          <Route index element={<UsuariosIndex />} />
-          <Route path="nuevo" element={<UsuariosNew />} />
-          <Route path="editar/:id" element={<UsuariosEdit />} />
-        </Route>
-        <Route path="banners" element={<AdminBanners />} />
-        <Route path="reportes" element={<AdminReportes />} />
-      </Route>
-    </Routes>
+      </Routes>
+      <Chatbot />
+    </>
   )
 }
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Swal from 'sweetalert2';
+import { useLoader } from '../context/LoaderContext';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +12,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { showLoader, hideLoader } = useLoader();
 
   const handleChange = (e) => {
     setFormData({
@@ -22,10 +24,11 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    showLoader();
 
     try {
       const response = await login(formData.correo, formData.clave);
-      
+
       Swal.fire({
         icon: 'success',
         title: '¡Bienvenido!',
@@ -48,11 +51,12 @@ const Login = () => {
       });
     } finally {
       setLoading(false);
+      hideLoader();
     }
   };
 
   return (
-    <div className="container py-5">
+    <div className="container py-5 pt-44 md:pt-60">
       <div className="row justify-content-center">
         <div className="col-md-5">
           <div className="card shadow">
@@ -60,7 +64,7 @@ const Login = () => {
               <h2 className="text-center mb-4">
                 <i className="fas fa-sign-in-alt"></i> Iniciar Sesión
               </h2>
-              
+
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                   <label className="form-label">Correo electrónico</label>
@@ -86,8 +90,8 @@ const Login = () => {
                   />
                 </div>
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="btn btn-primary w-100"
                   disabled={loading}
                 >

@@ -88,7 +88,7 @@ const Servicios = () => {
   }
 
   return (
-    <div className="container py-5">
+    <div className="container py-5 pt-44 md:pt-60">
       <div className="text-center mb-5">
         <h1><i className="fas fa-tools"></i> Servicios Técnicos</h1>
         <p className="lead text-muted">Soluciones profesionales para todas tus necesidades tecnológicas</p>
@@ -114,7 +114,7 @@ const Servicios = () => {
                     <span className="text-muted">Precio:</span>
                     <h3 className="text-primary mb-0">${parseFloat(servicio.precio).toFixed(2)}</h3>
                   </div>
-                  <button 
+                  <button
                     className="btn btn-primary"
                     onClick={() => handleSolicitar(servicio)}
                   >

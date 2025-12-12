@@ -10,6 +10,7 @@ const HeroCarousel = () => {
     const [carouselBanners, setCarouselBanners] = useState([]);
     const [lateralBanners, setLateralBanners] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     useEffect(() => {
         cargarBanners();
@@ -50,16 +51,16 @@ const HeroCarousel = () => {
     }
 
     return (
-        <div className="w-full bg-gray-50 py-6">
+        <div className="w-full bg-gray-50 py-2 md:py-6 mt-2">
             <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 px-4 max-w-[1300px] mx-auto">
-                <div className="lg:col-span-5 relative h-[450px] rounded-2xl overflow-hidden group">
+                <div className="lg:col-span-5 relative h-[200px] md:h-[450px] rounded-2xl overflow-hidden group bg-black">
                     <AnimatePresence initial={false}>
                         <motion.div
                             key={currentSlide}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            transition={{ duration: 0.5 }}
+                            transition={{ duration: isMobile ? 0.2 : 0.5 }}
                             className="absolute inset-0"
                         >
                             <div
@@ -76,28 +77,28 @@ const HeroCarousel = () => {
                                 <div className={`absolute inset-0 ${carouselBanners[currentSlide].gradiente}`} />
                             )}
 
-                            <div className="relative h-full flex flex-col justify-center px-16 text-white">
-                                <div className="mb-6">
-                                    <span className="text-xs font-bold tracking-[0.2em] uppercase opacity-90">
+                            <div className="relative h-full flex flex-col justify-center px-6 md:px-16 text-white">
+                                <div className="mb-3 md:mb-6">
+                                    <span className="text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase opacity-90">
                                         {carouselBanners[currentSlide].subtitulo || 'OFERTA ESPECIAL'}
                                     </span>
                                 </div>
 
-                                <div className="mb-2">
-                                    <h2 className="text-lg md:text-5xl font-black leading-[0.9] tracking-tight">
+                                <div className="mb-4 md:mb-2">
+                                    <h2 className="text-2xl md:text-5xl font-black leading-[0.9] tracking-tight">
                                         {carouselBanners[currentSlide].titulo}
                                     </h2>
                                 </div>
 
-                                <div className="mb-8">
+                                <div className="hidden md:block mb-8">
                                     <p className="text-xl w-8/12 font-semibold mb-1">{carouselBanners[currentSlide].descripcion}</p>
                                 </div>
 
                                 <div className="flex gap-4">
                                     <a href={carouselBanners[currentSlide].link || '/productos'}>
-                                        <button className="px-8 py-3.5 bg-white text-gray-900 font-bold rounded-full hover:bg-gray-100 transition-all shadow-lg flex items-center gap-2">
+                                        <button className="px-5 md:px-8 py-2 md:py-3.5 bg-white text-gray-900 font-bold rounded-full hover:bg-gray-100 transition-all shadow-lg flex items-center gap-2 text-xs md:text-base">
                                             {carouselBanners[currentSlide].texto_boton || 'Ver más'}
-                                            <ChevronRight className="w-5 h-5" />
+                                            <ChevronRight className="w-3 h-3 md:w-5 md:h-5" />
                                         </button>
                                     </a>
                                 </div>
@@ -118,24 +119,24 @@ const HeroCarousel = () => {
                         <ChevronRight className="w-6 h-6" />
                     </button>
 
-                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2.5">
+                    <div className="absolute bottom-2 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-1.5 md:gap-2.5">
                         {carouselBanners.map((_, index) => (
                             <button
                                 key={index}
                                 onClick={() => setCurrentSlide(index)}
-                                className={`h-2.5 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-white w-10' : 'bg-white/50 w-2.5 hover:bg-white/70'
+                                className={`h-1.5 md:h-2.5 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-white w-6 md:w-10' : 'bg-white/50 w-1.5 md:w-2.5 hover:bg-white/70'
                                     }`}
                             />
                         ))}
                     </div>
                 </div>
 
-                <div className="lg:col-span-2 flex flex-col gap-4">
+                <div className="hidden lg:flex lg:col-span-2 flex-col gap-4">
                     {lateralBanners.map((banner) => (
                         <a
                             key={banner.id}
                             href={banner.link || '/productos'}
-                            className={`relative h-[217px] rounded-2xl overflow-hidden group cursor-pointer hover:shadow-xl transition-all duration-300 flex flex-col justify-between p-6 ${banner.gradiente || 'bg-gray-900'}`}
+                            className={`relative h-[120px] md:h-[217px] rounded-2xl overflow-hidden group cursor-pointer hover:shadow-xl transition-all duration-300 flex flex-col justify-between p-4 md:p-6 ${banner.gradiente || 'bg-gray-900'}`}
                         >
                             {/* Fondo base oscuro por si el gradiente tiene transparencia */}
                             <div className="absolute inset-0 bg-gray-900 -z-10" />

@@ -44,6 +44,20 @@ try {
     $stmtMarcas->execute($paramsMarcas);
     $response['marcas'] = $stmtMarcas->fetchAll(PDO::FETCH_ASSOC);
 
+    // 2. Obtener Condiciones
+    $sqlCondiciones = "SELECT DISTINCT condicion FROM productos WHERE activo = 1 AND condicion IS NOT NULL AND condicion != ''";
+    if ($categoriaId) {
+        $sqlCondiciones .= " AND categoria_id = ?";
+    }
+    $sqlCondiciones .= " ORDER BY condicion";
+    $stmtCondiciones = $db->prepare($sqlCondiciones);
+    if ($categoriaId) {
+        $stmtCondiciones->execute([$categoriaId]);
+    } else {
+        $stmtCondiciones->execute();
+    }
+    $response['condiciones'] = $stmtCondiciones->fetchAll(PDO::FETCH_COLUMN);
+
     // 2. Obtener Atributos y Valores (Filtrados por categoría)
     // 2. Obtener Atributos y Valores
     // Si hay categoría, filtrar por productos de esa categoría (Strict)

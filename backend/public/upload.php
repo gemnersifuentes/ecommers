@@ -35,7 +35,7 @@ try {
 
     // Validar tipo de archivo
     $allowedTypes = [
-        'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+        'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/avif', 'image/svg+xml', 'image/bmp',
         'video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'
     ];
     $finfo = finfo_open(FILEINFO_MIME_TYPE);

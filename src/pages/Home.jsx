@@ -181,12 +181,15 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Spacer for fixed header */}
+      <div className="h-[120px] md:h-[185px]"></div>
+
       {/* Hero Carousel */}
       <HeroCarousel />
 
       {/* Categorías circulares - Estilo imagen de referencia */}
-      <div className="py-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 bg-white rounded-lg">
+      <div className="py-4 md:py-8 bg-gray-50">
+        <div className="max-w-7xl mx-4 md:mx-auto px-6 py-4 bg-white rounded-lg">
           {/* Scroll horizontal */}
           <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
             {categorias.map((categoria, index) => (
@@ -204,7 +207,7 @@ const Home = () => {
                     className="flex flex-col items-center cursor-pointer group"
                   >
                     {/* Círculo con imagen */}
-                    <div className="w-20 h-20 rounded-full border-2 border-transparent group-hover:border-orange-500 transition-all duration-300  mb-2 bg-white p-1">
+                    <div className="w-14 h-14 md:w-20 md:h-20 rounded-full border-2 border-transparent group-hover:border-orange-500 transition-all duration-300  mb-2 bg-white p-1">
                       <div className="w-full h-full rounded-full overflow-hidden">
                         {categoria.imagen ? (
                           <img
@@ -237,9 +240,9 @@ const Home = () => {
       {/* Ofertas Relámpago */}
       {
         ofertasRelampago.length > 0 && (
-          <div className="py-8 bg-gray-50">
+          <div className="py-4 md:py-8 bg-gray-50">
             {/* Banner OFERTAS WOW */}
-            <div className="bg-gradient-to-r mx-auto from-red-600 to-orange-500 rounded-xl p-4 md:p-6 mb-8 flex flex-col md:flex-row items-center justify-between shadow-lg text-white relative overflow-hidden max-w-7xl gap-4 md:gap-0">
+            <div className="bg-gradient-to-r mx-auto from-red-600 to-orange-500 rounded-xl p-4 md:p-6 mb-8 flex flex-col md:flex-row items-center justify-between shadow-lg text-white relative overflow-hidden max-w-7xl gap-4 md:gap-0 mx-4 md:mx-auto">
               {/* Fondo decorativo */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
 
@@ -274,7 +277,7 @@ const Home = () => {
                 </div>
               </div>
             </div>
-            <div className="max-w-7xl mx-auto px-6 py-8 bg-white rounded-lg">
+            <div className="max-w-7xl mx-4 md:mx-auto px-6 py-8 bg-white rounded-lg">
 
 
 
@@ -284,10 +287,10 @@ const Home = () => {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4">
                 {ofertasRelampago.map(producto => (
-                  <Link key={producto.id} to={`/producto/${producto.id}`} className="group">
-                    <div className="bg-white  rounded-lg p-3 transition-shadow relative">
+                  <Link key={producto.id} to={`/producto/${producto.id}`} className="group flex-shrink-0 w-[160px] md:w-[200px]">
+                    <div className="bg-white rounded-lg p-3 transition-shadow relative">
                       {/* Badge Descuento */}
                       <div className="absolute top-3 left-3 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded z-10">
                         -{Math.round(producto.descuento_valor)}%
@@ -310,8 +313,8 @@ const Home = () => {
 
                       {/* Precios */}
                       <div className="mb-2">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-lg font-bold text-orange-600">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-base md:text-lg font-bold text-orange-600">
                             S/ {parseFloat(producto.precio_final).toFixed(2)}
                           </span>
                           <span className="text-xs text-gray-400 line-through">

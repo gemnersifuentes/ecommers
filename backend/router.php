@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 
 // Servir archivos estáticos desde uploads
-if (preg_match('/\.(?:png|jpg|jpeg|gif|webp|svg|mp4|webm|ogg|mov)$/', $uri)) {
+if (preg_match('/\.(?:png|jpg|jpeg|gif|webp|avif|bmp|svg|mp4|webm|ogg|mov)$/', $uri)) {
     $filePath = __DIR__ . $uri;
     
     if (file_exists($filePath)) {

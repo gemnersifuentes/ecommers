@@ -6,6 +6,8 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { favoritosService } from '../../services';
 import Swal from 'sweetalert2';
+import { Loader } from '../Loader';
+import { FullScreenLoader } from '../FullScreenLoader';
 
 const ProductCard = ({ producto }) => {
     const navigate = useNavigate();
@@ -20,6 +22,7 @@ const ProductCard = ({ producto }) => {
     const [varianteSeleccionada, setVarianteSeleccionada] = useState(null);
     const [seleccionesAtributos, setSeleccionesAtributos] = useState({});
     const [imagenSeleccionada, setImagenSeleccionada] = useState(null);
+    const [loadingAdd, setLoadingAdd] = useState(false);
 
     // Calcular precio con descuento
     const precioBase = parseFloat(producto.precio_base);
@@ -131,8 +134,11 @@ const ProductCard = ({ producto }) => {
     };
 
     const handleAddDirectly = async () => {
+        setLoadingAdd(true);
         try {
             await addItem(producto, null, 1);
+            // Esperar mínimo 800ms para que el loader sea visible
+            await new Promise(resolve => setTimeout(resolve, 800));
             Swal.fire({
                 icon: 'success',
                 title: '¡Agregado!',
@@ -144,6 +150,8 @@ const ProductCard = ({ producto }) => {
             });
         } catch (error) {
             console.error('Error:', error);
+        } finally {
+            setLoadingAdd(false);
         }
     };
 
@@ -174,8 +182,11 @@ const ProductCard = ({ producto }) => {
             });
             return;
         }
+        setLoadingAdd(true);
         try {
             await addItem(producto, varianteSeleccionada, cantidad);
+            // Esperar mínimo 800ms para que el loader sea visible
+            await new Promise(resolve => setTimeout(resolve, 800));
             Swal.fire({
                 icon: 'success',
                 title: '¡Agregado!',
@@ -189,6 +200,8 @@ const ProductCard = ({ producto }) => {
             setVarianteSeleccionada(null);
         } catch (error) {
             console.error('Error:', error);
+        } finally {
+            setLoadingAdd(false);
         }
     };
 
@@ -281,13 +294,13 @@ const ProductCard = ({ producto }) => {
             <div
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
-                className="bg-white rounded-2xl overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group border border-gray-100 relative h-full flex flex-col"
+                className="bg-white rounded-2xl overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group border border-gray-100 relative h-full flex flex-col mx-0 md:mx-0"
             >
                 {/* Badges */}
                 <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
                     {descuento > 0 && (
-                        <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1">
-                            <Zap className="w-3 h-3 fill-current" /> FLASH
+                        <span className="bg-red-600 text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded flex items-center gap-1">
+                            <Zap className="w-2 h-2 md:w-3 md:h-3 fill-current" /> FLASH
                         </span>
                     )}
                 </div>
@@ -295,7 +308,7 @@ const ProductCard = ({ producto }) => {
                 {/* Botón Favorito */}
                 <button
                     onClick={toggleFavorite}
-                    className="absolute top-3 right-3 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-white text-gray-400 hover:text-red-500 shadow-sm transition-colors"
+                    className="absolute top-3 right-3 z-20 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-red-500  transition-colors"
                 >
                     {isFavorite ? (
                         <FaHeart className="text-red-500" />
@@ -307,25 +320,33 @@ const ProductCard = ({ producto }) => {
                 {/* Imagen (card preview) */}
                 <div
                     onClick={() => navigate(`/producto/${producto.id}`)}
-                    className="relative h-52 w-full p-4 bg-white flex items-center justify-center"
+                    className="relative h-40 md:h-52 w-full p-2 md:p-4 bg-white flex items-center justify-center overflow-hidden mb-4 md:mb-0"
                 >
                     <img
                         src={imagenPrincipal}
                         alt={producto.nombre}
-                        className={`w-full h-full object-contain transition-opacity duration-500 ${isHovered && imagenSecundaria !== imagenPrincipal ? 'opacity-0' : 'opacity-100'}`}
+                        className={`h-28 w-auto md:w-full md:h-full object-contain transition-opacity duration-500 ${isHovered && imagenSecundaria !== imagenPrincipal ? 'opacity-0' : 'opacity-100'}`}
                     />
                     {imagenSecundaria !== imagenPrincipal && (
                         <img
                             src={imagenSecundaria}
                             alt={producto.nombre}
-                            className={`absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+                            className={`absolute inset-0 h-28 w-auto md:w-full md:h-full mx-auto my-auto object-contain transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
                         />
                     )}
                 </div>
 
                 {/* Información */}
                 <div className="p-4 pt-0 flex-1 flex flex-col" onClick={() => navigate(`/producto/${producto.id}`)}>
-                    <h3 className="text-sm text-gray-600 mb-2 line-clamp-2 h-10 hover:text-orange-500 transition-colors">
+
+
+                    {producto.marca_nombre && (
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1 block">
+                            {producto.marca_nombre}
+                        </span>
+                    )}
+
+                    <h3 className="text-sm text-gray-600 mb-2 line-clamp-2 min-h-[40px] hover:text-orange-500 transition-colors">
                         {producto.nombre}
                     </h3>
 
@@ -344,14 +365,14 @@ const ProductCard = ({ producto }) => {
                     </div>
 
                     {/* Envío Gratis + Descuento */}
-                    <div className="flex flex-wrap items-baseline gap-2 mb-2">
+                    <div className="flex flex-wrap items-baseline gap-2 mb-1">
                         {(producto.envio_gratis === 1 || producto.envio_gratis === true) && (
-                            <span className="inline-block bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded animate-fade-in">
+                            <span className="inline-block bg-green-100 text-green-700 text-[8px] md:text-[10px] font-bold px-1.5 md:px-2 py-0.5 rounded animate-fade-in">
                                 Envío Gratis
                             </span>
                         )}
                         {descuento > 0 && (
-                            <span className="inline-block bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded animate-fade-in">
+                            <span className="inline-block bg-red-100 text-red-700 text-[8px] md:text-[10px] font-bold px-1.5 md:px-2 py-0.5 rounded animate-fade-in">
                                 {descuento}% OFF
                             </span>
                         )}
@@ -361,9 +382,9 @@ const ProductCard = ({ producto }) => {
 
 
                     {/* Footer Card: Left Col (Price/Sold) + Right (Button) */}
-                    <div className="flex items-end justify-between mt-auto pt-3 border-t border-gray-50">
+                    <div className="flex items-end justify-between mt-auto pt-1 ">
                         <div className="flex flex-col gap-0.5">
-                            <span className="text-xl font-black text-orange-500 leading-none">
+                            <span className="text-sm md:text-xl font-black text-orange-500 leading-none">
                                 ${precioFinal.toFixed(2)}
                             </span>
                             {descuento > 0 && (
@@ -378,7 +399,8 @@ const ProductCard = ({ producto }) => {
 
                         <button
                             onClick={handleOpenModal}
-                            className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center hover:bg-orange-600 transition-colors shadow-lg hover:scale-105 active:scale-95 mb-1"
+                            disabled={loadingAdd}
+                            className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center hover:bg-orange-600 transition-colors shadow-lg hover:scale-105 active:scale-95 mb-1 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {producto.variaciones && producto.variaciones.length > 0 ? <FaPlus size={12} /> : <ShoppingCart size={16} />}
                         </button>
@@ -655,9 +677,10 @@ const ProductCard = ({ producto }) => {
 
                                 <button
                                     onClick={handleAgregarDesdeModal}
-                                    disabled={!varianteSeleccionada || varianteSeleccionada.stock < cantidad}
-                                    className="w-full py-2 bg-orange-500 text-white font-medium rounded-[30px] hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-3"
+                                    disabled={!varianteSeleccionada || varianteSeleccionada.stock < cantidad || loadingAdd}
+                                    className="w-full py-2 bg-orange-500 text-white font-medium rounded-[30px] hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-3 flex items-center justify-center gap-2"
                                 >
+                                    {loadingAdd && <Loader size={14} />}
                                     Añadir al carrito
                                 </button>
 
@@ -672,6 +695,9 @@ const ProductCard = ({ producto }) => {
                     </div>
                 </>
             )}
+
+            {/* Loader de pantalla completa */}
+            {loadingAdd && <FullScreenLoader />}
         </>
     );
 };

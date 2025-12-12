@@ -667,7 +667,7 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                 )}
                                 <input
                                     type="file"
-                                    accept="image/*"
+                                    accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/avif,image/svg+xml,image/bmp"
                                     onChange={handleImagenChange}
                                     className="absolute inset-0 opacity-0 cursor-pointer"
                                 />
@@ -700,7 +700,7 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                     <span className="text-xs text-gray-500">Agregar</span>
                                     <input
                                         type="file"
-                                        accept="image/*"
+                                        accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/avif,image/svg+xml,image/bmp"
                                         multiple
                                         onChange={handleImagenesGaleriaChange}
                                         className="hidden"

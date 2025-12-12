@@ -4,12 +4,14 @@ import { useCart } from '../context/CartContext';
 import { Trash2, ShoppingBag, Minus, Plus, ArrowRight, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
+import { useLoader } from '../context/LoaderContext';
 
 const Carrito = () => {
   const { items, updateQuantity, removeItem, getTotal } = useCart();
   const navigate = useNavigate();
   const [seleccionados, setSeleccionados] = useState([]);
   const [todosSeleccionados, setTodosSeleccionados] = useState(true);
+  const { showLoader, hideLoader } = useLoader();
 
   // Asegurar que items sea siempre un array
   const cartItems = Array.isArray(items) ? items : [];
@@ -20,9 +22,11 @@ const Carrito = () => {
     setTodosSeleccionados(cartItems.length > 0);
   }, [cartItems.length]);
 
-  const handleCantidadChange = (itemId, nuevaCantidad) => {
+  const handleCantidadChange = async (itemId, nuevaCantidad) => {
     if (nuevaCantidad < 1) return;
-    updateQuantity(itemId, nuevaCantidad);
+    showLoader();
+    await updateQuantity(itemId, nuevaCantidad);
+    setTimeout(hideLoader, 500);
   };
 
   const handleEliminar = (itemId) => {
@@ -35,9 +39,11 @@ const Carrito = () => {
       cancelButtonText: 'Cancelar',
       confirmButtonColor: '#ea580c', // orange-600
       cancelButtonColor: '#9ca3af'
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        removeItem(itemId);
+        showLoader();
+        await removeItem(itemId);
+        setTimeout(hideLoader, 500);
         // El useEffect se encargará de actualizar la selección
         Swal.fire({
           title: 'Eliminado',
@@ -97,7 +103,7 @@ const Carrito = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Tu carrito está vacío</h2>
           <p className="text-gray-500 mb-8">¡Explora nuestro catálogo y encuentra lo que buscas!</p>
           <button
-            onClick={() => navigate('/productos')}
+            onClick={() => { showLoader(); navigate('/productos'); setTimeout(hideLoader, 500); }}
             className="w-full py-3 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
           >
             Ver Productos <ArrowRight size={18} />
@@ -108,7 +114,7 @@ const Carrito = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 pt-44 pb-12 md:pt-60">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="flex items-center gap-2 mb-8">
           <button onClick={() => navigate(-1)} className="text-gray-500 hover:text-orange-500 transition-colors">
@@ -305,7 +311,7 @@ const Carrito = () => {
               </div>
 
               <button
-                onClick={() => navigate('/checkout')}
+                onClick={() => { showLoader(); navigate('/checkout'); setTimeout(hideLoader, 500); }}
                 disabled={seleccionados.length === 0}
                 className="w-full py-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed mb-4 flex items-center justify-center gap-2"
               >
@@ -313,7 +319,7 @@ const Carrito = () => {
               </button>
 
               <button
-                onClick={() => navigate('/productos')}
+                onClick={() => { showLoader(); navigate('/productos'); setTimeout(hideLoader, 500); }}
                 className="w-full py-3 bg-white text-gray-700 font-medium rounded-xl border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-colors"
               >
                 Seguir comprando

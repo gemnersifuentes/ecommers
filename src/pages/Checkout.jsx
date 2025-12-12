@@ -8,6 +8,7 @@ import { tiendaService, direccionesService } from '../services';
 import { ubigeoPeru } from '../data/ubigeo_peru';
 import { DireccionForm } from '../components/DireccionForm';
 import Swal from 'sweetalert2';
+import { useLoader } from '../context/LoaderContext';
 
 const Checkout = () => {
     const { items: cart, getTotal, clearCart } = useCart();
@@ -16,6 +17,7 @@ const Checkout = () => {
     const [step, setStep] = useState(1); // 1: Envío, 2: Pago, 3: Éxito
     const [loading, setLoading] = useState(false);
     const [orderNumber, setOrderNumber] = useState('');
+    const { showLoader, hideLoader } = useLoader();
 
     // Delivery method and addresses
     const [metodoEnvio, setMetodoEnvio] = useState('domicilio');
@@ -142,6 +144,7 @@ const Checkout = () => {
 
     const handlePayment = async () => {
         setLoading(true);
+        showLoader();
         try {
             const orderData = {
                 usuario_id: usuario ? usuario.id : 0,
@@ -222,6 +225,7 @@ const Checkout = () => {
             });
         } finally {
             setLoading(false);
+            hideLoader();
         }
     };
 
@@ -295,7 +299,7 @@ const Checkout = () => {
             <div className="min-h-screen bg-gray-50 pt-24 pb-12 flex flex-col items-center justify-center">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Tu carrito está vacío</h2>
                 <button
-                    onClick={() => navigate('/')}
+                    onClick={() => { showLoader(); navigate('/'); setTimeout(hideLoader, 500); }}
                     className="px-6 py-2 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-600 transition-colors"
                 >
                     Volver a la tienda
@@ -305,7 +309,7 @@ const Checkout = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pt-8 pb-12">
+        <div className="min-h-screen bg-gray-50 pt-44 pb-12 md:pt-60">
             <div className="container mx-auto px-4 max-w-6xl">
 
                 {renderStepIndicator()}
@@ -346,7 +350,7 @@ const Checkout = () => {
                         </div>
 
                         <button
-                            onClick={() => navigate('/')}
+                            onClick={() => { showLoader(); navigate('/'); setTimeout(hideLoader, 500); }}
                             className="px-8 py-3 bg-orange-500 text-white rounded-full font-bold hover:bg-orange-600 transition-colors flex items-center gap-2 mx-auto"
                         >
                             Continuar Comprando <span>→</span>
@@ -631,7 +635,7 @@ const Checkout = () => {
 
                                     <div className="mt-8">
                                         <button
-                                            onClick={handleNextStep}
+                                            onClick={() => { showLoader(); handleNextStep(); setTimeout(hideLoader, 300); }}
                                             className="w-full py-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-all shadow-md hover:shadow-lg active:scale-[0.99]"
                                         >
                                             Continuar al Pago

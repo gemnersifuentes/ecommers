@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Swal from 'sweetalert2';
+import { useLoader } from '../context/LoaderContext';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+  const { showLoader, hideLoader } = useLoader();
 
   const handleChange = (e) => {
     setFormData({
@@ -34,10 +36,11 @@ const Register = () => {
     }
 
     setLoading(true);
+    showLoader();
 
     try {
       const response = await register(formData.nombre, formData.correo, formData.clave);
-      
+
       Swal.fire({
         icon: 'success',
         title: '¡Registro exitoso!',
@@ -55,11 +58,12 @@ const Register = () => {
       });
     } finally {
       setLoading(false);
+      hideLoader();
     }
   };
 
   return (
-    <div className="container py-5">
+    <div className="container py-5 pt-44 md:pt-60">
       <div className="row justify-content-center">
         <div className="col-md-5">
           <div className="card shadow">
@@ -67,7 +71,7 @@ const Register = () => {
               <h2 className="text-center mb-4">
                 <i className="fas fa-user-plus"></i> Crear Cuenta
               </h2>
-              
+
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                   <label className="form-label">Nombre completo</label>
@@ -119,8 +123,8 @@ const Register = () => {
                   />
                 </div>
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="btn btn-primary w-100"
                   disabled={loading}
                 >
