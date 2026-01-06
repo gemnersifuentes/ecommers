@@ -61,42 +61,69 @@ function listProducts($db, $userId) {
         $whereClauses = ["p.activo = 1"];
         $params = [];
 
-        // 1. Categoria
+        // 1. Busqueda (Preprocessing for Smart Detection and Scoring)
+        $searchTokens = [];
+        $detectedCategoryId = null;
+
+        if ($busqueda) {
+            $searchLower = mb_strtolower(trim($busqueda));
+            $searchTokens = preg_split('/\s+/', $searchLower, -1, PREG_SPLIT_NO_EMPTY);
+            
+            if (!empty($searchTokens)) {
+                // Smart Category Detection (Stay helpful but not restrictive)
+                $firstTerm = $searchTokens[0];
+                $firstTermClean = rtrim($firstTerm, 's'); 
+                
+                if (strlen($firstTermClean) > 2) {
+                    $stmtCatCheck = $db->prepare("SELECT id FROM categorias WHERE nombre LIKE ? AND activo = 1 LIMIT 1");
+                    $stmtCatCheck->execute(["$firstTermClean%"]);
+                    $catMatch = $stmtCatCheck->fetch(PDO::FETCH_ASSOC);
+                    
+                    if ($catMatch) {
+                        $detectedCategoryId = $catMatch['id'];
+                    }
+                }
+            }
+        }
+
         if ($categoria) {
-            // "slug" no existe en la tabla categorias según database.sql
-            // Usamos nombre como fallback
             $whereClauses[] = "(c.id = ? OR c.nombre = ?)";
             $params[] = $categoria;
             $params[] = $categoria;
         }
 
-        // 2. Busqueda
-        if ($busqueda) {
-            // Dividir la búsqueda en palabras individuales
-            $terminos = preg_split('/\s+/', trim($busqueda), -1, PREG_SPLIT_NO_EMPTY);
+        // 2. Busqueda Logic (Broad Selection + Smart Relevance sorting handles the rest)
+        if (!empty($searchTokens)) {
+            $searchORs = [];
             
-            if (empty($terminos)) {
-                $terminos = [$busqueda];
-            }
-
-            $orClauses = [];
+            // a) FULLTEXT match in Natural Language (Good for phrases)
+            $searchORs[] = "MATCH(p.nombre, p.descripcion, p.modelo, p.sku, p.etiquetas) AGAINST(? IN NATURAL LANGUAGE MODE)";
+            $params[] = $busqueda;
             
-            foreach ($terminos as $term) {
-                // Para cada palabra, buscar coincidencia en cualquiera de los campos
-                $orClauses[] = "(p.nombre LIKE ? OR p.descripcion LIKE ? OR m.nombre LIKE ? OR c.nombre LIKE ?)";
-                $params[] = "%$term%";
-                $params[] = "%$term%";
-                $params[] = "%$term%";
-                $params[] = "%$term%";
+            // b) Token matching (Handles partial words, typos-by-pluralization)
+            foreach($searchTokens as $token) {
+                if (strlen($token) > 2) {
+                    $tokenQuery = "(p.nombre LIKE ? OR p.descripcion LIKE ? OR p.modelo LIKE ? OR p.sku LIKE ? OR p.etiquetas LIKE ? OR c.nombre LIKE ? OR m.nombre LIKE ?)";
+                    $searchORs[] = $tokenQuery;
+                    
+                    // Singularize attempt (basic Spanish: remove 's' or 'es')
+                    $stem = $token;
+                    if (str_ends_with($token, 's')) {
+                         $stem = rtrim($token, 's');
+                    }
+                    
+                    $term = "%$stem%";
+                    $params[] = $term; $params[] = $term; $params[] = $term; $params[] = $term; $params[] = $term; $params[] = $term; $params[] = $term;
+                } else {
+                    // Short tokens (sku parts etc)
+                    $searchORs[] = "(p.sku LIKE ? OR p.modelo LIKE ?)";
+                    $term = "%$token%";
+                    $params[] = $term; $params[] = $term;
+                }
             }
-
-            // Unir todas las cláusulas de palabras con OR
-            // ( (busqueda1) OR (busqueda2) OR ... )
-            if (!empty($orClauses)) {
-                $whereClauses[] = "(" . implode(" OR ", $orClauses) . ")";
-            }
+            
+            $whereClauses[] = "(" . implode(" OR ", $searchORs) . ")";
         }
-
         // 3. Marcas
         if (!empty($marcas)) {
             $marcasArray = is_array($marcas) ? $marcas : explode(',', $marcas);
@@ -150,6 +177,7 @@ function listProducts($db, $userId) {
                 )
              )";
         }
+
 
         // 6. Atributos Dinámicos (Variantes) - Lógica corregida para 'attr_' y tabla producto_variantes
         $filtrosAtributos = [];
@@ -213,13 +241,82 @@ function listProducts($db, $userId) {
 
         // --- ORDER BY ---
         $orderSql = "ORDER BY p.fecha_creacion DESC"; // Default
-        switch ($ordenar) {
-            case 'precio_asc': $orderSql = "ORDER BY p.precio_base ASC"; break;
-            case 'precio_desc': $orderSql = "ORDER BY p.precio_base DESC"; break;
-            case 'nombre_asc': $orderSql = "ORDER BY p.nombre ASC"; break;
-            case 'nombre_desc': $orderSql = "ORDER BY p.nombre DESC"; break;
-            case 'mas_vendidos': $orderSql = "ORDER BY vendidos DESC"; break;
-            case 'mejor_calificados': $orderSql = "ORDER BY promedio_calificacion DESC"; break;
+
+        // Logic for Relevance Sorting when Searching (Weighted Score)
+        $orderParams = [];
+        
+        if ($busqueda && $ordenar === 'recomendados') {
+             // BUILD ADVANCED RELEVANCE SCORE
+             
+             // 1. Fulltext MATCH (Boolean + Natural Language combination)
+             $scoreSql = "(MATCH(p.nombre, p.descripcion, p.modelo, p.sku, p.etiquetas) AGAINST(? IN NATURAL LANGUAGE MODE) * 20)";
+             $orderParams[] = $busqueda;
+
+             // 2. Exact Phrase Match (HUGE BOOST)
+             $scoreSql .= " + (CASE WHEN p.nombre LIKE ? THEN 10000 ELSE 0 END)";
+             $orderParams[] = "%$busqueda%";
+             
+             // 3. Starts with Phrase Match
+             $scoreSql .= " + (CASE WHEN p.nombre LIKE ? THEN 5000 ELSE 0 END)";
+             $orderParams[] = "$busqueda%";
+
+             // 4. Smart Category Detection Boost
+             if ($detectedCategoryId) {
+                $scoreSql .= " + (CASE WHEN p.categoria_id = ? THEN 3000 ELSE 0 END)";
+                $orderParams[] = $detectedCategoryId;
+             }
+             
+             // 5. Individual Tokens Score
+             foreach ($searchTokens as $termToken) {
+                 if (strlen($termToken) > 2) {
+                     // Get stem (singular)
+                     $stemToken = $termToken;
+                     if (str_ends_with($termToken, 's')) {
+                         $stemToken = rtrim($termToken, 's');
+                     }
+                     
+                     // Word in Name (High)
+                     $scoreSql .= " + (CASE WHEN p.nombre LIKE ? THEN 600 ELSE 0 END)";
+                     $orderParams[] = "%$stemToken%";
+                     
+                     // Word in SKU or Modelo (Very High for technical searches)
+                     $scoreSql .= " + (CASE WHEN p.sku LIKE ? OR p.modelo LIKE ? THEN 800 ELSE 0 END)";
+                     $orderParams[] = "%$stemToken%";
+                     $orderParams[] = "%$stemToken%";
+
+                     // Word in Category or Brand Name
+                     $scoreSql .= " + (CASE WHEN c.nombre LIKE ? THEN 300 ELSE 0 END)";
+                     $orderParams[] = "%$stemToken%";
+                     $scoreSql .= " + (CASE WHEN m.nombre LIKE ? THEN 300 ELSE 0 END)";
+                     $orderParams[] = "%$stemToken%";
+                 }
+             }
+             
+             // 6. Penalty for Category Mismatch if Name doesn't contain the term
+             // (We use searchTokens[0] for the general check)
+             $mainTerm = $searchTokens[0];
+             $mainStem = str_ends_with($mainTerm, 's') ? rtrim($mainTerm, 's') : $mainTerm;
+             
+             $scoreSql .= " - (CASE WHEN p.nombre NOT LIKE ? AND p.descripcion NOT LIKE ? AND c.nombre LIKE ? AND c.nombre NOT LIKE ? THEN 2500 ELSE 0 END)";
+             $orderParams[] = "%$mainStem%";
+             $orderParams[] = "%$mainStem%";
+             $orderParams[] = "%$mainStem%"; // c.nombre LIKE %mainStem% (if category matches, don't penalize)
+             $orderParams[] = "%$mainStem%"; // c.nombre NOT LIKE %mainStem% -> if it doesn't match, penalize
+
+
+             // Ordenar por Puntaje DESC, luego por fecha
+             $orderSql = "ORDER BY ($scoreSql) DESC, p.fecha_creacion DESC";
+
+        } else {
+            switch ($ordenar) {
+                case 'precio_asc': $orderSql = "ORDER BY p.precio_base ASC"; break;
+                case 'precio_desc': $orderSql = "ORDER BY p.precio_base DESC"; break;
+                case 'nombre_asc': $orderSql = "ORDER BY p.nombre ASC"; break;
+                case 'nombre_desc': $orderSql = "ORDER BY p.nombre DESC"; break;
+                case 'mas_vendidos': $orderSql = "ORDER BY vendidos DESC"; break;
+                case 'mejor_calificados': $orderSql = "ORDER BY promedio_calificacion DESC"; break;
+                case 'recomendados': $orderSql = "ORDER BY p.destacado DESC, RAND()"; break;
+            }
         }
 
         // --- MAIN SELECT ---
@@ -240,8 +337,17 @@ function listProducts($db, $userId) {
                 $orderSql
                 LIMIT " . intval($limit) . " OFFSET " . intval($offset);
 
+        // $whereSql viene PRIMERO, luego $orderSql.
+        // Asi que debemos appendear los params de sorting a $params.
+        
+        $executionParams = $params; // Copia base
+        
+        if (!empty($orderParams)) {
+             $executionParams = array_merge($executionParams, $orderParams);
+        }
+
         $stmt = $db->prepare($sql);
-        $stmt->execute($params);
+        $stmt->execute($executionParams);
         $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
@@ -259,9 +365,9 @@ function listProducts($db, $userId) {
 
         echo json_encode([
             'data' => $productos,
-            'total' => $totalProductos,
-            'page' => $page,
-            'limit' => $limit
+            'total' => intval($totalProductos),
+            'page' => intval($page),
+            'limit' => intval($limit)
         ]);
 
     } catch (Exception $e) {

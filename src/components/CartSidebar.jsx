@@ -112,6 +112,11 @@ const CartSidebar = ({ isOpen, onClose }) => {
                                         const imagen = producto?.imagen || null;
                                         const nombre = producto?.nombre || 'Producto';
 
+                                        // Calculate max allowed quantity (default 10 if stock unknown)
+                                        const stockRaw = variacion ? variacion.stock : producto?.stock;
+                                        const stockActual = (stockRaw !== undefined && stockRaw !== null) ? Number(stockRaw) : 10;
+                                        const maxQty = Math.min(10, stockActual);
+
                                         return (
                                             <motion.div
                                                 key={item.id}
@@ -194,16 +199,18 @@ const CartSidebar = ({ isOpen, onClose }) => {
                                                                 <span className="w-8 text-center text-sm font-semibold text-gray-700">{item.cantidad}</span>
                                                                 <button
                                                                     onClick={async () => {
+                                                                        if (item.cantidad >= maxQty) return;
                                                                         showLoader();
                                                                         await updateQuantity(item.id, item.cantidad + 1);
                                                                         setTimeout(hideLoader, 500);
                                                                     }}
-                                                                    disabled={syncing}
+                                                                    disabled={syncing || item.cantidad >= maxQty}
                                                                     className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition disabled:opacity-30 border-l border-gray-200"
                                                                 >
                                                                     +
                                                                 </button>
                                                             </div>
+
                                                         </div>
                                                     </div>
                                                 </div>

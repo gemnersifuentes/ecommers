@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Truck, ChevronUp } from 'lucide-react';
+import { Truck, ChevronUp, MapPin } from 'lucide-react';
+import { formatDeliveryEstimate, getDeliveryLabel } from '../utils/dateUtils';
 import { Loader } from './Loader';
 import { FullScreenLoader } from './FullScreenLoader';
 
@@ -9,8 +10,8 @@ export const OrderCard = ({ pedido }) => {
     const [loadingReview, setLoadingReview] = useState(false);
 
     // Robust checking: If method is 'tienda' OR if the status itself implies pickup
-    const method = pedido.metodo_envio ? pedido.metodo_envio.toLowerCase().trim() : 'domicilio';
-    const isPickup = method === 'tienda' || pedido.estado === 'Listo para recoger' || pedido.estado === 'Recogido';
+    const rawMethod = pedido.metodo_envio ? pedido.metodo_envio.toLowerCase().trim() : 'domicilio';
+    const isPickup = rawMethod.includes('tienda') || pedido.estado.toLowerCase() === 'listo_recoger' || pedido.estado.toLowerCase() === 'recogido';
 
     return (
         <div className="bg-gray-50 rounded-lg border border-gray-200 mb-4 overflow-hidden">
@@ -47,7 +48,11 @@ export const OrderCard = ({ pedido }) => {
                         className="p-1.5 md:px-6 md:py-1.5 text-xs font-medium text-black bg-white border border-gray-300 rounded-lg md:rounded-[35px] hover:bg-gray-50 transition shadow-sm flex items-center justify-center"
                         aria-label={isExpanded ? "Ocultar detalles" : "Ver detalles"}
                     >
-                        <Truck size={16} className={`md:hidden text-orange-500 transition-transform ${isExpanded ? 'scale-x-[-1]' : ''}`} />
+                        {isPickup ? (
+                            <MapPin size={16} className={`md:hidden text-orange-500 transition-transform ${isExpanded ? 'scale-x-[-1]' : ''}`} />
+                        ) : (
+                            <Truck size={16} className={`md:hidden text-orange-500 transition-transform ${isExpanded ? 'scale-x-[-1]' : ''}`} />
+                        )}
                         <span className="hidden md:inline">{isExpanded ? 'Ocultar' : 'Ver detalles'}</span>
                     </button>
                 </div>
@@ -60,8 +65,12 @@ export const OrderCard = ({ pedido }) => {
                     <div className="px-3 py-6 border-b border-gray-100 bg-white md:px-6">
                         {/* ... Timeline code kept mostly same but ensure clean background ... */}
                         <div className="flex items-center gap-2 mb-6">
-                            <Truck size={20} className="text-orange-500" />
-                            <h4 className="text-sm font-bold text-gray-900">Estado del Envío</h4>
+                            {isPickup ? (
+                                <MapPin size={20} className="text-orange-500" />
+                            ) : (
+                                <Truck size={20} className="text-orange-500" />
+                            )}
+                            <h4 className="text-sm font-bold text-gray-900">{isPickup ? 'Estado del Recojo' : 'Estado del Envío'}</h4>
                         </div>
 
                         {(() => {
@@ -70,20 +79,20 @@ export const OrderCard = ({ pedido }) => {
                                 : ['Pedido Realizado', 'Confirmado', 'Preparando', 'Enviado', 'Entregado'];
 
                             const statusMap = {
-                                'Pendiente': 0,
-                                'Pagado': 1,
-                                'En proceso': 1,
-                                'En Preparación': 2,
-                                'Enviado': 3,
-                                'Listo para recoger': 3,
-                                'Entregado': 4,
-                                'Completado': 4,
-                                'Recogido': 4, // Mapping explicit status if used
-                                'Devuelto': 4,
-                                'Cancelado': 4
+                                'pendiente': 0,
+                                'pendiente_verificacion': 1,
+                                'pagado': 1,
+                                'en_preparacion': 2,
+                                'enviado': 3,
+                                'listo_recoger': 3,
+                                'entregado': 4,
+                                'completado': 4,
+                                'recogido': 4,
+                                'devuelto': 0,
+                                'cancelado': 4
                             };
 
-                            const currentStepIndex = statusMap[pedido.estado] ?? 0;
+                            const currentStepIndex = statusMap[pedido.estado.toLowerCase()] ?? 0;
                             const progressPercentage = (currentStepIndex / (steps.length - 1)) * 100;
 
                             return (
@@ -115,21 +124,49 @@ export const OrderCard = ({ pedido }) => {
                     {/* Products Section - White Background */}
                     <div className="px-3 py-3 bg-white md:px-6">
                         <div className="mb-2">
-                            <h3 className="text-[12px] font-medium text-orange-500 mb-1 capitalize flex items-center gap-1">
-                                <svg width="6" height="6" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="4" cy="4" r="4" fill="#22C55E" />
-                                </svg>
-                                {pedido.estado === 'Pendiente' ? 'Pendiente de pago' : pedido.estado}
+                            {(() => {
+                                const statusConfigs = {
+                                    'pendiente': { label: 'Pendiente de pago', color: '#EAB308', icon: Truck },
+                                    'pendiente_verificacion': { label: 'Pendiente de Verificación', color: '#F97316', icon: Truck },
+                                    'pagado': { label: 'Pagado', color: '#22C55E', icon: Truck },
+                                    'en_preparacion': { label: 'En Preparación', color: '#6366F1', icon: Truck },
+                                    'enviado': {
+                                        label: isPickup ? '¡Listo para recoger!' : 'Enviado',
+                                        color: isPickup ? '#F59E0B' : '#A855F7',
+                                        icon: isPickup ? MapPin : Truck
+                                    },
+                                    'listo_recoger': { label: '¡Listo para recoger!', color: '#F59E0B', icon: MapPin },
+                                    'entregado': {
+                                        label: isPickup ? 'Recogido en Tienda' : 'Entregado',
+                                        color: '#10B981',
+                                        icon: isPickup ? MapPin : Truck
+                                    },
+                                    'completado': {
+                                        label: isPickup ? 'Recogido en Tienda' : 'Completado',
+                                        color: '#10B981',
+                                        icon: isPickup ? MapPin : Truck
+                                    },
+                                    'recogido': { label: 'Recogido en Tienda', color: '#10B981', icon: MapPin },
+                                    'cancelado': { label: 'Cancelado', color: '#EF4444', icon: Truck },
+                                    'devuelto': { label: 'Devuelto', color: '#6B7280', icon: Truck }
+                                };
+                                const state = pedido.estado.toLowerCase();
+                                const config = statusConfigs[state] || { label: pedido.estado, color: '#22C55E', icon: isPickup ? MapPin : Truck };
+                                const StatusIcon = config.icon;
 
-                                {!isPickup && (
-                                    <span className="text-[10px] text-gray-500 ml-1"> {pedido.estado === 'Entregado' ? 'Entregado el ' : ' Llega el '}
-                                        <span className=" text-gray-500">
-                                            {new Date(new Date(pedido.fecha_creacion).setDate(new Date(pedido.fecha_creacion).getDate() + 3)).toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                return (
+                                    <h3 className="text-[12px] font-medium mb-1 capitalize flex items-center gap-1" style={{ color: config.color }}>
+                                        <StatusIcon size={14} className="mr-0.5" />
+                                        {config.label}
+
+                                        <span className="text-[10px] text-gray-500 ml-1"> {(() => {
+                                            const estimate = formatDeliveryEstimate(pedido.fecha_creacion, pedido.datos_envio, isPickup);
+                                            return `${getDeliveryLabel(state, isPickup, estimate)} ${estimate}`;
+                                        })()}
                                         </span>
-                                    </span>
-                                )}
-                            </h3>
-
+                                    </h3>
+                                );
+                            })()}
                         </div>
 
                         <div className="flex gap-6">

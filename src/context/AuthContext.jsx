@@ -20,29 +20,34 @@ export const AuthProvider = ({ children }) => {
     // Cargar datos de localStorage al iniciar
     const usuarioGuardado = localStorage.getItem('usuario');
     const tokenGuardado = localStorage.getItem('token');
-    
-    console.log('🔐 AuthContext inicializando...', {
-      usuarioGuardado: !!usuarioGuardado,
-      tokenGuardado: !!tokenGuardado
-    });
-    
+
     if (usuarioGuardado && tokenGuardado) {
       try {
         setUsuario(JSON.parse(usuarioGuardado));
-        console.log('✓ Usuario cargado de localStorage');
       } catch (e) {
         console.error('Error parsing usuario:', e);
         localStorage.removeItem('usuario');
         localStorage.removeItem('token');
       }
     }
-    
+
     setLoading(false);
     setInitialized(true);
   }, []);
 
   const login = async (correo, clave) => {
     const response = await authService.login(correo, clave);
+    if (response.success) {
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('usuario', JSON.stringify(response.usuario));
+      setUsuario(response.usuario);
+      return response;
+    }
+    throw new Error(response.message);
+  };
+
+  const googleLogin = async (credential) => {
+    const response = await authService.googleLogin(credential);
     if (response.success) {
       localStorage.setItem('token', response.token);
       localStorage.setItem('usuario', JSON.stringify(response.usuario));
@@ -67,6 +72,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     usuario,
     login,
+    googleLogin,
     register,
     logout,
     isAuthenticated: !!usuario,

@@ -1,0 +1,2 @@
+2026-01-05 22:56:23 Params: ["15","null","tienda","tarjeta",null,"285.85499999999996","pagado","{\"nombre\":\"Alexander\",\"dni\":\"424\"}","","424","ORD-260105-189"]
+2026-01-05 22:58:16 Params: ["17","4","domicilio","tarjeta",null,118,"pagado","{\"nombre\":\"Guest Tester\",\"direccion\":\"Calle de Pruebas 456\",\"departamento\":\"Lima\",\"provincia\":\"Lima\",\"distrito\":\"Miraflores\",\"cp\":\"15047\",\"telefono\":\"987654321\",\"referencia\":\"Frente al parque\"}","Frente al parque","","ORD-260105-963"]

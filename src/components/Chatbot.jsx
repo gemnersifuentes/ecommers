@@ -65,10 +65,20 @@ const Chatbot = () => {
         setIsTyping(true);
 
         // "Pensamiento" de la IA (Algoritmo de búsqueda + NLP Template)
-        setTimeout(() => {
-            const response = aiBrain.processQuery(userText, products, services);
-            setMessages(prev => [...prev, response]);
-            setIsTyping(false);
+        setTimeout(async () => {
+            try {
+                const response = await aiBrain.processQuery(userText, products || [], services || [], messages);
+                setMessages(prev => [...prev, response]);
+            } catch (error) {
+                console.error("AI Brain Error:", error);
+                setMessages(prev => [...prev, {
+                    id: Date.now(),
+                    text: "⚠️ **Error Fatal**: Lo siento, mi cerebro se ha desconectado momentáneamente. Por favor intenta de nuevo.",
+                    isBot: true
+                }]);
+            } finally {
+                setIsTyping(false);
+            }
         }, 1200);
     };
 
@@ -207,7 +217,10 @@ const Chatbot = () => {
                                                                     {prod.nombre}
                                                                 </p>
                                                                 <p className="text-sm font-bold text-orange-500">
-                                                                    ${parseFloat(prod.precio).toFixed(2)}
+                                                                    ${(() => {
+                                                                        const p = parseFloat(prod.precio);
+                                                                        return isNaN(p) ? '0.00' : p.toFixed(2);
+                                                                    })()}
                                                                 </p>
                                                             </div>
                                                             <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#0ea5e9]" />

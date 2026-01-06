@@ -191,7 +191,96 @@ switch ($method) {
             $busqueda = isset($_GET['busqueda']) ? $_GET['busqueda'] : null;
             
             try {
-                // Consulta directa a tablas
+                // Configuración inicial de consulta
+                $whereClauses = ["(p.activo = 1 OR " . ((isset($_GET['admin_mode']) && $_GET['admin_mode'] === 'true') ? '1=1' : '0=1') . ")"];
+                $params = [];
+                $scoreSql = '';
+                $scoreParams = [];
+
+                if ($categoria) {
+                    $whereClauses[] = "p.categoria_id = ?";
+                    $params[] = $categoria;
+                }
+                
+                if ($busqueda) {
+                    $whereClauses[] = "(p.nombre LIKE ? OR p.descripcion LIKE ? OR p.sku LIKE ? OR p.modelo LIKE ? OR p.etiquetas LIKE ? OR m.nombre LIKE ? OR c.nombre LIKE ?)";
+                    $term = "%$busqueda%";
+                    // 7 placeholders in the where clause
+                    $params = array_merge($params, [$term, $term, $term, $term, $term, $term, $term]);
+                    
+                    // Simple relevance score for admin (Name/SKU Priority)
+                    $scoreSql = "(CASE WHEN p.nombre LIKE ? THEN 100 ELSE 0 END + 
+                                  CASE WHEN p.sku LIKE ? THEN 80 ELSE 0 END + 
+                                  CASE WHEN p.modelo LIKE ? THEN 80 ELSE 0 END +
+                                  CASE WHEN p.nombre LIKE ? THEN 50 ELSE 0 END +
+                                  CASE WHEN c.nombre LIKE ? THEN 20 ELSE 0 END)";
+                    $scoreParams = [$busqueda, $busqueda, $busqueda, "%$busqueda%", "%$busqueda%"];
+                }
+
+                // Otros filtros...
+                if (isset($_GET['destacado']) && $_GET['destacado'] === '1') {
+                    $whereClauses[] = "p.destacado = 1";
+                }
+                if (isset($_GET['nuevo']) && $_GET['nuevo'] === '1') {
+                    $whereClauses[] = "p.nuevo = 1";
+                }
+                if (isset($_GET['bajo_stock']) && $_GET['bajo_stock'] === '1') {
+                    $whereClauses[] = "(p.stock <= p.stock_minimo OR p.stock = 0)";
+                }
+
+                // Filtro por marcas
+                if (isset($_GET['marcas']) && !empty($_GET['marcas'])) {
+                    $marcasIds = explode(',', $_GET['marcas']);
+                    $marcasIds = array_filter($marcasIds, 'is_numeric');
+                    if (!empty($marcasIds)) {
+                        $placeholders = implode(',', array_fill(0, count($marcasIds), '?'));
+                        $whereClauses[] = "p.marca_id IN ($placeholders)";
+                        $params = array_merge($params, $marcasIds);
+                    }
+                }
+
+                // Filtro por precio
+                if (isset($_GET['precio_min']) && is_numeric($_GET['precio_min'])) {
+                    $whereClauses[] = "p.precio_base >= ?";
+                    $params[] = $_GET['precio_min'];
+                }
+                if (isset($_GET['precio_max']) && is_numeric($_GET['precio_max'])) {
+                    $whereClauses[] = "p.precio_base <= ?";
+                    $params[] = $_GET['precio_max'];
+                }
+
+                // Filtros por atributos dinámicos (attr_*)
+                foreach ($_GET as $key => $value) {
+                    if (strpos($key, 'attr_') === 0 && !empty($value)) {
+                        $valoresIds = explode(',', $value);
+                        $valoresIds = array_filter($valoresIds, 'is_numeric');
+                        if (empty($valoresIds)) continue;
+                        
+                        $placeholders = implode(',', array_fill(0, count($valoresIds), '?'));
+                        $whereClauses[] = "EXISTS (
+                            SELECT 1 
+                            FROM producto_variantes pv 
+                            WHERE pv.producto_id = p.id 
+                            AND pv.atributo_valor_id IN ($placeholders)
+                            AND pv.activo = 1
+                        )";
+                        $params = array_merge($params, $valoresIds);
+                    }
+                }
+
+                $whereSql = "WHERE " . implode(" AND ", $whereClauses);
+
+                // 1. Obtener TOTAL (Importante para paginación)
+                $countSql = "SELECT COUNT(DISTINCT p.id) 
+                             FROM productos p 
+                             LEFT JOIN categorias c ON p.categoria_id = c.id 
+                             LEFT JOIN marcas m ON p.marca_id = m.id 
+                             $whereSql";
+                $countStmt = $db->prepare($countSql);
+                $countStmt->execute($params);
+                $totalProductos = $countStmt->fetchColumn();
+
+                // 2. Obtener DATOS con grouping, ordering y limit
                 $sql = "SELECT p.*, 
                                c.nombre as categoria_nombre,
                                m.nombre as marca_nombre,
@@ -204,191 +293,63 @@ switch ($method) {
                                    THEN 1 
                                    ELSE 0 
                                END as tiene_descuento,
-                               CASE 
-                                   WHEN d.id IS NOT NULL AND d.activo = 1 
-                                       AND (d.fecha_inicio IS NULL OR d.fecha_inicio <= CURDATE())
-                                       AND (d.fecha_fin IS NULL OR d.fecha_fin >= CURDATE())
-                                   THEN 
-                                       CASE 
-                                           WHEN d.tipo = 'porcentaje' THEN p.precio_base * (1 - COALESCE(d.valor, 0) / 100)
-                                           WHEN d.tipo = 'monto_fijo' THEN GREATEST(0, p.precio_base - COALESCE(d.valor, 0))
-                                           ELSE p.precio_base
-                                       END
-                                   ELSE p.precio_base 
-                               END as precio_final
+                               p.precio_base as precio_final
                         FROM productos p
                         LEFT JOIN categorias c ON p.categoria_id = c.id
                         LEFT JOIN marcas m ON p.marca_id = m.id
                         LEFT JOIN descuentos d ON (
                             (d.producto_id = p.id OR d.categoria_id = p.categoria_id OR d.marca_id = p.marca_id)
                             AND d.activo = 1
-                            AND (d.fecha_inicio IS NULL OR d.fecha_inicio <= CURDATE())
-                            AND (d.fecha_fin IS NULL OR d.fecha_fin >= CURDATE())
                         )
-                        WHERE (p.activo = 1 OR " . ((isset($_GET['admin_mode']) && $_GET['admin_mode'] === 'true') ? '1=1' : '0=1') . ")";
-                
-                $params = [];
-                
-                if ($categoria) {
-                    $sql .= " AND p.categoria_id = ?";
-                    $params[] = $categoria;
-                }
-                
-                if ($busqueda) {
-                    $sql .= " AND (p.nombre LIKE ? OR p.descripcion LIKE ?)";
-                    $params[] = "%$busqueda%";
-                    $params[] = "%$busqueda%";
-                }
+                        $whereSql
+                        GROUP BY p.id";
 
-                // Filtro por marcas
-                if (isset($_GET['marcas']) && !empty($_GET['marcas'])) {
-                    $marcasIds = explode(',', $_GET['marcas']);
-                    $marcasIds = array_filter($marcasIds, 'is_numeric');
-                    if (!empty($marcasIds)) {
-                        $placeholders = implode(',', array_fill(0, count($marcasIds), '?'));
-                        $sql .= " AND p.marca_id IN ($placeholders)";
-                        $params = array_merge($params, $marcasIds);
-                    }
-                }
-
-                // Filtro por precio
-                if (isset($_GET['precio_min']) && is_numeric($_GET['precio_min'])) {
-                    $sql .= " AND p.precio_base >= ?";
-                    $params[] = $_GET['precio_min'];
-                }
-                if (isset($_GET['precio_max']) && is_numeric($_GET['precio_max'])) {
-                    $sql .= " AND p.precio_base <= ?";
-                    $params[] = $_GET['precio_max'];
-                }
-
-                // Filtros por atributos dinámicos (attr_*)
-                foreach ($_GET as $key => $value) {
-                    if (strpos($key, 'attr_') === 0 && !empty($value)) {
-                        $valoresIds = explode(',', $value);
-                        $valoresIds = array_filter($valoresIds, 'is_numeric');
-                        if (empty($valoresIds)) continue;
-                        
-                        $placeholders = implode(',', array_fill(0, count($valoresIds), '?'));
-                        
-                        $sql .= " AND EXISTS (
-                            SELECT 1 
-                            FROM producto_variantes pv 
-                            WHERE pv.producto_id = p.id 
-                            AND pv.atributo_valor_id IN ($placeholders)
-                            AND pv.activo = 1
-                        )";
-                        
-                        $params = array_merge($params, $valoresIds);
-                    }
-                }
-                
                 // Ordenamiento
                 $orden = isset($_GET['orden']) ? $_GET['orden'] : 'recomendados';
+                $orderSql = "";
+                $finalParams = $params;
+
                 switch ($orden) {
-                    case 'precio_asc':
-                        $sql .= " ORDER BY p.precio_base ASC";
-                        break;
-                    case 'precio_desc':
-                        $sql .= " ORDER BY p.precio_base DESC";
-                        break;
+                    case 'precio_asc': $orderSql = " ORDER BY p.precio_base ASC"; break;
+                    case 'precio_desc': $orderSql = " ORDER BY p.precio_base DESC"; break;
                     default:
-                        $sql .= " ORDER BY p.fecha_creacion DESC";
+                        if ($scoreSql) {
+                            $orderSql = " ORDER BY $scoreSql DESC, p.fecha_creacion DESC";
+                            $finalParams = array_merge($finalParams, $scoreParams);
+                        } else {
+                            $orderSql = " ORDER BY p.fecha_creacion DESC";
+                        }
                 }
                 
-                // Primero obtener el total de productos (sin LIMIT)
-                $countStmt = $db->prepare($sql);
-                $countStmt->execute($params);
-                $totalProductos = $countStmt->rowCount();
-                
-                // Ahora agregar paginación con LIMIT y OFFSET (como integers directos)
                 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
                 $limit = isset($_GET['limit']) ? max(1, intval($_GET['limit'])) : 16;
                 $offset = ($page - 1) * $limit;
                 
-                // Agregar LIMIT y OFFSET directamente (no como parámetros)
-                $sql .= " LIMIT " . intval($limit) . " OFFSET " . intval($offset);
+                $sql .= $orderSql . " LIMIT " . intval($limit) . " OFFSET " . intval($offset);
                 
                 $stmt = $db->prepare($sql);
-                $stmt->execute($params);
+                $stmt->execute($finalParams);
                 $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
-                // Agregar variaciones y convertir tipos
+                // Formatear resultados
                 foreach ($productos as &$producto) {
                     $producto['precio_base'] = floatval($producto['precio_base']);
                     $producto['precio_final'] = floatval($producto['precio_final']);
                     $producto['descuento_valor'] = floatval($producto['descuento_valor'] ?? 0);
-                    $producto['descuento_tipo'] = $producto['descuento_tipo'] ?? null;
-                    // Mantener compatibilidad con frontend que busca descuento_aplicado
-                    $producto['descuento_aplicado'] = $producto['descuento_valor'];
                     $producto['tiene_descuento'] = intval($producto['tiene_descuento']);
                     $producto['stock'] = intval($producto['stock']);
                     
-                    try {
-                        // Usar LEFT JOIN para asegurar que carguen las variantes aunque tengan datos incompletos
-                        $stmtVar = $db->prepare("
-                            SELECT v.id, v.precio, v.stock, v.sku,
-                                   av.id as valor_id,
-                                   COALESCE(av.valor, 'Estándar') as valor,
-                                   av.color_hex,
-                                   a.id as atributo_id,
-                                   COALESCE(a.nombre, 'Opción') as atributo_nombre,
-                                   a.permite_precio
-                            FROM producto_variantes v
-                            LEFT JOIN atributo_valores av ON v.atributo_valor_id = av.id
-                            LEFT JOIN atributos a ON av.atributo_id = a.id
-                            WHERE v.producto_id = ? AND v.activo = 1
-                            ORDER BY a.nombre, av.valor
-                        ");
-                        $stmtVar->execute([$producto['id']]);
-                        $variantes = $stmtVar->fetchAll(PDO::FETCH_ASSOC);
-                        
-                        // Agrupar variantes con sus atributos
-                        $variantesAgrupadas = [];
-                        foreach ($variantes as $var) {
-                            $varianteId = $var['id'];
-                            if (!isset($variantesAgrupadas[$varianteId])) {
-                                $variantesAgrupadas[$varianteId] = [
-                                    'id' => $var['id'],
-                                    // Si el precio de variable es 0 o nulo, usar el del producto base
-                                    'precio' => floatval($var['precio'] > 0 ? $var['precio'] : $producto['precio_final']),
-                                    'stock' => intval($var['stock']),
-                                    'sku' => $var['sku'],
-                                    'atributos' => []
-                                ];
-                            }
-                            
-                            // Solo agregar atributos si tienen ID válido (para evitar 'Opción: Estándar' vacíos si no hay enlace)
-                            if ($var['atributo_id']) {
-                                $variantesAgrupadas[$varianteId]['atributos'][] = [
-                                    'atributo_id' => $var['atributo_id'],
-                                    'atributo_nombre' => $var['atributo_nombre'],
-                                    'valor_id' => $var['valor_id'],
-                                    'valor' => $var['valor'],
-                                    'color_hex' => $var['color_hex']
-                                ];
-                            } else {
-                                // Si hay variante pero no atributos (caso legacy raro), crear uno dummy para que el frontend no falle
-                                // O mejor, no agregamos atributos y dejamos que el frontend maneje variante sin atributos si es necesario
-                                // Pero el modal depende de atributos. Agregamos uno genérico.
-                                $variantesAgrupadas[$varianteId]['atributos'][] = [
-                                    'atributo_id' => 0,
-                                    'atributo_nombre' => 'Opción',
-                                    'valor_id' => 0,
-                                    'valor' => 'Única',
-                                    'color_hex' => null
-                                ];
-                            }
-                        }
-                        
-                        $producto['variaciones'] = array_values($variantesAgrupadas);
-                    } catch (Exception $e) {
-                        $producto['variaciones'] = [];
-                    }
+                    // Cargar variantes básicas
+                    $stmtVar = $db->prepare("SELECT id, precio, stock, sku FROM producto_variantes WHERE producto_id = ? AND activo = 1");
+                    $stmtVar->execute([$producto['id']]);
+                    $producto['variaciones'] = $stmtVar->fetchAll(PDO::FETCH_ASSOC);
                 }
                 
                 echo json_encode([
                     'data' => $productos,
-                    'total' => $totalProductos
+                    'total' => intval($totalProductos),
+                    'page' => $page,
+                    'limit' => $limit
                 ]);
 
             } catch (Exception $e) {

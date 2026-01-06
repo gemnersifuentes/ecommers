@@ -48,12 +48,11 @@ const AdminMarcas = () => {
 
   const handleEliminar = async (id) => {
     const result = await Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Esta acción no se puede deshacer',
+      title: '¿Eliminar marca?',
+      text: 'Esta acción desactivará la marca en toda la tienda',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#6b7280'
     });
@@ -61,7 +60,7 @@ const AdminMarcas = () => {
     if (result.isConfirmed) {
       try {
         await marcasService.delete(id);
-        Swal.fire('Eliminado', 'Marca eliminada exitosamente', 'success');
+        Swal.fire('Eliminado', 'La marca ha sido removida', 'success');
         cargarMarcas();
       } catch (error) {
         Swal.fire('Error', 'No se pudo eliminar la marca', 'error');
@@ -74,201 +73,158 @@ const AdminMarcas = () => {
     try {
       if (marcaEdit) {
         await marcasService.update(marcaEdit.id, formData);
-        Swal.fire('Actualizado', 'Marca actualizada exitosamente', 'success');
+        Swal.fire('¡Éxito!', 'Marca actualizada', 'success');
       } else {
         await marcasService.create(formData);
-        Swal.fire('Creado', 'Marca creada exitosamente', 'success');
+        Swal.fire('¡Éxito!', 'Nueva marca registrada', 'success');
       }
       setMostrarModal(false);
       cargarMarcas();
     } catch (error) {
-      Swal.fire('Error', 'No se pudo guardar la marca', 'error');
+      Swal.fire('Error', 'No se pudo procesar la solicitud', 'error');
     }
   };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const marcasFiltradas = marcas.filter(marca =>
     marca.nombre.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: 'rgb(147,51,234)' }}></div></div>;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="max-w-7xl mx-auto space-y-8 px-4 pb-12">
+      {/* Premium Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Marcas</h2>
-          <p className="text-xs text-gray-500 mt-1">Gestiona las marcas de productos</p>
+          <h2 className="text-3xl font-black text-[#1e293b] tracking-tight uppercase">Marcas</h2>
+          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-1">Identidad de fabricantes y socios</p>
         </div>
-        <button 
-          onClick={handleNuevo}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-sm"
-        >
-          <i className="fas fa-plus"></i>
-          Nueva Marca
-        </button>
-      </div>
 
-      {/* Search Bar */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <div className="relative">
-          <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-          <input
-            type="text"
-            placeholder="Buscar marcas..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 text-xs border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          />
+        <div className="flex items-center gap-4">
+          <div className="relative group">
+            <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input
+              type="text"
+              placeholder="Buscar socios..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2.5 bg-white border-2 border-transparent focus:border-purple-500/20 rounded-2xl text-xs font-bold shadow-sm focus:outline-none transition-all w-64"
+            />
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleNuevo}
+            className="px-8 py-3 bg-[#1e293b] text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-xl hover:bg-purple-600 transition-all flex items-center gap-3"
+          >
+            <i className="fas fa-certificate text-[10px]"></i>
+            Registrar Marca
+          </motion.button>
         </div>
       </div>
 
       {/* Marcas Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <AnimatePresence>
           {marcasFiltradas.map((marca, index) => (
             <motion.div
               key={marca.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.2, delay: index * 0.05 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all group"
+              transition={{ delay: index * 0.05 }}
+              className="group bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-purple-500/5 p-8 flex flex-col items-center text-center relative overflow-hidden hover:border-purple-200 transition-all"
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-                    <i className="fas fa-copyright text-xl"></i>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-sm">{marca.nombre}</h3>
-                    <p className="text-[10px] text-gray-500">ID: {marca.id}</p>
-                  </div>
-                </div>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => handleEditar(marca)}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    title="Editar"
-                  >
-                    <i className="fas fa-edit text-xs"></i>
-                  </button>
-                  <button
-                    onClick={() => handleEliminar(marca.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Eliminar"
-                  >
-                    <i className="fas fa-trash text-xs"></i>
-                  </button>
-                </div>
+              <div className="absolute top-0 right-0 p-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => handleEditar(marca)} className="w-8 h-8 flex items-center justify-center bg-purple-50 text-purple-600 rounded-xl hover:bg-purple-600 hover:text-white transition-all">
+                  <i className="fas fa-edit text-[10px]"></i>
+                </button>
+                <button onClick={() => handleEliminar(marca.id)} className="w-8 h-8 flex items-center justify-center bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all">
+                  <i className="fas fa-trash-alt text-[10px]"></i>
+                </button>
               </div>
-              
-              {marca.descripcion && (
-                <p className="text-xs text-gray-600 line-clamp-2">{marca.descripcion}</p>
-              )}
+
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-[1.25rem] flex items-center justify-center text-white shadow-lg shadow-purple-500/30 mb-5 group-hover:rotate-6 transition-transform">
+                <span className="text-xl font-black">{marca.nombre.charAt(0).toUpperCase()}</span>
+              </div>
+
+              <h3 className="text-sm font-black text-[#1e293b] uppercase tracking-tight mb-1">{marca.nombre}</h3>
+              <p className="text-[9px] text-[#1e293b]/30 font-black uppercase tracking-widest mb-4">Socio Estratégico #{marca.id}</p>
+
+              <p className="text-[11px] text-gray-500 font-medium leading-relaxed">
+                {marca.descripcion || 'No se ha definido una descripción técnica para este fabricante.'}
+              </p>
+
+              <div className="mt-6 pt-4 border-t border-gray-50 w-full">
+                <span className="text-[10px] font-black text-purple-600 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Ver Productos</span>
+              </div>
             </motion.div>
           ))}
         </AnimatePresence>
       </div>
 
-      {marcasFiltradas.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
-          <i className="fas fa-copyright text-gray-300 text-5xl mb-4"></i>
-          <p className="text-gray-500 font-medium text-xs">No se encontraron marcas</p>
-        </div>
-      )}
-
-      {/* Modal */}
+      {/* Modal Marca */}
       <AnimatePresence>
         {mostrarModal && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          >
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-md"
+          <div className="fixed inset-0 bg-[#1e293b]/60 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden"
             >
-              <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4 rounded-t-2xl flex items-center justify-between">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <i className={`fas fa-${marcaEdit ? 'edit' : 'plus-circle'}`}></i>
-                  {marcaEdit ? 'Editar Marca' : 'Nueva Marca'}
-                </h3>
-                <button
-                  onClick={() => setMostrarModal(false)}
-                  className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white"
-                >
+              <div className="px-10 py-8 bg-gradient-to-r from-purple-600 to-indigo-700 flex justify-between items-center text-white">
+                <div>
+                  <h3 className="text-xl font-black uppercase tracking-widest">{marcaEdit ? 'Actualizar' : 'Alta de'} Marca</h3>
+                  <p className="text-[10px] font-bold text-white/70 uppercase tracking-tight">Registro de proveedores</p>
+                </div>
+                <button onClick={() => setMostrarModal(false)} className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/20 hover:bg-white/30 transition-all">
                   <i className="fas fa-times"></i>
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-2">
-                    <i className="fas fa-copyright text-purple-600 mr-2"></i>
-                    Nombre de la Marca
-                  </label>
-                  <input
-                    type="text"
-                    name="nombre"
-                    value={formData.nombre}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2.5 text-xs border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Ej: Samsung, Kingston, Intel..."
-                  />
+              <form onSubmit={handleSubmit} className="p-10 space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Razón Social / Nombre</label>
+                    <input
+                      type="text"
+                      name="nombre"
+                      value={formData.nombre}
+                      onChange={handleChange}
+                      required
+                      placeholder="Ej: Sony, Microsoft, Apple..."
+                      className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-purple-500/20 rounded-2xl text-xs font-bold text-[#1e293b] focus:outline-none focus:bg-white transition-all"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Información de Marca</label>
+                    <textarea
+                      name="descripcion"
+                      value={formData.descripcion}
+                      onChange={handleChange}
+                      placeholder="Historia o detalles del fabricante..."
+                      rows="4"
+                      className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-purple-500/20 rounded-2xl text-xs font-medium text-[#1e293b] focus:outline-none focus:bg-white transition-all resize-none"
+                    ></textarea>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-2">
-                    <i className="fas fa-align-left text-purple-600 mr-2"></i>
-                    Descripción
-                  </label>
-                  <textarea
-                    name="descripcion"
-                    value={formData.descripcion}
-                    onChange={handleChange}
-                    rows="3"
-                    className="w-full px-4 py-2.5 text-xs border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                    placeholder="Descripción de la marca (opcional)..."
-                  ></textarea>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setMostrarModal(false)}
-                    className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 text-xs font-semibold rounded-xl hover:bg-gray-50 transition-colors"
-                  >
+                <div className="flex gap-4 pt-4">
+                  <button type="button" onClick={() => setMostrarModal(false)} className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-[#1e293b] bg-gray-100 rounded-2xl hover:bg-gray-200 transition-all">
                     Cancelar
                   </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-xl transition-colors"
-                  >
-                    {marcaEdit ? 'Actualizar' : 'Crear Marca'}
+                  <button type="submit" className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-white bg-[#1e293b] rounded-2xl shadow-xl shadow-purple-500/20 hover:bg-purple-600 transition-all">
+                    {marcaEdit ? 'Actualizar Marca' : 'Confirmar Registro'}
                   </button>
                 </div>
               </form>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>

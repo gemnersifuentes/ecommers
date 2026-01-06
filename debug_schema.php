@@ -1,17 +1,15 @@
 <?php
-require_once 'backend/config/conexion.php';
-$db = new Database();
-$conn = $db->getConnection();
+require_once __DIR__ . '/backend/config/conexion.php';
+$database = new Database();
+$db = $database->getConnection();
 
-echo "--- PEDIDOS ---\n";
-$stmt = $conn->query('DESCRIBE pedidos');
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    print_r($row);
+function printTableSchema($db, $tableName) {
+    echo "\n--- Schema for $tableName ---\n";
+    $stmt = $db->query("DESCRIBE $tableName");
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        print_r($row);
+    }
 }
 
-echo "\n--- DETALLE_PEDIDO ---\n";
-$stmt = $conn->query('DESCRIBE detalle_pedido');
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    print_r($row);
-}
-?>
+printTableSchema($db, 'pedidos');
+printTableSchema($db, 'detalle_pedido');

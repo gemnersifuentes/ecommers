@@ -12,7 +12,9 @@ const MobileProductFilters = ({
     categorias = [],
     atributosDisponibles = [],
     ordenamiento,
-    setOrdenamiento
+    setOrdenamiento,
+    relevantCategories = [],
+    relevantBrands = []
 }) => {
     // Estado para controlar qué modal está abierto
     const [activeModal, setActiveModal] = useState(null);
@@ -130,11 +132,19 @@ const MobileProductFilters = ({
         </>
     );
 
-    // 2. MODAL DE MARCAS
     const renderBrandModal = () => {
-        const marcasFiltradas = marcas.filter(m =>
-            m.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        const marcasFiltradas = marcas.filter(m => {
+            const matchesSearch = m.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+            const isSelected = filters.marcas?.includes(parseInt(m.id));
+            const isRelevant = relevantBrands.length > 0 && relevantBrands.includes(parseInt(m.id));
+
+            // Strict filtering during search
+            if (filters.busqueda && relevantBrands.length > 0 && !isRelevant && !isSelected) {
+                return false;
+            }
+
+            return matchesSearch;
+        });
 
         return (
             <>
@@ -311,23 +321,33 @@ const MobileProductFilters = ({
                             </span>
                         </button>
 
-                        {categorias.map(cat => (
-                            <button
-                                key={cat.id}
-                                onClick={() => {
-                                    onFilterChange({ categoria_id: parseInt(cat.id) });
-                                    closeModal();
-                                }}
-                                className={`w-full flex items-center gap-4 py-3 px-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${filters.categoria_id === parseInt(cat.id) ? 'bg-orange-50' : ''}`}
-                            >
-                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${filters.categoria_id === parseInt(cat.id) ? 'border-orange-500' : 'border-gray-300 bg-white'}`}>
-                                    {filters.categoria_id === parseInt(cat.id) && <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />}
-                                </div>
-                                <span className={`text-xs flex-1 text-left ${filters.categoria_id === parseInt(cat.id) ? 'font-bold text-orange-700' : 'text-gray-700'}`}>
-                                    {cat.nombre}
-                                </span>
-                            </button>
-                        ))}
+                        {categorias.map(cat => {
+                            const isSelected = filters.categoria_id === parseInt(cat.id);
+                            const isRelevant = relevantCategories.length > 0 && relevantCategories.includes(parseInt(cat.id));
+
+                            if (filters.busqueda && relevantCategories.length > 0 && !isRelevant && !isSelected) {
+                                return null;
+                            }
+
+                            return (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => {
+                                        onFilterChange({ categoria_id: parseInt(cat.id) });
+                                        closeModal();
+                                    }}
+                                    className={`w-full flex items-center gap-4 py-3 px-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${isSelected ? 'bg-orange-50' : ''} ${isRelevant && !isSelected ? 'bg-orange-50/50' : ''}`}
+                                >
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${isSelected ? 'border-orange-500' : 'border-gray-300 bg-white'} ${isRelevant ? 'border-orange-400' : ''}`}>
+                                        {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />}
+                                        {!isSelected && isRelevant && <div className="w-1.5 h-1.5 rounded-full bg-orange-300" />}
+                                    </div>
+                                    <span className={`text-xs flex-1 text-left ${isSelected ? 'font-bold text-orange-700' : (isRelevant ? 'font-bold text-gray-800' : 'text-gray-700')}`}>
+                                        {cat.nombre}
+                                    </span>
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
@@ -349,6 +369,118 @@ const MobileProductFilters = ({
                     </div>
 
                     <div className="flex-1 overflow-y-auto p-4 space-y-6 hide-scrollbar-mobile pb-20">
+                        {/* Active Filters Section (New) */}
+                        {(filters.marcas?.length > 0 || filters.categoria_id) && (
+                            <div className="mb-6 pb-6 border-b border-gray-100">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="font-bold text-gray-900 text-sm">Filtro seleccionado</h3>
+                                    {/* Clear All Button (X) */}
+                                    <button
+                                        onClick={() => {
+                                            showLoader();
+                                            onFilterChange({ marcas: [], categoria_id: null });
+                                            setTimeout(hideLoader, 600);
+                                        }}
+                                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                                    >
+                                        <FaTimes size={14} />
+                                    </button>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2">
+                                    {/* Selected Categories */}
+                                    {filters.categoria_id && (() => {
+                                        // Find category name from props
+                                        const catName = categorias.find(c => parseInt(c.id) === parseInt(filters.categoria_id))?.nombre;
+                                        if (!catName) return null;
+                                        return (
+                                            <button
+                                                onClick={() => {
+                                                    showLoader();
+                                                    onFilterChange({ categoria_id: null });
+                                                    setTimeout(hideLoader, 600);
+                                                }}
+                                                className="group flex items-center justify-between px-3 py-1.5 bg-white border border-gray-200 rounded text-[10px] text-gray-700 hover:border-orange-200 hover:text-orange-600 transition-all uppercase"
+                                            >
+                                                <span className="font-medium">{catName}</span>
+                                                <FaTimes size={10} className="ml-2 text-gray-400 group-hover:text-orange-500" />
+                                            </button>
+                                        );
+                                    })()}
+
+                                    {/* Selected Brands */}
+                                    {filters.marcas?.map(marcaId => {
+                                        const marcaName = marcas.find(m => parseInt(m.id) === parseInt(marcaId))?.nombre;
+                                        if (!marcaName) return null;
+                                        return (
+                                            <button
+                                                key={`selected-brand-${marcaId}`}
+                                                onClick={() => {
+                                                    showLoader();
+                                                    const newMarcas = filters.marcas.filter(id => id !== marcaId);
+                                                    onFilterChange({ marcas: newMarcas });
+                                                    setTimeout(hideLoader, 600);
+                                                }}
+                                                className="group flex items-center justify-between px-3 py-1.5 bg-white border border-gray-200 rounded text-[10px] text-gray-700 hover:border-orange-200 hover:text-orange-600 transition-all uppercase"
+                                            >
+                                                <span className="font-medium">{marcaName}</span>
+                                                <FaTimes size={10} className="ml-2 text-gray-400 group-hover:text-orange-500" />
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Tipo de Entrega - Info Estática (New) */}
+                        <div className="mb-6 border-b border-gray-100 pb-6">
+                            <h3 className="font-bold text-gray-900 text-sm mb-4">Tipo de Entrega</h3>
+
+                            <div className="space-y-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-4 h-4 mt-0.5 rounded border border-gray-300 bg-white flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <svg className="w-4 h-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+                                            </svg>
+                                            <span className="text-xs font-medium text-gray-700">Envío a domicilio</span>
+                                        </div>
+                                        <span className="inline-block px-2 py-0.5 bg-white border border-gray-200 rounded text-[10px] text-gray-600">
+                                            Llega mañana
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-3">
+                                    <div className="w-4 h-4 mt-0.5 rounded border border-gray-300 bg-white flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <svg className="w-4 h-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            <span className="text-xs font-medium text-gray-700">Retiro en un punto</span>
+                                        </div>
+                                        <span className="inline-block px-2 py-0.5 bg-white border border-gray-200 rounded text-[10px] text-gray-600">
+                                            Retira mañana
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* 1. Ordenar */}
                         <div className="border-b border-gray-100 pb-4">
                             <button onClick={() => toggleSection('ordenar')} className="w-full flex items-center justify-between mb-3">
@@ -396,15 +528,25 @@ const MobileProductFilters = ({
                                         <input type="radio" checked={!filters.categoria_id} onChange={() => onFilterChange({ categoria_id: null })} className="hidden" />
                                         <span className={`text-xs ${!filters.categoria_id ? 'font-bold text-orange-500' : 'text-gray-600'}`}>Todo</span>
                                     </label>
-                                    {categorias.map(categoria => (
-                                        <label key={categoria.id} className="flex items-center gap-3 cursor-pointer group">
-                                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${filters.categoria_id === parseInt(categoria.id) ? 'border-orange-500' : 'border-gray-300'}`}>
-                                                {filters.categoria_id === parseInt(categoria.id) && <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />}
-                                            </div>
-                                            <input type="radio" checked={filters.categoria_id === parseInt(categoria.id)} onChange={() => onFilterChange({ categoria_id: parseInt(categoria.id) })} className="hidden" />
-                                            <span className={`text-xs ${filters.categoria_id === parseInt(categoria.id) ? 'font-bold text-orange-500' : 'text-gray-600'}`}>{categoria.nombre}</span>
-                                        </label>
-                                    ))}
+                                    {categorias.map(categoria => {
+                                        const isSelected = filters.categoria_id === parseInt(categoria.id);
+                                        const isRelevant = relevantCategories.length > 0 && relevantCategories.includes(parseInt(categoria.id));
+
+                                        if (filters.busqueda && relevantCategories.length > 0 && !isRelevant && !isSelected) {
+                                            return null;
+                                        }
+
+                                        return (
+                                            <label key={categoria.id} className="flex items-center gap-3 cursor-pointer group">
+                                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${isSelected ? 'border-orange-500' : 'border-gray-300'} ${isRelevant ? 'ring-2 ring-orange-100 border-orange-400' : ''}`}>
+                                                    {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />}
+                                                    {!isSelected && isRelevant && <div className="w-1.5 h-1.5 rounded-full bg-orange-300" />}
+                                                </div>
+                                                <input type="radio" checked={isSelected} onChange={() => onFilterChange({ categoria_id: parseInt(categoria.id) })} className="hidden" />
+                                                <span className={`text-xs ${isSelected ? 'font-bold text-orange-500' : (isRelevant ? 'font-bold text-gray-800' : 'text-gray-600')}`}>{categoria.nombre}</span>
+                                            </label>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
@@ -463,25 +605,34 @@ const MobileProductFilters = ({
                             </button>
                             {expandedSections.marca && (
                                 <div className="space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-1">
-                                    {marcas.map(marca => (
-                                        <label key={marca.id} className="flex items-center gap-3 cursor-pointer group">
-                                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${filters.marcas?.includes(parseInt(marca.id)) ? 'bg-orange-500 border-orange-500' : 'border-gray-300 bg-white'}`}>
-                                                {filters.marcas?.includes(parseInt(marca.id)) && <FaCheck className="text-white text-[10px]" />}
-                                            </div>
-                                            <input
-                                                type="checkbox"
-                                                checked={filters.marcas?.includes(parseInt(marca.id))}
-                                                onChange={(e) => {
-                                                    const marcaId = parseInt(marca.id);
-                                                    const currentMarcas = filters.marcas || [];
-                                                    const newMarcas = e.target.checked ? [...currentMarcas, marcaId] : currentMarcas.filter(id => parseInt(id) !== marcaId);
-                                                    onFilterChange({ marcas: newMarcas });
-                                                }}
-                                                className="hidden"
-                                            />
-                                            <span className={`text-xs ${filters.marcas?.includes(parseInt(marca.id)) ? 'font-bold text-gray-900' : 'text-gray-600'}`}>{marca.nombre}</span>
-                                        </label>
-                                    ))}
+                                    {marcas.map(marca => {
+                                        const isSelected = filters.marcas?.includes(parseInt(marca.id));
+                                        const isRelevant = relevantBrands.length > 0 && relevantBrands.includes(parseInt(marca.id));
+
+                                        if (filters.busqueda && relevantBrands.length > 0 && !isRelevant && !isSelected) {
+                                            return null;
+                                        }
+
+                                        return (
+                                            <label key={marca.id} className="flex items-center gap-3 cursor-pointer group">
+                                                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${filters.marcas?.includes(parseInt(marca.id)) ? 'bg-orange-500 border-orange-500' : 'border-gray-300 bg-white'}`}>
+                                                    {filters.marcas?.includes(parseInt(marca.id)) && <FaCheck className="text-white text-[10px]" />}
+                                                </div>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={filters.marcas?.includes(parseInt(marca.id))}
+                                                    onChange={(e) => {
+                                                        const marcaId = parseInt(marca.id);
+                                                        const currentMarcas = filters.marcas || [];
+                                                        const newMarcas = e.target.checked ? [...currentMarcas, marcaId] : currentMarcas.filter(id => parseInt(id) !== marcaId);
+                                                        onFilterChange({ marcas: newMarcas });
+                                                    }}
+                                                    className="hidden"
+                                                />
+                                                <span className={`text-xs ${filters.marcas?.includes(parseInt(marca.id)) ? 'font-bold text-gray-900' : 'text-gray-600'}`}>{marca.nombre}</span>
+                                            </label>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>

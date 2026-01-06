@@ -30,19 +30,8 @@ export const CartProvider = ({ children }) => {
 
       setLoading(true);
       try {
-        console.log('🔄 Cargando carrito desde backend...');
         const cartData = await carritoService.getCarrito();
-        console.log('📦 Carrito recibido:', cartData);
-
-        // Mostrar los IDs de cada item
-        if (Array.isArray(cartData)) {
-          cartData.forEach((item, idx) => {
-            console.log(`  Item ${idx}: id="${item.id}", producto_id=${item.producto?.id}, variante_id=${item.variacion?.id || 'null'}`);
-          });
-        }
-
         setItems(cartData || []);
-        console.log('✓ Carrito actualizado');
       } catch (error) {
         console.error('Error al cargar el carrito:', error);
         setItems([]);

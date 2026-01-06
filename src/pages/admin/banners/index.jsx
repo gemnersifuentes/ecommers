@@ -228,12 +228,15 @@ const AdminBanners = () => {
                 return;
             }
 
-            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            const allowedTypes = [
+                'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+                'image/svg+xml', 'image/avif', 'image/bmp', 'image/tiff'
+            ];
             if (!allowedTypes.includes(file.type)) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Tipo de archivo no válido',
-                    text: 'Solo se permiten imágenes JPG, PNG, GIF o WEBP'
+                    text: 'Solo se permiten imágenes JPG, PNG, GIF, WEBP, SVG, AVIF, BMP o TIFF'
                 });
                 e.target.value = '';
                 return;
@@ -332,6 +335,8 @@ const AdminBanners = () => {
 
     const carouselBanners = bannersFiltrados.filter(b => b.tipo === 'carousel');
     const lateralBanners = bannersFiltrados.filter(b => b.tipo === 'lateral');
+    const gridBanners = bannersFiltrados.filter(b => b.tipo === 'grid');
+    const categoryGridBanners = bannersFiltrados.filter(b => b.tipo === 'category_grid');
 
     if (loading) {
         return (
@@ -436,6 +441,66 @@ const AdminBanners = () => {
                     </div>
                 </div>
 
+                {/* Grid Banners */}
+                <div className="mb-8">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-purple-100 rounded-lg">
+                            <Layout size={24} className="text-purple-600" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-gray-900">Banners Centrales (Grid)</h2>
+                        <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold">
+                            {gridBanners.length} banners
+                        </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {gridBanners.map((banner) => (
+                            <BannerCard
+                                key={banner.id}
+                                banner={banner}
+                                onEdit={() => handleEditar(banner)}
+                                onDelete={() => handleEliminar(banner.id)}
+                            />
+                        ))}
+                        {gridBanners.length === 0 && (
+                            <div className="col-span-full py-16 text-center bg-white rounded-2xl border-2 border-dashed border-gray-200">
+                                <ImageIcon className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                                <p className="text-gray-500 text-lg font-medium">No hay banners tipo Grid</p>
+                                <p className="text-gray-400 text-sm mt-2">Estos banners aparecen debajo del carrusel</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Category Grid Banners */}
+                <div className="mb-8">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-green-100 rounded-lg">
+                            <Layout size={24} className="text-green-600" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-gray-900">Sección con Productos</h2>
+                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                            {categoryGridBanners.length} secciones
+                        </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {categoryGridBanners.map((banner) => (
+                            <BannerCard
+                                key={banner.id}
+                                banner={banner}
+                                onEdit={() => handleEditar(banner)}
+                                onDelete={() => handleEliminar(banner.id)}
+                            />
+                        ))}
+                        {categoryGridBanners.length === 0 && (
+                            <div className="col-span-full py-16 text-center bg-white rounded-2xl border-2 border-dashed border-gray-200">
+                                <ImageIcon className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                                <p className="text-gray-500 text-lg font-medium">No hay secciones con productos</p>
+                                <p className="text-gray-400 text-sm mt-2">Banner + productos de una categoría</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
                 {/* Modal Formulario */}
                 <AnimatePresence>
                     {mostrarModal && (
@@ -486,6 +551,8 @@ const AdminBanners = () => {
                                                     >
                                                         <option value="carousel">🎠 Carrusel Principal</option>
                                                         <option value="lateral">📱 Lateral Pequeño</option>
+                                                        <option value="grid">🔳 Banners Centrales (Grid)</option>
+                                                        <option value="category_grid">🛍️ Sección con Productos</option>
                                                     </select>
                                                 </div>
                                                 <div>
@@ -572,6 +639,27 @@ const AdminBanners = () => {
                                                         placeholder="Descripción breve del banner..."
                                                     ></textarea>
                                                 </div>
+                                                {/* Category Selector for category_grid type */}
+                                                {formData.tipo === 'category_grid' && (
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-2">Categoría de Productos *</label>
+                                                        <select
+                                                            name="link"
+                                                            value={formData.link}
+                                                            onChange={handleChange}
+                                                            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                                            required
+                                                        >
+                                                            <option value="">Seleccionar categoría...</option>
+                                                            {categorias.map(cat => (
+                                                                <option key={cat.id} value={`?categoria=${cat.id}`}>
+                                                                    {cat.nombre}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                        <p className="text-xs text-gray-500 mt-1">Los productos de esta categoría se mostrarán junto al banner</p>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 
@@ -595,7 +683,7 @@ const AdminBanners = () => {
                                                             <p className="text-gray-700 font-medium mb-1">
                                                                 {selectedFile ? selectedFile.name : 'Click para subir imagen'}
                                                             </p>
-                                                            <p className="text-sm text-gray-500">JPG, PNG, GIF o WEBP (máx. 2MB)</p>
+                                                            <p className="text-sm text-gray-500">JPG, PNG, GIF, WEBP, SVG, AVIF (máx. 20MB)</p>
                                                         </div>
                                                     </div>
                                                 </label>
@@ -605,7 +693,10 @@ const AdminBanners = () => {
                                                         <div className="aspect-video relative">
                                                             <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
                                                             {formData.gradiente && (
-                                                                <div className={`absolute inset-0 ${formData.gradiente}`}></div>
+                                                                <div
+                                                                    className={`absolute inset-0 ${formData.gradiente.startsWith('bg-') ? formData.gradiente : ''}`}
+                                                                    style={!formData.gradiente.startsWith('bg-') ? { backgroundColor: formData.gradiente } : {}}
+                                                                ></div>
                                                             )}
                                                         </div>
                                                         <button
@@ -693,7 +784,7 @@ const AdminBanners = () => {
                                                             const r = parseInt(hex.substring(0, 2), 16);
                                                             const g = parseInt(hex.substring(2, 4), 16);
                                                             const b = parseInt(hex.substring(4, 6), 16);
-                                                            setFormData({ ...formData, gradiente: `bg-[rgba(${r},${g},${b},${opacity})]` });
+                                                            setFormData({ ...formData, gradiente: `rgba(${r},${g},${b},${opacity})` });
                                                         }}
                                                         className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-all font-medium text-xs whitespace-nowrap"
                                                     >
@@ -869,7 +960,10 @@ const BannerCard = ({ banner, onEdit, onDelete }) => {
                             className="w-full h-full object-cover"
                         />
                         {banner.gradiente && (
-                            <div className={`absolute inset-0 ${banner.gradiente}`}></div>
+                            <div
+                                className={`absolute inset-0 ${banner.gradiente.startsWith('bg-') ? banner.gradiente : ''}`}
+                                style={!banner.gradiente.startsWith('bg-') ? { backgroundColor: banner.gradiente } : {}}
+                            ></div>
                         )}
                     </>
                 ) : (

@@ -29,6 +29,7 @@ import {
   Clock // Added Clock import
 } from "lucide-react";
 import { useLoader } from "../context/LoaderContext";
+import { useSettings } from "../context/SettingsContext";
 
 const headerStyles = `
   .header-shadow {
@@ -51,7 +52,11 @@ const Header = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { showLoader, hideLoader } = useLoader()
-  const [searchQuery, setSearchQuery] = useState("")
+  const { settings } = useSettings()
+  const [searchQuery, setSearchQuery] = useState(() => {
+    const params = new URLSearchParams(location.search)
+    return params.get('busqueda') || ""
+  })
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -114,11 +119,16 @@ const Header = () => {
   }, [])
 
   // Sync search query with URL on mount and updates
+  // Sync search query with URL on mount and updates
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const busqueda = params.get('busqueda');
+    // If busqueda exists, set it. If not, clear the search query
+    // This allows the input to clear when navigating to pages without search or home
     if (busqueda) {
       setSearchQuery(busqueda);
+    } else {
+      setSearchQuery("");
     }
   }, [location.search]);
 
@@ -141,10 +151,15 @@ const Header = () => {
     return () => clearTimeout(timeoutId)
   }, [searchQuery])
 
+  const mobileSearchRef = useRef(null)
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+      const isDesktopClick = searchContainerRef.current && searchContainerRef.current.contains(event.target);
+      const isMobileClick = mobileSearchRef.current && mobileSearchRef.current.contains(event.target);
+
+      if (!isDesktopClick && !isMobileClick) {
         setShowSearchDropdown(false)
       }
     }
@@ -165,7 +180,6 @@ const Header = () => {
     if (e.key === 'Enter' && searchQuery.trim()) {
       searchService.saveSearchTerm(searchQuery)
       navigate(`/productos?busqueda=${searchQuery}`)
-      setSearchQuery("")
       setShowSearchDropdown(false)
     }
   }
@@ -174,7 +188,6 @@ const Header = () => {
     if (searchQuery.trim()) {
       searchService.saveSearchTerm(searchQuery)
       navigate(`/productos?busqueda=${searchQuery}`)
-      setSearchQuery("")
       setShowSearchDropdown(false)
     }
   }
@@ -222,7 +235,6 @@ const Header = () => {
       }
     }
     setShowSearchDropdown(false)
-    setSearchQuery("")
   }
 
   const isActivePath = (path) => location.pathname === path
@@ -301,10 +313,9 @@ const Header = () => {
                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
 
-              {/* Logo */}
               <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
                 <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-orange-600">
-                  tiendatec<span className="text-gray-800">.com</span>
+                  {settings.nombre_empresa?.toLowerCase() === 'tiendatec' ? 'redhard' : settings.nombre_empresa.toLowerCase()}<span className="text-gray-800">.com</span>
                 </h1>
               </Link>
 
@@ -319,7 +330,7 @@ const Header = () => {
                     onKeyPress={handleSearch}
                     onFocus={handleSearchFocus}
                     autoComplete="off"
-                    placeholder="Buscar en tiendatec.com"
+                    placeholder={`Buscar en ${settings.nombre_empresa.toLowerCase()}.com`}
                     className={`w-full pl-4 pr-14 py-3 border-2 border-gray-300 text-sm focus:outline-none focus:border-gray-400 search-input-falabella 
                         ${shouldShowDropdown
                         ? 'rounded-t-3xl rounded-b-none border-b-0 shadow-none'
@@ -583,16 +594,15 @@ const Header = () => {
 
             {/* Mobile Search */}
             <div className={`md:hidden mt-2 mb-2 px-4 transition-all duration-200 ${shouldShowDropdown ? 'relative z-50' : ''}`}>
-              <div className={`relative w-full transition-all duration-200 ${shouldShowDropdown ? 'shadow-lg rounded-3xl' : ''}`}>
+              <div ref={mobileSearchRef} className={`relative w-full transition-all duration-200 ${shouldShowDropdown ? 'shadow-lg rounded-3xl' : ''}`}>
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={handleSearch}
                   onFocus={handleSearchFocus}
-                  onBlur={handleSearchBlur}
                   autoComplete="off"
-                  placeholder="Buscar en tiendatec.com"
+                  placeholder={`Buscar en ${settings.nombre_empresa.toLowerCase()}.com`}
                   className={`w-full pl-3 pr-12 py-2 border-2 border-gray-300 text-xs focus:outline-none focus:border-gray-400 search-input-falabella box-border
                      ${shouldShowDropdown
                       ? 'rounded-t-3xl rounded-b-none border-b-0 shadow-none'
@@ -650,11 +660,15 @@ const Header = () => {
                                   <button
                                     key={product.id}
                                     onClick={() => handleSuggestionClick('product', product)}
-                                    className="w-full text-left py-1.5 px-2 hover:bg-gray-50 rounded group flex items-center justify-between"
+                                    className="w-full text-left p-2 hover:bg-gray-50 rounded flex items-center gap-2"
                                   >
-                                    <span className="text-xs text-gray-700 group-hover:text-orange-600 font-medium truncate">
-                                      {product.nombre}
-                                    </span>
+                                    {product.imagen && (
+                                      <img src={product.imagen} alt={product.nombre} className="w-10 h-10 object-contain" />
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-xs text-gray-700 font-medium truncate">{product.nombre}</p>
+                                      <p className="text-[10px] text-orange-600 font-bold">${product.precio.toFixed(2)}</p>
+                                    </div>
                                   </button>
                                 ))}
                               </div>
@@ -952,7 +966,7 @@ const Header = () => {
       < CartSidebar isOpen={cartSidebarOpen} onClose={() => setCartSidebarOpen(false)} />
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-10">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
         <div className="flex items-center justify-around py-2">
           {/* Home */}
           <Link

@@ -14,6 +14,21 @@ export const authService = {
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
+  },
+
+  forgotPassword: async (correo) => {
+    const response = await api.post('/api/auth.php?action=forgot-password', { correo });
+    return response.data;
+  },
+
+  resetPassword: async (token, clave) => {
+    const response = await api.post('/api/auth.php?action=reset-password', { token, clave });
+    return response.data;
+  },
+
+  googleLogin: async (credential) => {
+    const response = await api.post('/api/auth.php?action=google-login', { credential });
+    return response.data;
   }
 };
 
@@ -74,27 +89,32 @@ export const categoriasService = {
 
 export const serviciosService = {
   getAll: async () => {
-    const response = await api.get('/servicios');
+    const response = await api.get('/api/servicios.php');
     return response.data;
   },
 
   getById: async (id) => {
-    const response = await api.get(`/servicios/${id}`);
+    const response = await api.get(`/api/servicios.php?id=${id}`);
     return response.data;
   },
 
   create: async (data) => {
-    const response = await api.post('/servicios', data);
+    const response = await api.post('/api/servicios.php', data);
     return response.data;
   },
 
   update: async (id, data) => {
-    const response = await api.put(`/servicios/${id}`, data);
+    if (data instanceof FormData) {
+      data.append('_method', 'PUT');
+      const response = await api.post(`/api/servicios.php?id=${id}`, data);
+      return response.data;
+    }
+    const response = await api.put(`/api/servicios.php?id=${id}`, data);
     return response.data;
   },
 
   delete: async (id) => {
-    const response = await api.delete(`/servicios/${id}`);
+    const response = await api.delete(`/api/servicios.php?id=${id}`);
     return response.data;
   }
 };
@@ -137,66 +157,66 @@ export const catalogosService = {
 export const pedidosService = {
   getAll: async (estado = null) => {
     const params = estado ? { estado } : {};
-    const response = await api.get('/pedidos', { params });
+    const response = await api.get('/api/pedidos', { params });
     return response.data;
   },
 
   getById: async (id) => {
-    const response = await api.get(`/pedidos/${id}`);
+    const response = await api.get(`/api/pedidos/${id}`);
     return response.data;
   },
 
   create: async (data) => {
-    const response = await api.post('/pedidos', data);
+    const response = await api.post('/api/pedidos', data);
     return response.data;
   },
 
   updateEstado: async (id, estado) => {
-    const response = await api.put(`/pedidos/${id}`, { estado });
+    const response = await api.put(`/api/pedidos/${id}`, { estado });
     return response.data;
   },
 
   cancel: async (id) => {
-    const response = await api.delete(`/pedidos/${id}`);
+    const response = await api.delete(`/api/pedidos/${id}`);
     return response.data;
   }
 };
 
 export const usuariosService = {
   getAll: async () => {
-    const response = await api.get('/usuarios');
+    const response = await api.get('/api/usuarios');
     return response.data;
   },
 
   getById: async (id) => {
-    const response = await api.get(`/usuarios/${id}`);
+    const response = await api.get(`/api/usuarios/${id}`);
     return response.data;
   },
 
   create: async (data) => {
-    const response = await api.post('/usuarios', data);
+    const response = await api.post('/api/usuarios', data);
     return response.data;
   },
 
   update: async (id, data) => {
-    const response = await api.put(`/usuarios/${id}`, data);
+    const response = await api.put(`/api/usuarios/${id}`, data);
     return response.data;
   },
 
   delete: async (id) => {
-    const response = await api.delete(`/usuarios/${id}`);
+    const response = await api.delete(`/api/usuarios/${id}`);
     return response.data;
   }
 };
 
 export const reportesService = {
-  getDashboard: async () => {
-    const response = await api.get('/reportes/dashboard');
+  getDashboard: async (periodo = '12M') => {
+    const response = await api.get(`/api/reportes/dashboard?periodo=${periodo}`);
     return response.data;
   },
 
   getVentas: async (fechaInicio, fechaFin) => {
-    const response = await api.get('/reportes/ventas', {
+    const response = await api.get('/api/reportes/ventas', {
       params: { fecha_inicio: fechaInicio, fecha_fin: fechaFin }
     });
     return response.data;
@@ -205,54 +225,54 @@ export const reportesService = {
 
 export const marcasService = {
   getAll: async () => {
-    const response = await api.get('/marcas');
+    const response = await api.get('/api/marcas');
     return response.data;
   },
 
   getById: async (id) => {
-    const response = await api.get(`/marcas/${id}`);
+    const response = await api.get(`/api/marcas/${id}`);
     return response.data;
   },
 
   create: async (data) => {
-    const response = await api.post('/marcas', data);
+    const response = await api.post('/api/marcas', data);
     return response.data;
   },
 
   update: async (id, data) => {
-    const response = await api.put(`/marcas/${id}`, data);
+    const response = await api.put(`/api/marcas/${id}`, data);
     return response.data;
   },
 
   delete: async (id) => {
-    const response = await api.delete(`/marcas/${id}`);
+    const response = await api.delete(`/api/marcas/${id}`);
     return response.data;
   }
 };
 
 export const descuentosService = {
   getAll: async (params = {}) => {
-    const response = await api.get('/descuentos', { params });
+    const response = await api.get('/api/descuentos', { params });
     return response.data;
   },
 
   getById: async (id) => {
-    const response = await api.get(`/descuentos/${id}`);
+    const response = await api.get(`/api/descuentos/${id}`);
     return response.data;
   },
 
   create: async (data) => {
-    const response = await api.post('/descuentos', data);
+    const response = await api.post('/api/descuentos', data);
     return response.data;
   },
 
   update: async (id, data) => {
-    const response = await api.put(`/descuentos/${id}`, data);
+    const response = await api.put(`/api/descuentos/${id}`, data);
     return response.data;
   },
 
   delete: async (id) => {
-    const response = await api.delete(`/descuentos/${id}`);
+    const response = await api.delete(`/api/descuentos/${id}`);
     return response.data;
   }
 };
@@ -300,7 +320,10 @@ export const tiendaService = {
   },
 
   crearPedido: async (data) => {
-    const response = await api.post('/api/tienda/pedidos.php', data);
+    const config = data instanceof FormData
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : {};
+    const response = await api.post('/api/tienda/pedidos.php', data, config);
     return response.data;
   },
 
@@ -311,6 +334,11 @@ export const tiendaService = {
 
   getPedidoById: async (pedidoId) => {
     const response = await api.get(`/api/tienda/pedidos.php?id=${pedidoId}`);
+    return response.data;
+  },
+
+  createMPPreference: async (data) => {
+    const response = await api.post('/api/tienda/mercado_pago_handler.php?action=create_preference', data);
     return response.data;
   }
 };
@@ -377,3 +405,71 @@ export const favoritosService = {
 };
 
 export { default as bannersService } from './bannersService';
+
+export const reservacionesService = {
+  getAll: async (usuarioId = null) => {
+    const params = usuarioId ? { usuario_id: usuarioId } : {};
+    const response = await api.get('/api/reservaciones.php', { params });
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await api.get(`/api/reservaciones.php?id=${id}`);
+    return response.data;
+  },
+
+  create: async (data) => {
+    const response = await api.post('/api/reservaciones.php', data);
+    return response.data;
+  },
+
+  update: async (id, data) => {
+    const response = await api.put(`/api/reservaciones.php?id=${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id) => {
+    const response = await api.delete(`/api/reservaciones.php?id=${id}`);
+    return response.data;
+  },
+
+  trackTicket: async (id) => {
+    const response = await api.get(`/api/reservaciones.php?action=track&id=${id}`);
+    return response.data;
+  }
+};
+
+export const ajustesService = {
+  get: async () => {
+    const response = await api.get('/api/ajustes.php');
+    return response.data;
+  },
+
+  update: async (data) => {
+    const response = await api.put('/api/ajustes.php', data);
+    return response.data;
+  }
+};
+
+export const mensajesService = {
+  getAll: async () => {
+    const response = await api.get('/api/mensajes.php');
+    return response.data;
+  },
+  create: async (data) => {
+    const response = await api.post('/api/mensajes.php', data);
+    return response.data;
+  },
+  update: async (data) => {
+    const response = await api.put('/api/mensajes.php', data);
+    return response.data;
+  },
+  delete: async (id) => {
+    const response = await api.delete(`/api/mensajes.php?id=${id}`);
+    return response.data;
+  },
+  responder: async (data) => {
+    const response = await api.post('/api/mensajes.php', data);
+    return response.data;
+  }
+};

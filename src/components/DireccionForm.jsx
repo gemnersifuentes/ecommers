@@ -17,6 +17,7 @@ export const DireccionForm = ({ isOpen, onClose, onSubmit, direccion = null, usu
 
     const [provincias, setProvincias] = useState([]);
     const [distritos, setDistritos] = useState([]);
+    const [errors, setErrors] = useState({});
 
     // Cargar datos de dirección si es edición
     useEffect(() => {
@@ -66,10 +67,28 @@ export const DireccionForm = ({ isOpen, onClose, onSubmit, direccion = null, usu
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
+
+        if (name === 'telefono') {
+            const digits = value.replace(/\D/g, '').slice(0, 9);
+            setFormData(prev => ({ ...prev, [name]: digits }));
+        } else if (name === 'codigo_postal') {
+            const digits = value.replace(/\D/g, '').slice(0, 10);
+            setFormData(prev => ({ ...prev, [name]: digits }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: type === 'checkbox' ? checked : value
+            }));
+        }
+
+        // Limpiar error al editar
+        if (errors[name]) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
+        }
     };
 
     const handleUbigeoChange = (e) => {
@@ -103,12 +122,46 @@ export const DireccionForm = ({ isOpen, onClose, onSubmit, direccion = null, usu
                 distrito: dist?.name || ''
             }));
         }
+
+        // Limpiar errores de ubicación
+        if (errors[name] || errors.provincia || errors.distrito) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                if (name === 'departamento') {
+                    delete newErrors.provincia;
+                    delete newErrors.distrito;
+                } else if (name === 'provincia') {
+                    delete newErrors.distrito;
+                }
+                return newErrors;
+            });
+        }
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        const newErrors = {};
+        if (!formData.nombre_destinatario.trim()) newErrors.nombre_destinatario = 'El nombre es obligatorio';
+        if (!formData.direccion.trim()) newErrors.direccion = 'La dirección es obligatoria';
+        if (!formData.departamento) newErrors.departamento = 'El departamento es obligatorio';
+        if (!formData.provincia) newErrors.provincia = 'La provincia es obligatoria';
+        if (!formData.distrito) newErrors.distrito = 'El distrito es obligatorio';
+
+        // Teléfono: 9 dígitos y empieza con 9
+        if (!formData.telefono.trim()) {
+            newErrors.telefono = 'El teléfono es obligatorio';
+        } else if (!/^9\d{8}$/.test(formData.telefono.trim())) {
+            newErrors.telefono = 'Número de celular inválido (debe empezar con 9 y tener 9 dígitos)';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
         const payload = { ...formData, usuario_id: usuarioId };
-        console.log('Enviando dirección:', payload); // Debug
 
         if (!usuarioId) {
             alert('Error: No se identificó al usuario. Por favor recarga la página.');
@@ -148,10 +201,10 @@ export const DireccionForm = ({ isOpen, onClose, onSubmit, direccion = null, usu
                             name="nombre_destinatario"
                             value={formData.nombre_destinatario}
                             onChange={handleChange}
-                            required
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none transition-colors ${errors.nombre_destinatario ? 'border-red-500 focus:ring-red-200 focus:border-red-500' : 'border-gray-300 focus:ring-orange-200 focus:border-orange-500'}`}
                             placeholder="Ej: Juan Pérez"
                         />
+                        {errors.nombre_destinatario && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.nombre_destinatario}</p>}
                     </div>
 
                     {/* Teléfono */}
@@ -164,10 +217,10 @@ export const DireccionForm = ({ isOpen, onClose, onSubmit, direccion = null, usu
                             name="telefono"
                             value={formData.telefono}
                             onChange={handleChange}
-                            required
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none transition-colors ${errors.telefono ? 'border-red-500 focus:ring-red-200 focus:border-red-500' : 'border-gray-300 focus:ring-orange-200 focus:border-orange-500'}`}
                             placeholder="987654321"
                         />
+                        {errors.telefono && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.telefono}</p>}
                     </div>
 
                     {/* Dirección */}
@@ -180,10 +233,10 @@ export const DireccionForm = ({ isOpen, onClose, onSubmit, direccion = null, usu
                             name="direccion"
                             value={formData.direccion}
                             onChange={handleChange}
-                            required
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none transition-colors ${errors.direccion ? 'border-red-500 focus:ring-red-200 focus:border-red-500' : 'border-gray-300 focus:ring-orange-200 focus:border-orange-500'}`}
                             placeholder="Av. Principal 123, Piso 3, Dpto. 301"
                         />
+                        {errors.direccion && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.direccion}</p>}
                     </div>
 
                     {/* Ubigeo - Grid 3 columnas */}
@@ -197,14 +250,14 @@ export const DireccionForm = ({ isOpen, onClose, onSubmit, direccion = null, usu
                                 name="departamento"
                                 value={ubigeoPeru.departamentos.find(d => d.name === formData.departamento)?.id || ''}
                                 onChange={handleUbigeoChange}
-                                required
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none transition-colors ${errors.departamento ? 'border-red-500 focus:ring-red-200 focus:border-red-500' : 'border-gray-300 focus:ring-orange-200 focus:border-orange-500'}`}
                             >
                                 <option value="">Seleccionar</option>
                                 {ubigeoPeru.departamentos.map(dept => (
                                     <option key={dept.id} value={dept.id}>{dept.name}</option>
                                 ))}
                             </select>
+                            {errors.departamento && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.departamento}</p>}
                         </div>
 
                         {/* Provincia */}
@@ -216,15 +269,15 @@ export const DireccionForm = ({ isOpen, onClose, onSubmit, direccion = null, usu
                                 name="provincia"
                                 value={provincias.find(p => p.name === formData.provincia)?.id || ''}
                                 onChange={handleUbigeoChange}
-                                required
                                 disabled={!provincias.length}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none disabled:bg-gray-100"
+                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none transition-colors disabled:bg-gray-100 ${errors.provincia ? 'border-red-500 focus:ring-red-200 focus:border-red-500' : 'border-gray-300 focus:ring-orange-200 focus:border-orange-500'}`}
                             >
                                 <option value="">Seleccionar</option>
                                 {provincias.map(prov => (
                                     <option key={prov.id} value={prov.id}>{prov.name}</option>
                                 ))}
                             </select>
+                            {errors.provincia && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.provincia}</p>}
                         </div>
 
                         {/* Distrito */}
@@ -236,15 +289,15 @@ export const DireccionForm = ({ isOpen, onClose, onSubmit, direccion = null, usu
                                 name="distrito"
                                 value={distritos.find(d => d.name === formData.distrito)?.id || ''}
                                 onChange={handleUbigeoChange}
-                                required
                                 disabled={!distritos.length}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none disabled:bg-gray-100"
+                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none transition-colors disabled:bg-gray-100 ${errors.distrito ? 'border-red-500 focus:ring-red-200 focus:border-red-500' : 'border-gray-300 focus:ring-orange-200 focus:border-orange-500'}`}
                             >
                                 <option value="">Seleccionar</option>
                                 {distritos.map(dist => (
                                     <option key={dist.id} value={dist.id}>{dist.name}</option>
                                 ))}
                             </select>
+                            {errors.distrito && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.distrito}</p>}
                         </div>
                     </div>
 
@@ -273,9 +326,10 @@ export const DireccionForm = ({ isOpen, onClose, onSubmit, direccion = null, usu
                             value={formData.referencia}
                             onChange={handleChange}
                             rows={2}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none resize-none"
+                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none resize-none transition-colors ${errors.referencia ? 'border-red-500 focus:ring-red-200 focus:border-red-500' : 'border-gray-300 focus:ring-orange-200 focus:border-orange-500'}`}
                             placeholder="Ej: Edificio azul, frente al parque"
                         />
+                        {errors.referencia && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.referencia}</p>}
                     </div>
 
                     {/* Checkbox predeterminada */}

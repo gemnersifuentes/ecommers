@@ -367,4 +367,11 @@
   .pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
   }
+
+  /* Override FullScreenLoader to be white only when wrapped in this class */
+  .loader-override-white>div {
+    background-color: white !important;
+    background-opacity: 1 !important;
+    --tw-bg-opacity: 1 !important;
+  }
 }

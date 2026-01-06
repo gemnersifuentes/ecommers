@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import { useLoader } from '../context/LoaderContext';
 
 
+
 import {
     FaShoppingCart,
     FaArrowLeft,
@@ -18,7 +19,7 @@ import {
     FaMinus,
     FaPlus
 } from 'react-icons/fa';
-import { CheckCircle2, FileText, Settings, ChevronLeft, ChevronRight, Store, Truck, Package, ChevronDown, ArrowLeft, Heart, Home } from 'lucide-react';
+import { CheckCircle2, FileText, Settings, ChevronLeft, ChevronRight, Store, Truck, Package, ChevronDown, ArrowLeft, Heart, Home, MessageCircle as Chat } from 'lucide-react';
 import ProductReviews from '../components/products/ProductReviews';
 import SimpleToast from '../components/ui/SimpleToast';
 
@@ -199,12 +200,10 @@ const ProductoDetalle = () => {
     useEffect(() => {
         if (variacionSeleccionada && variacionSeleccionada.imagen) {
             const fullUrl = getImageUrl(variacionSeleccionada.imagen);
-            const index = imagenesGaleria.indexOf(fullUrl);
+            // imagenesGaleria now contains objects with {type, url}
+            const index = imagenesGaleria.findIndex(img => img.url === fullUrl);
             if (index !== -1) {
                 setImagenActual(index);
-            } else if (fullUrl) {
-                // If variation image is not in main gallery, treat it separately or add it? 
-                // For now, let's just stick to gallery logic or fallback to 0
             }
         }
     }, [variacionSeleccionada, imagenesGaleria]);
@@ -327,8 +326,8 @@ const ProductoDetalle = () => {
     const tieneStock = stockActual > 0;
 
     return (
-        <div className="min-h-screen bg-gray-50 w-full pt-44 md:pt-60">
-            <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="min-h-screen bg-gray-50 w-full pt-32 md:pt-60">
+            <div className="container mx-auto px-4 py-4 md:py-8 max-w-7xl">
                 {/* Header with Back, Title, SKU */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div className="flex items-center gap-3">
@@ -374,10 +373,13 @@ const ProductoDetalle = () => {
                                         <img
                                             src={imagenesGaleria[imagenActual]?.url}
                                             alt={producto.nombre}
-                                            className={`w-full h-full object-contain transition-transform duration-200 ${isHovering ? 'scale-150' : 'scale-100'}`}
+                                            onMouseEnter={() => setIsHovering(true)}
+                                            onMouseLeave={() => setIsHovering(false)}
+                                            className={`w-full h-full object-contain transition-transform duration-200 ${isHovering ? 'scale-[2]' : 'scale-100'}`}
                                             style={isHovering ? {
-                                                transformOrigin: `${cursorPos.x}% ${cursorPos.y}%`
-                                            } : undefined}
+                                                transformOrigin: `${cursorPos.x}% ${cursorPos.y}%`,
+                                                cursor: 'zoom-in'
+                                            } : { cursor: 'zoom-in' }}
                                         />
                                     )
                                 ) : (
@@ -399,13 +401,15 @@ const ProductoDetalle = () => {
                                     <>
                                         <button
                                             onClick={handlePrevImage}
-                                            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-md hover:bg-white transition-all opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                                            onMouseEnter={(e) => { e.stopPropagation(); setIsHovering(false); }}
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-md hover:bg-white transition-all opacity-0 group-hover:opacity-100 disabled:opacity-50 z-10 cursor-pointer"
                                         >
                                             <ChevronLeft className="w-5 h-5" />
                                         </button>
                                         <button
                                             onClick={handleNextImage}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-md hover:bg-white transition-all opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                                            onMouseEnter={(e) => { e.stopPropagation(); setIsHovering(false); }}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-md hover:bg-white transition-all opacity-0 group-hover:opacity-100 disabled:opacity-50 z-10 cursor-pointer"
                                         >
                                             <ChevronRight className="w-5 h-5" />
                                         </button>
@@ -416,15 +420,16 @@ const ProductoDetalle = () => {
                             {/* Thumbnails & Pagination Matches Reference */}
                             {imagenesGaleria.length > 1 && (
                                 <div className="flex flex-col items-center gap-4">
-                                    {/* Thumbnails Row */}
-                                    <div className="flex justify-center gap-3">
+                                    {/* Thumbnails Row - Now wraps on mobile */}
+                                    {/* Thumbnails Row - Improved Mobile Layout */}
+                                    <div className="flex flex-wrap justify-center gap-3 w-full max-w-lg mx-auto px-1">
                                         {imagenesGaleria.map((img, index) => (
                                             <button
                                                 key={index}
                                                 onClick={() => setImagenActual(index)}
-                                                className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${imagenActual === index
-                                                    ? 'border-orange-500 ring-1 ring-orange-500 ' // Dark/Black selection
-                                                    : 'border-transparent hover:border-gray-200 bg-gray-50'
+                                                className={`w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${imagenActual === index
+                                                    ? 'border-orange-500  ring-orange-500 '
+                                                    : 'border-transparent hover:border-orange-300 bg-gray-50'
                                                     }`}
                                             >
                                                 {img.type === 'video' ? (
@@ -475,7 +480,7 @@ const ProductoDetalle = () => {
                         <div className="bg-white rounded-lg p-6 h-fit">
                             {/* Brand & Title */}
                             <div className="mb-4">
-                                <div className="flex justify-between items-center text-sm text-gray-600">
+                                <div className="flex justify-between items-center text-[10px] md:text-sm text-gray-600">
                                     <p className="mb-1">{producto.marca_nombre || 'JBL'}</p>
                                     <div className="flex items-center gap-4 text-[10px] text-gray-500 ">
                                         <span className="flex items-center gap-1">
@@ -488,10 +493,10 @@ const ProductoDetalle = () => {
                                     </div>
                                 </div>
 
-                                <h1 className="text-[18px] font-bold text-gray-900 leading-snug mb-2">
+                                <h1 className="text-[11px] md:text-[18px] font-bold text-gray-900 leading-snug mb-2">
                                     {producto.nombre}
                                 </h1>
-                                <p className="text-[11px] text-gray-500 leading-relaxed line-clamp-2 mb-3">
+                                <p className="text-[10px] md:text-[11px] text-gray-500 leading-relaxed line-clamp-2 mb-3">
                                     {producto.descripcion}
                                 </p>
                                 <div className="flex items-center gap-1.5 mb-4">
@@ -500,11 +505,11 @@ const ProductoDetalle = () => {
                                             <FaStar key={i} size={10} className={i < Math.round(producto.promedio_calificacion || 5) ? 'text-yellow-400' : 'text-gray-300'} />
                                         ))}
                                     </div>
-                                    <span className="text-xs text-gray-600">{producto.promedio_calificacion || '5'} ({producto.total_resenas || '0'}) comentarios</span>
+                                    <span className="text-[10px] md:text-xs text-gray-600">{producto.promedio_calificacion || '5'} ({producto.total_resenas || '0'}) comentarios</span>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
+                            <div className="flex items-center gap-2 text-[10px] md:text-sm text-gray-600 mb-6">
                                 <span>Vendido por</span>
                                 <div className="flex items-center gap-1">
                                     <Store size={14} className="text-green-600" />
@@ -527,15 +532,15 @@ const ProductoDetalle = () => {
                                 <div className="space-y-6 order-2 xl:order-1">
                                     {/* Especificaciones Principales Mini-Box */}
                                     <div className="bg-gray-50 rounded-md p-4">
-                                        <h4 className="font-bold text-xs text-gray-900 mb-3">Especificaciones principales</h4>
-                                        <ul className="space-y-2.5 text-xs text-gray-700 mb-3">
+                                        <h4 className="font-bold text-[10px] md:text-xs text-gray-900 mb-3">Especificaciones principales</h4>
+                                        <ul className="space-y-2.5 text-[10px] md:text-xs text-gray-700 mb-3">
 
-                                            {producto.especificaciones?.slice(0, 5).map((especificacion, index) => (
+                                            {producto.especificaciones?.slice(0, 3).map((especificacion, index) => (
                                                 <li key={index} className="flex gap-2 items-start">
                                                     <span className="text-gray-400 font-bold text-xs flex-shrink-0">•</span>
                                                     <div className="flex-1">
-                                                        <span className="font-semibold text-xs text-gray-900">{especificacion.nombre}: </span>
-                                                        <span className="text-xs text-gray-700">{especificacion.valor}</span>
+                                                        <span className="font-semibold text-[10px] text-gray-900">{especificacion.nombre}: </span>
+                                                        <span className="text-[10px] text-gray-700">{especificacion.valor}</span>
                                                     </div>
                                                 </li>
                                             ))}
@@ -545,7 +550,7 @@ const ProductoDetalle = () => {
                                                 setSpecsExpanded(true);
                                                 document.getElementById('especificaciones-completas')?.scrollIntoView({ behavior: 'smooth' });
                                             }}
-                                            className="text-xs text-gray-500 hover:text-primary hover:underline transition-colors mt-1"
+                                            className="text-[10px] md:text-xs text-gray-500 hover:text-primary hover:underline transition-colors mt-1"
                                         >
                                             Ver más especificaciones
                                         </button>
@@ -553,13 +558,13 @@ const ProductoDetalle = () => {
 
                                     {/* Badges de servicio */}
                                     <div className="space-y-3">
-                                        <h4 className="font-bold text-xs text-gray-900 mb-3">Metodos de envio</h4>
+                                        <h4 className="font-bold text-[10px] md:text-xs text-gray-900 mb-3">Metodos de envio</h4>
                                         <div className="bg-[#fff7ed] border border-[#ffedd5] rounded-xl p-2 flex items-center gap-2 transition-colors">
                                             <div className="bg-orange-500 p-2 rounded-full text-[#c2410c]">
                                                 <Home size={15} className="text-white" />
                                             </div>
                                             <div>
-                                                <h4 className="text-[#9a3412] font-bold text-xs">Envío a Domicilio</h4>
+                                                <h4 className="text-[#9a3412] font-bold text-[10px] md:text-xs">Envío a Domicilio</h4>
                                                 <p className="text-[#9a3412]/70 text-[10px]">Recíbelo en tu casa</p>
                                             </div>
                                         </div>
@@ -569,7 +574,7 @@ const ProductoDetalle = () => {
                                                 <Store size={15} className="text-white" />
                                             </div>
                                             <div>
-                                                <h4 className="text-[#9a3412] font-bold text-xs">Retiro en Tienda</h4>
+                                                <h4 className="text-[#9a3412] font-bold text-[10px] md:text-xs">Retiro en Tienda</h4>
                                                 <p className="text-[#9a3412]/70 text-[10px]">Recógelo gratis</p>
                                             </div>
                                         </div>
@@ -581,18 +586,18 @@ const ProductoDetalle = () => {
                                     {/* Price section */}
                                     <div>
                                         <div className="flex items-baseline gap-3 mb-1">
-                                            <span className="text-xl font-bold text-gray-900">
+                                            <span className="text-lg md:text-xl font-bold text-gray-900">
                                                 S/ {parseFloat(precioActual).toFixed(2)}
                                             </span>
                                             {descuento > 0 && (
-                                                <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded text-xs font-bold border border-red-100">
+                                                <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded text-[10px] md:text-xs font-bold border border-red-100">
                                                     {descuento}% OFF
                                                 </span>
                                             )}
                                         </div>
 
                                         {descuento > 0 && (
-                                            <span className="text-xs text-gray-400 line-through decoration-gray-400/50 block mb-3">
+                                            <span className="text-[10px] md:text-xs text-gray-400 line-through decoration-gray-400/50 block mb-3">
                                                 S/ {parseFloat(precioBase).toFixed(2)}
                                             </span>
                                         )}
@@ -622,7 +627,7 @@ const ProductoDetalle = () => {
                                                 return (
                                                     <div key={nombre}>
                                                         <div className="flex justify-between items-center mb-2">
-                                                            <label className="text-xs font-bold text-gray-900 capitalize">
+                                                            <label className="text-[10px] md:text-xs font-bold text-gray-900 capitalize">
                                                                 {nombre}: <span className="text-gray-500 font-normal ml-1">
                                                                     {valores.find(v => seleccionesAtributos[nombre] === v.id)?.valor || 'Seleccionar'}
                                                                 </span>
@@ -644,28 +649,23 @@ const ProductoDetalle = () => {
                                                                         <button
                                                                             key={valor.id}
                                                                             onClick={() => handleSeleccionAtributo(nombre, valor.id)}
-                                                                            className={`
-          flex flex-col items-center gap-2 p-2 rounded-lg transition-all relative
-          ${isSelected
-                                                                                    ? 'ring-2 ring-orange-500 bg-orange-50 border-orange-500 shadow-md'
-                                                                                    : 'border border-gray-100 hover:border-orange-200 hover:bg-orange-50 hover:shadow-md'
-                                                                                }
-        `}
+                                                                            className={`flex flex-col items-center gap-2 p-2 rounded-lg transition-all relative ${isSelected
+                                                                                ? 'ring-2 ring-orange-500 bg-orange-50 border-orange-500 shadow-md'
+                                                                                : 'border border-gray-100 hover:border-orange-200 hover:bg-orange-50 hover:shadow-md'
+                                                                                } `}
                                                                         >
                                                                             {/* Icono de chat en esquina superior derecha */}
                                                                             {isSelected && (
                                                                                 <div className="absolute top-1 right-1 w-4 h-4 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs z-10">
 
+                                                                                    <CheckCircle2 size={12} />
                                                                                 </div>
                                                                             )}
 
                                                                             {/* Large Image Container */}
                                                                             <div
-                                                                                className={`
-            w-12 h-12 rounded-sm border overflow-hidden bg-white shadow-sm transition-all
-            ${isSelected
-                                                                                    }
-          `}
+                                                                                className={`w-12 h-12 rounded-sm border overflow-hidden bg-white shadow-sm transition-all${isSelected
+                                                                                    }`}
                                                                             >
                                                                                 <img
                                                                                     src={imgUrl || 'https://via.placeholder.com/150'}
@@ -676,13 +676,10 @@ const ProductoDetalle = () => {
 
                                                                             {/* Label Button */}
                                                                             <span
-                                                                                className={`
-            px-1 py-1 rounded-lg text-xs font-bold border transition-all min-w-[5rem]
-            ${isSelected
-                                                                                        ? 'border-orange-500 text-orange-700 bg-orange-50'
-                                                                                        : 'border-gray-200 text-gray-600 bg-white group-hover:border-orange-300 group-hover:text-orange-600'
-                                                                                    }
-          `}
+                                                                                className={`px-1 py-1 rounded-lg text-[10px] md:text-xs font-bold border transition-all min-w-[5rem] ${isSelected
+                                                                                    ? 'border-orange-500 text-orange-700 bg-orange-50'
+                                                                                    : 'border-gray-200 text-gray-600 bg-white group-hover:border-orange-300 group-hover:text-orange-600'
+                                                                                    }`}
                                                                             >
                                                                                 {valor.valor}
                                                                             </span>
@@ -700,7 +697,7 @@ const ProductoDetalle = () => {
                                                                             key={valor.id}
                                                                             onClick={() => handleSeleccionAtributo(nombre, valor.id)}
                                                                             className={`
-                                                                            px-4 py-2 rounded-lg text-sm border font-medium transition-all min-w-[4rem]
+                                                                            px-4 py-2 rounded-lg text-[10px] md:text-sm border font-medium transition-all min-w-[4rem]
                                                                             ${isSelected
                                                                                     ? 'border-orange-500 text-orange-600 bg-orange-50 ring-1 ring-orange-500'
                                                                                     : 'border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-500 bg-white'}
@@ -740,14 +737,14 @@ const ProductoDetalle = () => {
                                                     <FaPlus size={10} />
                                                 </button>
                                             </div>
-                                            <span className="text-xs text-gray-500">Máximo 10 unidades</span>
+                                            <span className="text-[10px] md:text-xs text-gray-500">Máximo 10 unidades</span>
                                         </div>
 
                                         <button
                                             onClick={handleAddToCart}
                                             disabled={!tieneStock || (producto.variaciones?.length > 0 && !variacionSeleccionada)}
                                             className={`
-                                            w-full py-3 rounded-full font-bold text-white text-sm
+                                            w-full py-3 rounded-full font-bold text-white text-[10px] md:text-sm
                                             transition-all active:scale-[0.98]
                                             ${(tieneStock && (!producto.variaciones?.length || variacionSeleccionada))
                                                     ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20'
@@ -774,9 +771,9 @@ const ProductoDetalle = () => {
                 </div>
 
                 {/* Reviews Grid Section */}
-                <div className="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    {/* Left Column: Reviews */}
-                    <div className="">
+                <div className="mt-16 flex flex-col lg:grid lg:grid-cols-2 gap-12">
+                    {/* Reviews - Second on mobile (order-2), Left on desktop */}
+                    <div className="order-2 lg:order-1">
                         <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                             <FaStar className="text-yellow-400" />
                             Opiniones de Clientes
@@ -784,9 +781,9 @@ const ProductoDetalle = () => {
                         <ProductReviews productoId={id} />
                     </div>
 
-                    {/* Right Column: Specifications Table */}
-                    <div id="especificaciones-completas" className="hidden lg:block bg-white rounded-lg p-6 h-fit">
-                        <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-4">
+                    {/* Specifications - First on mobile (order-1), Right on desktop */}
+                    <div id="especificaciones-completas" className="order-1 lg:order-2 bg-white rounded-lg p-6 h-fit">
+                        <h3 className="text-[11px] md:text-xl font-bold text-gray-900 mb-6 flex items-center gap-4">
                             <div className="p-2.5 rounded-full text-[#c2410c]">
                                 <FileText size={20} />
                             </div>
@@ -815,7 +812,7 @@ const ProductoDetalle = () => {
                             return (
                                 <>
                                     <div className="relative overflow-hidden rounded-lg border border-gray-100">
-                                        <table className="w-full text-sm text-left">
+                                        <table className="w-full text-[10px] md:text-sm text-left">
                                             <tbody className="divide-y divide-gray-100">
 
                                                 {visibleSpecs.map((spec, i) => (
@@ -841,7 +838,7 @@ const ProductoDetalle = () => {
                                         <div className="mt-6 text-center">
                                             <button
                                                 onClick={() => setSpecsExpanded(!specsExpanded)}
-                                                className="px-6 py-2.5 border border-orange-500 rounded-full text-sm font-medium text-orange-500 hover:bg-orange-50 transition-colors inline-flex items-center gap-2"
+                                                className="mt-4 text-[10px] md:text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-2 transition-colors"
                                             >
                                                 {specsExpanded ? (
                                                     <>Ver menos</>

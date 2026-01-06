@@ -1,26 +1,13 @@
 <?php
 require_once __DIR__ . '/backend/config/conexion.php';
+$database = new Database();
+$db = $database->getConnection();
 
-try {
-    $db = (new Database())->getConnection();
-    
-    echo "=== COLUMNAS TABLA PRODUCTOS ===\n";
-    $stm = $db->query("DESCRIBE productos");
-    $cols = $stm->fetchAll(PDO::FETCH_COLUMN);
-    print_r($cols);
+echo "--- Table: variaciones ---\n";
+$stmt = $db->query("DESCRIBE variaciones");
+print_r($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-    echo "\n=== TABLAS DISPONIBLES ===\n";
-    $stm = $db->query("SHOW TABLES");
-    $tables = $stm->fetchAll(PDO::FETCH_COLUMN);
-    print_r($tables);
-
-    if (in_array('detalle_pedido', $tables)) {
-         echo "\n=== COLUMNAS DETALLE_PEDIDO ===\n";
-         $stm = $db->query("DESCRIBE detalle_pedido");
-         print_r($stm->fetchAll(PDO::FETCH_COLUMN));
-    }
-
-} catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
-}
+echo "\n--- Table: producto_variantes ---\n";
+$stmt = $db->query("DESCRIBE producto_variantes");
+print_r($stmt->fetchAll(PDO::FETCH_ASSOC));
 ?>

@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { productosService, serviciosService, tiendaCategoriasService, tiendaService } from '../services';
+import { productosService, serviciosService, tiendaCategoriasService, tiendaService, bannersService } from '../services';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Card, CardContent } from '../components/ui/Card';
 import Loading from '../components/ui/Loading';
 import HeroCarousel from '../components/HeroCarousel';
+import BannerGrid from '../components/home/BannerGrid';
+import CategorySection from '../components/home/CategorySection';
 import {
   FaShippingFast,
   FaShieldAlt,
@@ -26,6 +28,7 @@ import {
   FaCheckCircle,
   FaRegHeart
 } from 'react-icons/fa';
+import { FiArrowRight } from 'react-icons/fi';
 import {
   ShoppingBag,
   Sparkles,
@@ -119,6 +122,8 @@ import ProductCard from '../components/products/ProductCard';
 const Home = () => {
   const [productosDestacados, setProductosDestacados] = useState([]);
   const [productosRecomendados, setProductosRecomendados] = useState([]); // New state
+  const [gridBanners, setGridBanners] = useState([]); // Dynamic Grid Banners
+  const [categoryGridBanners, setCategoryGridBanners] = useState([]); // Category + Products sections
   const [servicios, setServicios] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [ofertasRelampago, setOfertasRelampago] = useState([]);
@@ -146,11 +151,13 @@ const Home = () => {
 
   const cargarDatos = async () => {
     try {
-      const [productosData, serviciosData, categoriasData, ofertasData] = await Promise.all([
-        tiendaService.getProductos(),
+      const [productosData, serviciosData, categoriasData, ofertasData, gridBannersData, categoryBannersData] = await Promise.all([
+        tiendaService.getProductos({ limit: 60 }),
         serviciosService.getAll(),
         tiendaCategoriasService.getAll(),
-        tiendaService.getProductos({ ofertas: 1, limit: 5 })
+        tiendaService.getProductos({ ofertas: 1, limit: 20 }), // Fetch more to shuffle
+        bannersService.getActive('grid'), // Fetch grid banners
+        bannersService.getActive('category_grid') // Fetch category grid banners
       ]);
 
       // Verificar si productosData es un array o viene en .data
@@ -160,14 +167,38 @@ const Home = () => {
       // Randomly select products for "Recommended" or just take a different slice
       // Shuffling for variety
       const shuffled = [...productosArray].sort(() => 0.5 - Math.random());
-      setProductosRecomendados(shuffled.slice(0, 18));
+      setProductosRecomendados(shuffled.slice(0, 36));
 
-      // Procesar ofertas
+      // Procesar ofertas (Ensure Category Variety)
       const ofertasArray = Array.isArray(ofertasData) ? ofertasData : (ofertasData.data || []);
-      setOfertasRelampago(ofertasArray);
 
-      setServicios(serviciosData);
+      // Group by category to pick 1 from each
+      const groups = {};
+      ofertasArray.forEach(p => {
+        const cat = p.categoria_id || 'unknown';
+        if (!groups[cat]) groups[cat] = [];
+        groups[cat].push(p);
+      });
+
+      const variedOfertas = [];
+      const keys = Object.keys(groups);
+      // Randomize category order
+      keys.sort(() => 0.5 - Math.random());
+
+      // Interleave products from different categories
+      const maxItems = Math.max(...Object.values(groups).map(g => g.length), 0);
+      for (let i = 0; i < maxItems; i++) {
+        keys.forEach(key => {
+          if (groups[key][i]) variedOfertas.push(groups[key][i]);
+        });
+      }
+
+      setOfertasRelampago(variedOfertas.slice(0, 6));
+
+      setServicios(Array.isArray(serviciosData) ? serviciosData : (serviciosData.data || []));
       setCategorias(categoriasData);
+      setGridBanners(Array.isArray(gridBannersData) ? gridBannersData : []);
+      setCategoryGridBanners(Array.isArray(categoryBannersData) ? categoryBannersData : []);
     } catch (error) {
       console.error('Error al cargar datos:', error);
     } finally {
@@ -242,7 +273,7 @@ const Home = () => {
         ofertasRelampago.length > 0 && (
           <div className="py-4 md:py-8 bg-gray-50">
             {/* Banner OFERTAS WOW */}
-            <div className="bg-gradient-to-r mx-auto from-red-600 to-orange-500 rounded-xl p-4 md:p-6 mb-8 flex flex-col md:flex-row items-center justify-between shadow-lg text-white relative overflow-hidden max-w-7xl gap-4 md:gap-0 mx-4 md:mx-auto">
+            <div className="bg-gradient-to-r from-red-600 to-orange-500 rounded-xl p-4 md:p-6 mb-8 flex flex-col md:flex-row items-center justify-between shadow-lg text-white relative overflow-hidden max-w-7xl gap-4 md:gap-0 mx-4 md:mx-auto">
               {/* Fondo decorativo */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
 
@@ -287,9 +318,9 @@ const Home = () => {
                 </Link>
               </div>
 
-              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4">
+              <div className="flex lg:grid lg:grid-cols-6 gap-4 overflow-x-auto lg:overflow-visible scrollbar-hide pb-4 px-4">
                 {ofertasRelampago.map(producto => (
-                  <Link key={producto.id} to={`/producto/${producto.id}`} className="group flex-shrink-0 w-[160px] md:w-[200px]">
+                  <Link key={producto.id} to={`/producto/${producto.id}`} className="group flex-shrink-0 w-[160px] lg:w-auto">
                     <div className="bg-white rounded-lg p-3 transition-shadow relative">
                       {/* Badge Descuento */}
                       <div className="absolute top-3 left-3 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded z-10">
@@ -344,6 +375,18 @@ const Home = () => {
           </div >
         )
       }
+      {/* Dual Banner Section: Dynamic Grid Banners */}
+      <BannerGrid banners={gridBanners} />
+
+      {/* Category Product Sections */}
+      {categoryGridBanners.map((banner) => (
+        <CategorySection key={banner.id} banner={banner} />
+      ))}
+      {/* Audífonos ideales para ti - Estilo Falabella */}
+
+
+
+
       <div className="py-4 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-center gap-4 mb-8">
@@ -369,390 +412,99 @@ const Home = () => {
           </div>
         </div>
       </div>
-      {/* Productos Destacados Compactos */}
-      <div className="py-12">
-        <div className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-10"
-          >
-            <motion.div
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ type: "spring", stiffness: 200 }}
-              className="inline-flex items-center gap-2 mb-4 px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 rounded-full text-xs font-bold shadow-lg"
-            >
-              <motion.span
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              >
-                ⭐
-              </motion.span>
-              Los Más Vendidos
-              <TrendingUp className="w-4 h-4" />
-            </motion.div>
 
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-              Productos{' '}
-              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Destacados
-              </span>
-            </h2>
-            <p className="text-sm text-gray-600 max-w-2xl mx-auto">
-              Descubre nuestra selección premium con ofertas exclusivas
-            </p>
-          </motion.div>
 
-          {/* Carrusel de productos */}
-          <div className="relative group/carousel">
-            {/* Botón anterior */}
-            <button
-              onClick={() => {
-                const container = document.getElementById('productos-carousel');
-                container.scrollBy({ left: -500, behavior: 'smooth' });
-              }}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-gray-50"
-            >
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
 
-            {/* Botón siguiente */}
-            <button
-              onClick={() => {
-                const container = document.getElementById('productos-carousel');
-                container.scrollBy({ left: 500, behavior: 'smooth' });
-              }}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-gray-50"
-            >
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
 
-            {/* Contenedor del carrusel */}
-            <div
-              id="productos-carousel"
-              className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth px-4 py-2"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {productosDestacados.map((producto, index) => (
-                <motion.div
-                  key={producto.id}
-                  initial={{ opacity: 0, x: 50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05, duration: 0.3 }}
-                  className="flex-shrink-0 w-[240px]"
-                >
-                  <Link to={`/producto/${producto.id}`}>
-                    <motion.div
-                      whileHover={{ y: -4 }}
-                      className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 group relative"
-                    >
-                      {/* Imagen estilo Falabella */}
-                      <div className="relative h-48 bg-white overflow-hidden p-4">
-                        {producto.imagen ? (
-                          <img
-                            src={producto.imagen}
-                            alt={producto.nombre}
-                            className="w-full h-full object-contain"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full">
-                            <Package className="w-20 h-20 text-gray-300" />
-                          </div>
-                        )}
 
-                        {/* Badge descuento estilo Falabella */}
-                        <div className="absolute top-2 left-2">
-                          <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-                            -20%
-                          </span>
-                        </div>
-                      </div>
 
-                      {/* Contenido estilo Falabella */}
-                      <div className="p-3 border-t border-gray-100">
-                        {/* Marca/Categoría */}
-                        <p className="text-xs text-gray-500 uppercase mb-1 font-semibold">
-                          {producto.categoria || 'TECNOLOGÍA'}
-                        </p>
 
-                        {/* Nombre del producto */}
-                        <h3 className="text-sm text-gray-800 mb-2 line-clamp-2 min-h-[2.5rem] leading-tight">
-                          {producto.nombre}
-                        </h3>
 
-                        {/* Precios estilo Falabella */}
-                        <div className="mb-2">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-lg font-bold text-gray-900">
-                              ${parseFloat(producto.precio_base).toFixed(2)}
-                            </span>
-                            <span className="text-xs text-white bg-red-500 px-1.5 py-0.5 rounded font-bold">
-                              -20%
-                            </span>
-                          </div>
-                          <span className="text-xs text-gray-400 line-through">
-                            ${(parseFloat(producto.precio_base) * 1.25).toFixed(2)}
-                          </span>
-                        </div>
-
-                        {/* Rating estilo Falabella */}
-                        <div className="flex items-center gap-1 mb-3">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                          ))}
-                          <span className="text-xs text-gray-500 ml-1">4.8</span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </Link>
-                </motion.div>
-              ))}
+      {/* Servicios Profesionales - Style Catálogo */}
+      <div className="py-12 md:py-16 bg-gray-50 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Sparkles className="w-4 h-4 text-orange-500" />
+                <span className="text-[10px] font-bold text-orange-600 uppercase tracking-[0.2em]">Servicios VIP</span>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">
+                CENTRO <span className="text-orange-600">ESPECIALIZADO</span>
+              </h2>
             </div>
-          </div>
-
-          {/* Botón ver todos */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mt-8"
-          >
-            <Link to="/productos">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-8 py-3 border-2 border-blue-600 text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition-all inline-flex items-center gap-2"
-              >
-                Ver Todos los Productos
-                <ArrowRight className="w-5 h-5" />
-              </motion.button>
+            <Link to="/servicios" className="group flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-orange-600 transition-colors">
+              VER TODOS LOS SERVICIOS <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-          </motion.div>
-        </div>
-      </div>
-      {/* Banner Cuotéalo - Estilo Falabella */}
-      <div className="py-8">
-        <div className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-16">
-          <div className="relative bg-gradient-to-r from-blue-900 via-blue-800 to-orange-500 rounded-2xl overflow-hidden">
-            {/* Contenido del banner */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 items-center">
-              {/* Lado izquierdo - Texto */}
-              <div className="p-8 lg:p-12 text-white relative z-10">
-                <h2 className="text-3xl lg:text-4xl font-bold mb-2">
-                  Con <span className="text-cyan-300">cuotéalo</span>
-                </h2>
-                <h3 className="text-2xl lg:text-3xl font-bold mb-2">
-                  Compra en <span className="font-black">PERU SMART</span>
-                </h3>
-                <p className="text-lg lg:text-xl">
-                  en cuotas y <span className="text-red-400 font-bold">sin tarjeta de crédito</span>
-                </p>
-              </div>
-
-              {/* Lado derecho - Imagen de productos */}
-              <div className="relative h-48 lg:h-64 flex items-center justify-center p-4">
-                {/* Decoración de fondo */}
-                <div className="absolute inset-0 bg-gradient-to-l from-orange-400/20 to-transparent"></div>
-
-                {/* Productos con imágenes */}
-                <div className="relative z-10 flex items-center justify-center gap-2">
-                  {productosDestacados.slice(0, 3).map((producto, i) => (
-                    <div
-                      key={i}
-                      className={`w-24 h-32 lg:w-32 lg:h-40 bg-white rounded-lg shadow-2xl transform ${i === 0 ? '-rotate-6' : i === 1 ? 'rotate-3 scale-110' : 'rotate-12'
-                        } overflow-hidden`}
-                    >
-                      {producto.imagen ? (
-                        <img
-                          src={producto.imagen}
-                          alt={producto.nombre}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-400 flex items-center justify-center">
-                          <Package className="w-12 h-12 text-gray-600" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Flecha decorativa */}
-            <div className="absolute top-0 right-1/2 lg:right-1/3 w-0 h-0 border-t-[200px] border-t-transparent border-l-[100px] border-l-blue-900 border-b-[200px] border-b-transparent opacity-50"></div>
           </div>
-        </div>
-      </div>
-      {/* Audífonos ideales para ti - Estilo Falabella */}
-      <div className="py-12 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-16">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Banner lateral izquierdo */}
-            <div className="lg:col-span-1">
-              <div className="relative bg-gradient-to-br from-gray-900 to-gray-700 rounded-lg p-6 h-full flex flex-col justify-between text-white overflow-hidden">
-                <div className="relative z-10">
-                  <h3 className="text-xl font-bold mb-2">LIBERTAD AUDITIVA TOTAL</h3>
-                  <h4 className="text-2xl font-black mb-3">CON LOS AIRPODS</h4>
-                  <p className="text-sm mb-4 text-gray-300">Sonido de alta calidad y sin cables</p>
-                  <span className="inline-block bg-white text-gray-900 text-xs font-bold px-3 py-1 rounded cursor-pointer hover:bg-gray-100 transition-colors">
-                    VER PRODUCTO
-                  </span>
-                </div>
-                {/* Imagen de producto */}
-                {productosDestacados[0]?.imagen && (
-                  <div className="absolute bottom-0 right-0 w-32 h-32 opacity-30">
-                    <img
-                      src={productosDestacados[0].imagen}
-                      alt="Producto"
-                      className="w-full h-full object-contain transform rotate-12"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
 
-            {/* Productos a la derecha */}
-            <div className="lg:col-span-3">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900">
-                  Audífonos ideales para ti
-                </h2>
-                <Link to="/productos" className="text-blue-600 font-semibold text-sm hover:underline flex items-center gap-1">
-                  VER TODO
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {productosDestacados.slice(0, 4).map((producto) => (
-                  <Link key={producto.id} to={`/producto/${producto.id}`}>
-                    <motion.div
-                      whileHover={{ y: -4 }}
-                      className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
-                    >
-                      <div className="relative h-40 bg-white overflow-hidden p-3">
-                        {producto.imagen ? (
-                          <img
-                            src={producto.imagen}
-                            alt={producto.nombre}
-                            className="w-full h-full object-contain"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full">
-                            <Package className="w-16 h-16 text-gray-300" />
-                          </div>
-                        )}
-                        <div className="absolute top-2 left-2">
-                          <span className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded">
-                            -17%
-                          </span>
-                        </div>
-                      </div>
-                      <div className="p-3 border-t border-gray-100">
-                        <h3 className="text-sm text-gray-800 mb-2 line-clamp-2 min-h-[2.5rem] leading-tight">
-                          {producto.nombre}
-                        </h3>
-                        <div className="mb-2">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-base font-bold text-gray-900">
-                              ${parseFloat(producto.precio_base).toFixed(2)}
-                            </span>
-                          </div>
-                          <span className="text-xs text-gray-400 line-through">
-                            ${(parseFloat(producto.precio_base) * 1.2).toFixed(2)}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
-                          ))}
-                          <span className="text-xs text-gray-500 ml-1">4.7</span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-
-
-
-
-
-      {/* Servicios Compactos */}
-      <div className="bg-white py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-8"
-          >
-            <div className="inline-flex items-center gap-2 mb-3 px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 rounded-full text-xs font-bold shadow-lg">
-              <FaTools className="w-3 h-3" />
-              SERVICIOS PROFESIONALES
-            </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-              Asistencia <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Técnica</span>
-            </h2>
-            <p className="text-sm text-gray-600 max-w-2xl mx-auto">
-              Servicios técnicos especializados para tu equipo
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 gap-6 px-2">
-            {servicios.map((servicio, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {servicios.slice(0, 4).map((servicio, i) => (
               <motion.div
                 key={servicio.id}
-                initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                whileHover={{ y: -5, scale: 1.01 }}
-                className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-4 hover:border-blue-500 hover:shadow-lg transition-all group cursor-pointer"
+                className="bg-white rounded-2xl overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group border border-gray-100 flex flex-col h-full relative"
               >
-                <div className="flex gap-4">
-                  <motion.div
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                    className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0"
-                  >
-                    <FaTools className="text-xl text-white" />
-                  </motion.div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                      {servicio.nombre}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{servicio.descripcion}</p>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-xs text-gray-500">Desde</span>
-                        <span className="text-xl font-bold text-blue-600 ml-1">
-                          ${parseFloat(servicio.precio).toFixed(2)}
-                        </span>
-                      </div>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all text-xs"
-                      >
-                        Solicitar
-                      </motion.button>
+                {/* Badges al estilo Producto */}
+                <div className="absolute top-4 left-4 z-10">
+                  <span className="bg-orange-600 text-white text-[9px] font-bold px-2 py-1 rounded shadow-sm flex items-center gap-1 uppercase tracking-tighter">
+                    <Sparkles className="w-3 h-3" /> Servicio
+                  </span>
+                </div>
+
+                {/* Imagen del Servicio */}
+                <div className="relative h-48 w-full p-6 bg-white flex items-center justify-center overflow-hidden">
+                  {servicio.imagen ? (
+                    <img
+                      src={servicio.imagen.startsWith('http') ? servicio.imagen : `http://localhost:8000${servicio.imagen}`}
+                      alt={servicio.nombre}
+                      className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded-lg text-orange-200">
+                      <FaTools className="text-6xl" />
                     </div>
+                  )}
+                </div>
+
+                {/* Info del Servicio */}
+                <div className="p-4 pt-0 flex-1 flex flex-col">
+                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1 block">
+                    Soporte Especializado
+                  </span>
+
+                  <h3 className="text-sm font-medium text-gray-700 mb-2 line-clamp-2 min-h-[40px] group-hover:text-orange-500 transition-colors">
+                    {servicio.nombre}
+                  </h3>
+
+                  {/* Rating Estrellas */}
+                  <div className="flex items-center gap-1 mb-3">
+                    <div className="flex text-[10px] text-yellow-400 gap-0.5">
+                      <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
+                    </div>
+                    <span className="text-[10px] text-gray-400">(4.9)</span>
+                  </div>
+
+                  <div className="flex flex-wrap items-baseline gap-2 mb-4">
+                    <span className="inline-block bg-orange-50 text-orange-700 text-[9px] font-bold px-2 py-0.5 rounded border border-orange-100 italic">
+                      Calidad Garantizada
+                    </span>
+                  </div>
+
+                  {/* Footer similar a ProductCard */}
+                  <div className="flex items-end justify-between mt-auto pt-2 border-t border-gray-50">
+                    <div className="flex flex-col">
+                      <span className="text-[9px] text-gray-400 font-medium uppercase leading-none opacity-50 mb-1">Precio sugerido</span>
+                      <span className="text-xl font-black text-orange-600 leading-none">
+                        S/ {parseFloat(servicio.precio).toFixed(0)}
+                      </span>
+                    </div>
+                    <button className="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center hover:bg-orange-600 transition-all shadow-lg hover:scale-110">
+                      <FiArrowRight className="text-xl" />
+                    </button>
                   </div>
                 </div>
               </motion.div>
@@ -839,7 +591,7 @@ const Home = () => {
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 

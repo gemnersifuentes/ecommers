@@ -30,23 +30,34 @@ try {
     );
     $db->exec("set names utf8mb4");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Prepare Search Tokens and Stems
+    $tokens = explode(' ', $query);
+    $searchORs = ["MATCH(p.nombre, p.descripcion, p.modelo, p.sku, p.etiquetas) AGAINST(? IN NATURAL LANGUAGE MODE)"];
+    $allParams = [$query];
     
-    $searchTerm = "%{$query}%";
-    
-    // Productos que coinciden - SOLO columnas que existen
+    foreach($tokens as $token) {
+        if (strlen($token) > 2) {
+            $stem = str_ends_with($token, 's') ? rtrim($token, 's') : $token;
+            $searchORs[] = "(p.nombre LIKE ? OR p.descripcion LIKE ? OR p.modelo LIKE ? OR p.sku LIKE ? OR c.nombre LIKE ?)";
+            $term = "%$stem%";
+            for($i=0;$i<5;$i++) $allParams[] = $term; // Matches 5 placeholders
+        }
+    }
+    $whereSql = "(" . implode(" OR ", $searchORs) . ")";
+
+    // Productos que coinciden
     $stmt = $db->prepare("
-        SELECT DISTINCT
-            p.id,
-            p.nombre,
-            p.imagen,
-            p.precio_base
+        SELECT DISTINCT p.id, p.nombre, p.imagen, p.precio_base,
+               (MATCH(p.nombre, p.descripcion, p.modelo, p.sku, p.etiquetas) AGAINST(? IN NATURAL LANGUAGE MODE)) as relevance
         FROM productos p
-        WHERE p.nombre LIKE ?
-            AND p.activo = 1
-        ORDER BY p.nombre ASC
+        LEFT JOIN categorias c ON p.categoria_id = c.id
+        WHERE $whereSql AND p.activo = 1
+        ORDER BY relevance DESC, p.nombre ASC
         LIMIT 10
     ");
-    $stmt->execute([$searchTerm]);
+    
+    $executionParams = array_merge([$query], $allParams);
+    $stmt->execute($executionParams);
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Marcas relacionadas

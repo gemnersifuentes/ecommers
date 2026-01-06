@@ -1,10 +1,11 @@
 <?php
-require_once 'backend/config/conexion.php';
-$db = new Database();
-$conn = $db->getConnection();
-
-$stmt = $conn->query("DESCRIBE pedidos");
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    echo $row['Field'] . "\n";
+require 'backend/config/conexion.php';
+try {
+    $s = $db->query('DESCRIBE productos');
+    foreach ($s->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        echo $row['Field'] . "\n";
+    }
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
 }
 ?>

@@ -160,6 +160,11 @@ const Carrito = () => {
                 const imagen = producto?.imagen || null;
                 const nombre = producto?.nombre || 'Producto';
                 const isSelected = seleccionados.includes(item.id);
+                // Calculate max allowed quantity with proper fallback
+                const stockProp = variacion ? variacion.stock : producto?.stock;
+                // If stock information is missing, default to 10 so we don't block, but still cap at 10
+                const stockActual = (stockProp !== undefined && stockProp !== null) ? Number(stockProp) : 10;
+                const maxQty = Math.min(10, stockActual);
 
                 return (
                   <motion.div
@@ -256,8 +261,12 @@ const Carrito = () => {
                               {item.cantidad}
                             </span>
                             <button
-                              onClick={() => handleCantidadChange(item.id, item.cantidad + 1)}
-                              className="p-2 hover:bg-white hover:text-orange-500 transition-colors rounded-r-lg text-gray-600"
+                              onClick={() => {
+                                if (item.cantidad >= maxQty) return;
+                                handleCantidadChange(item.id, item.cantidad + 1);
+                              }}
+                              disabled={item.cantidad >= maxQty}
+                              className="p-2 hover:bg-white hover:text-orange-500 transition-colors rounded-r-lg text-gray-600 disabled:opacity-30 disabled:hover:bg-transparent"
                             >
                               <Plus size={14} />
                             </button>

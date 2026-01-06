@@ -65,7 +65,7 @@ function handleImageUpload() {
     error_log("Archivo recibido: $fileName, Tamaño: $fileSize, Tipo: $fileType");
 
     $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'avif', 'bmp', 'tiff'];
 
     if (!in_array($fileExt, $allowed)) {
         error_log("Extensión no permitida: $fileExt");

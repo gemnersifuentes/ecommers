@@ -2,13 +2,32 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { Check, CreditCard, MapPin, Truck, Store, Home, Plus, Edit2 } from 'lucide-react';
+import {
+    Check,
+    CreditCard,
+    MapPin,
+    Truck,
+    Store,
+    Home,
+    Plus,
+    Edit2,
+    Phone,
+    Copy,
+    ExternalLink,
+    AlertCircle,
+    Package,
+    ArrowLeft,
+    ChevronRight,
+    User,
+    Mail
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { tiendaService, direccionesService } from '../services';
 import { ubigeoPeru } from '../data/ubigeo_peru';
 import { DireccionForm } from '../components/DireccionForm';
 import Swal from 'sweetalert2';
 import { useLoader } from '../context/LoaderContext';
+import { formatDeliveryEstimate, getDeliveryLabel } from '../utils/dateUtils';
 
 const Checkout = () => {
     const { items: cart, getTotal, clearCart } = useCart();
@@ -17,7 +36,23 @@ const Checkout = () => {
     const [step, setStep] = useState(1); // 1: Envío, 2: Pago, 3: Éxito
     const [loading, setLoading] = useState(false);
     const [orderNumber, setOrderNumber] = useState('');
+    const [finalOrderData, setFinalOrderData] = useState(null);
+    const [metodoPago, setMetodoPago] = useState('tarjeta');
+    const [comprobante, setComprobante] = useState(null);
+    const [mpPreferenceId, setMpPreferenceId] = useState(null);
     const { showLoader, hideLoader } = useLoader();
+
+    useEffect(() => {
+        // Cargar SDK de Mercado Pago
+        const script = document.createElement('script');
+        script.src = 'https://sdk.mercadopago.com/js/v2';
+        script.async = true;
+        document.body.appendChild(script);
+
+        return () => {
+            document.body.removeChild(script);
+        };
+    }, []);
 
     // Delivery method and addresses
     const [metodoEnvio, setMetodoEnvio] = useState('domicilio');
@@ -26,21 +61,24 @@ const Checkout = () => {
     const [usarOtraDireccion, setUsarOtraDireccion] = useState(false);
     const [guardarDireccion, setGuardarDireccion] = useState(false);
     const [mostrarFormDireccion, setMostrarFormDireccion] = useState(false);
+    const [errors, setErrors] = useState({});
 
     // Initial state from user data
     const [formData, setFormData] = useState({
         nombre: usuario?.nombre || '',
+        correo: usuario?.correo || '',
         direccion: usuario?.direccion || '',
         departamento: '',
         provincia: '',
         distrito: '',
-        ciudad: usuario?.ciudad || '', // Keeping for fallback
+        ciudad: usuario?.ciudad || '',
         cp: usuario?.cp || '',
         telefono: usuario?.telefono || '',
         tarjetaNumero: '',
         tarjetaExpiracion: '',
         tarjetaCvv: '',
-        dni: '' // Added DNI
+        dni: '',
+        referencia: ''
     });
 
     // Update form data when user data is available
@@ -49,6 +87,7 @@ const Checkout = () => {
             setFormData(prev => ({
                 ...prev,
                 nombre: usuario.nombre || prev.nombre,
+                correo: usuario.correo || prev.correo,
                 direccion: usuario.direccion || prev.direccion,
                 ciudad: usuario.ciudad || prev.ciudad,
                 estado: usuario.estado || prev.estado,
@@ -59,10 +98,31 @@ const Checkout = () => {
     }, [usuario]);
 
     const handleInputChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        const { name, value } = e.target;
+
+        // Restricción de entrada para teléfono y DNI
+        if (name === 'telefono') {
+            const digits = value.replace(/\D/g, '').slice(0, 9);
+            setFormData(prev => ({ ...prev, [name]: digits }));
+        } else if (name === 'dni' || name === 'cp') {
+            const maxLength = name === 'dni' ? 8 : 10;
+            const digits = value.replace(/\D/g, '').slice(0, maxLength);
+            setFormData(prev => ({ ...prev, [name]: digits }));
+        } else {
+            setFormData({
+                ...formData,
+                [name]: value
+            });
+        }
+
+        // Limpiar error al escribir
+        if (errors[name]) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
+        }
     };
 
     const handleUbicacionChange = (e) => {
@@ -76,6 +136,19 @@ const Checkout = () => {
                 updates.distrito = '';
             }
             return { ...prev, ...updates };
+        });
+
+        // Limpiar errores de ubicación
+        setErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors[name];
+            if (name === 'departamento') {
+                delete newErrors.provincia;
+                delete newErrors.distrito;
+            } else if (name === 'provincia') {
+                delete newErrors.distrito;
+            }
+            return newErrors;
         });
     };
 
@@ -134,7 +207,58 @@ const Checkout = () => {
         }
     };
 
+    const validateStep1 = () => {
+        const newErrors = {};
+
+        if (metodoEnvio === 'domicilio') {
+            if (direcciones.length > 0 && !usarOtraDireccion) {
+                if (!direccionSeleccionada) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Dirección requerida',
+                        text: 'Por favor selecciona una dirección de envío o agrega una nueva.',
+                        confirmButtonColor: '#f97316'
+                    });
+                    return false;
+                }
+            } else {
+                // Validación Formulario Manual
+                if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es obligatorio';
+                if (!usuario && !formData.correo.trim()) {
+                    newErrors.correo = 'El correo es obligatorio';
+                } else if (!usuario && !/\S+@\S+\.\S+/.test(formData.correo)) {
+                    newErrors.correo = 'Formato de correo inválido';
+                }
+                if (!formData.departamento) newErrors.departamento = 'Selecciona un departamento';
+                if (!formData.provincia) newErrors.provincia = 'Selecciona una provincia';
+                if (!formData.distrito) newErrors.distrito = 'Selecciona un distrito';
+                if (!formData.direccion.trim()) newErrors.direccion = 'La dirección es obligatoria';
+
+                // Validación Teléfono
+                if (!formData.telefono.trim()) {
+                    newErrors.telefono = 'El teléfono es obligatorio';
+                } else if (!/^9\d{8}$/.test(formData.telefono.trim())) {
+                    newErrors.telefono = 'Número de celular inválido (debe empezar con 9 y tener 9 dígitos)';
+                }
+            }
+        } else {
+            // Retiro en Tienda
+            if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es obligatorio';
+            if (!formData.dni.trim()) {
+                newErrors.dni = 'El DNI es obligatorio';
+            } else if (!/^\d{8}$/.test(formData.dni.trim())) {
+                newErrors.dni = 'El DNI debe tener 8 dígitos';
+            }
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleNextStep = () => {
+        if (step === 1 && !validateStep1()) {
+            return;
+        }
         setStep(step + 1);
     };
 
@@ -142,70 +266,184 @@ const Checkout = () => {
         setStep(step - 1);
     };
 
+    const handleCopy = (text, label) => {
+        navigator.clipboard.writeText(text);
+        Swal.fire({
+            title: '¡Copiado!',
+            text: `${label} copiado al portapapeles`,
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false,
+            toast: true,
+            position: 'top-end'
+        });
+    };
+
+    const handleMercadoPago = async (orderData) => {
+        try {
+            const response = await tiendaService.createMPPreference(orderData);
+            if (response.success && response.init_point) {
+                window.location.href = response.init_point;
+            } else {
+                throw new Exception("Error al generar el link de pago");
+            }
+        } catch (error) {
+            hideLoader();
+            setLoading(false);
+            Swal.fire('Error', 'No se pudo conectar con Mercado Pago: ' + error.message, 'error');
+        }
+    };
+
     const handlePayment = async () => {
         setLoading(true);
         showLoader();
         try {
-            const orderData = {
-                usuario_id: usuario ? usuario.id : 0,
-                total: getTotal(),
-                metodo_envio: metodoEnvio,
-                items: cart.map(item => ({
-                    id: item.producto.id,
-                    variacion_id: item.variacion ? item.variacion.id : null,
-                    cantidad: item.cantidad,
-                    precio: item.precio
-                }))
-            };
-
-            // Handle shipping based on delivery method
-            if (metodoEnvio === 'domicilio') {
-                if (direccionSeleccionada && !usarOtraDireccion && direcciones.length > 0) {
-                    // Using saved address
-                    orderData.direccion_id = direccionSeleccionada;
-
-                    // Copy address data for backup
-                    const dir = direcciones.find(d => d.id === direccionSeleccionada);
-                    if (dir) {
-                        orderData.shipping = {
-                            nombre: dir.nombre_destinatario,
-                            telefono: dir.telefono,
-                            direccion: dir.direccion,
-                            departamento: dir.departamento,
-                            provincia: dir.provincia,
-                            distrito: dir.distrito,
-                            cp: dir.codigo_postal,
-                            referencia: dir.referencia
-                        };
-                    }
-                } else {
-                    // Using new address from form
-                    orderData.shipping = {
-                        nombre: formData.nombre,
-                        telefono: formData.telefono,
-                        direccion: formData.direccion,
-                        departamento: ubigeoPeru.departamentos.find(d => d.id === formData.departamento)?.name || formData.departamento,
-                        provincia: getProvincias(formData.departamento).find(p => p.id === formData.provincia)?.name || formData.provincia,
-                        distrito: getDistritos(formData.provincia).find(d => d.id === formData.distrito)?.name || formData.distrito,
-                        cp: formData.cp,
-                        referencia: formData.referencia
-                    };
-                    orderData.guardar_direccion = guardarDireccion;
-                }
-            } else {
-                // Store pickup - only contact info
-                orderData.shipping = {
-                    nombre: formData.nombre,
-                    dni: formData.dni
-                };
+            // Validation for manual methods
+            if (['yape_manual', 'plin', 'transferencia'].includes(metodoPago) && !comprobante) {
+                hideLoader();
+                setLoading(false);
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Comprobante requerido',
+                    text: 'Por favor adjunta una captura de tu pago para continuar.',
+                    confirmButtonColor: '#f97316'
+                });
+                return;
             }
 
-            const response = await tiendaService.crearPedido(orderData);
+            const shippingData = {};
+            // Build base data for shipment
+            if (metodoEnvio === 'domicilio') {
+                const dir = direcciones.find(d => d.id === direccionSeleccionada) || {};
+                Object.assign(shippingData, {
+                    nombre: dir.nombre_destinatario || formData.nombre,
+                    telefono: dir.telefono || formData.telefono,
+                    direccion: dir.direccion || formData.direccion,
+                    departamento: dir.departamento || (ubigeoPeru.departamentos.find(d => d.id === formData.departamento)?.name || formData.departamento),
+                    provincia: dir.provincia || (getProvincias(formData.departamento).find(p => p.id === formData.provincia)?.name || formData.provincia),
+                    distrito: dir.distrito || (getDistritos(formData.provincia).find(d => d.id === formData.distrito)?.name || formData.distrito),
+                    cp: dir.codigo_postal || formData.cp,
+                    referencia: dir.referencia || formData.referencia
+                });
+            } else {
+                Object.assign(shippingData, {
+                    nombre: formData.nombre,
+                    dni: formData.dni
+                });
+            }
+
+            const baseOrderData = {
+                usuario_id: usuario ? usuario.id : '',
+                correo: formData.correo,
+                total: getTotal() * 1.18,
+                metodo_envio: metodoEnvio,
+                metodo_pago: metodoPago,
+                items: cart.map(item => ({
+                    id: item.producto.id,
+                    nombre: item.producto.nombre,
+                    cantidad: item.cantidad,
+                    precio: item.precio, // Enviar precio base (sin IGV adicional aquí, el email calculará o mostrará base)
+                    precio_regular: item.precio_regular || item.precio,
+                    variacion_id: item.variacion ? item.variacion.id : null,
+                    variacion_nombre: item.variacion?.atributos?.[0]
+                        ? `${item.variacion.atributos[0].atributo_nombre}: ${item.variacion.atributos[0].valor}`
+                        : null,
+                })),
+                shipping: shippingData,
+                direccion_id: (metodoEnvio === 'domicilio' && direccionSeleccionada && !usarOtraDireccion) ? direccionSeleccionada : null,
+                guardar_direccion: guardarDireccion
+            };
+
+            // CASE 1: GATEWAYS (MERCADO PAGO / PAYPAL) - Create order first, then redirect
+            if (['mercadopago', 'paypal'].includes(metodoPago)) {
+                // Prepare FormData for Backend (to support any future file if needed)
+                const formDataToSubmit = new FormData();
+                Object.keys(baseOrderData).forEach(key => {
+                    const value = baseOrderData[key];
+                    if (value === null || value === undefined) {
+                        formDataToSubmit.append(key, '');
+                    } else if (typeof value === 'object') {
+                        formDataToSubmit.append(key, JSON.stringify(value));
+                    } else {
+                        formDataToSubmit.append(key, value);
+                    }
+                });
+
+                // Create the order in standard system first
+                const response = await tiendaService.crearPedido(formDataToSubmit);
+
+                if (response.success) {
+                    // If DB record created, proceed to payment gateway
+                    setOrderNumber(response.numero_pedido);
+                    if (metodoPago === 'mercadopago') {
+                        // Pass the generated order number to MP for reference
+                        const mpData = { ...baseOrderData, numero_pedido: response.numero_pedido };
+                        await handleMercadoPago(mpData);
+                    } else {
+                        // Handle PayPal or others...
+                        setStep(3);
+                        clearCart();
+                    }
+                } else {
+                    throw new Error(response.message || 'Error al pre-registrar el pedido');
+                }
+                return;
+            }
+
+            // CASE 2: MANUAL METHODS (YAPE, PLIN, TRANSFERENCIA) - Using FormData
+            const formDataToSubmit = new FormData();
+            Object.keys(baseOrderData).forEach(key => {
+                const value = baseOrderData[key];
+                if (value === null || value === undefined) {
+                    formDataToSubmit.append(key, '');
+                } else if (typeof value === 'object') {
+                    formDataToSubmit.append(key, JSON.stringify(value));
+                } else {
+                    formDataToSubmit.append(key, value);
+                }
+            });
+
+            if (comprobante) {
+                formDataToSubmit.append('comprobante', comprobante);
+            }
+
+            const response = await tiendaService.crearPedido(formDataToSubmit);
 
             if (response.success) {
+                const dir = direcciones.find(d => d.id === direccionSeleccionada);
+                const provinceName = getProvincias(formData.departamento).find(p => p.id === formData.provincia)?.name || '';
+                const districtName = getDistritos(formData.provincia).find(d => d.id === formData.distrito)?.name || '';
+                const departmentName = ubigeoPeru.departamentos.find(d => d.id === formData.departamento)?.name || '';
+
+                setFinalOrderData({
+                    items: [...cart],
+                    cliente: { ...formData },
+                    envío: {
+                        metodo: metodoEnvio,
+                        direccion: dir || {
+                            direccion: formData.direccion,
+                            referencia: formData.referencia,
+                            distrito: districtName,
+                            provincia: provinceName,
+                            departamento: departmentName
+                        },
+                        ubigeo: {
+                            departamento: departmentName,
+                            provincia: provinceName,
+                            distrito: districtName
+                        }
+                    },
+                    pago: {
+                        metodo: metodoPago,
+                        subtotal: getSubtotal(),
+                        descuento: getTotalDiscount(),
+                        total: getTotal() * 1.18
+                    },
+                    orderNumber: response.numero_pedido
+                });
+
                 setOrderNumber(response.numero_pedido);
                 setStep(3);
-                clearCart();
                 clearCart();
             } else {
                 Swal.fire({
@@ -315,46 +553,180 @@ const Checkout = () => {
                 {renderStepIndicator()}
 
                 {step === 3 ? (
-                    // Success View
+                    // Success View Redesigned
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
+                        initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-white rounded-xl shadow-lg p-12 text-center max-w-2xl mx-auto"
+                        className="max-w-5xl mx-auto"
                     >
-                        <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <Check className="w-12 h-12 text-green-500" strokeWidth={3} />
-                        </div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-4">¡Pedido Confirmado!</h1>
-                        <p className="text-gray-500 mb-8 max-w-md mx-auto">
-                            Gracias por tu compra. Hemos recibido tu pedido y comenzaremos a procesarlo de inmediato. Recibirás un correo de confirmación pronto.
-                        </p>
+                        <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 mb-8">
+                            {/* Success Header */}
+                            <div className="bg-green-500 p-8 text-center text-white">
+                                <motion.div
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ type: "spring", damping: 10, stiffness: 100 }}
+                                    className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4"
+                                >
+                                    <Check className="w-8 h-8 text-white" strokeWidth={3} />
+                                </motion.div>
+                                <h1 className="text-3xl font-extrabold mb-2">¡Pedido Confirmado!</h1>
+                                <p className="text-green-50 opacity-90">
+                                    Gracias por tu compra. Tu pedido <span className="font-bold underline">#{orderNumber}</span> ha sido registrado con éxito.
+                                </p>
+                            </div>
 
-                        <div className="bg-gray-50 rounded-lg p-6 mb-8 text-left max-w-sm mx-auto border border-gray-100">
-                            <div className="flex justify-between mb-2">
-                                <span className="text-sm text-gray-500">Número de Pedido</span>
-                                <span className="text-sm font-bold text-gray-900">#{orderNumber || 'PENDING'}</span>
-                            </div>
-                            <div className="flex justify-between mb-4">
-                                <span className="text-sm text-gray-500">Fecha</span>
-                                <span className="text-sm font-bold text-gray-900">{new Date().toLocaleDateString()}</span>
-                            </div>
-                            <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
-                                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                                    <Truck size={16} className="text-orange-500" />
+                            <div className="p-6 md:p-10 grid grid-cols-1 lg:grid-cols-3 gap-10">
+                                {/* Details Column (Left) */}
+                                <div className="lg:col-span-2 space-y-8">
+                                    {/* Order Metadata */}
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pb-6 border-b border-gray-100">
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Fecha</span>
+                                            <span className="text-sm font-bold text-gray-900">{new Date().toLocaleDateString('es-PE')}</span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Método de Pago</span>
+                                            <span className="text-sm font-bold text-gray-900 capitalize">{finalOrderData?.pago.metodo.replace(/_/g, ' ')}</span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Estado</span>
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 w-fit">Recibido</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Items List */}
+                                    <div>
+                                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                            <Package className="text-orange-500" size={20} />
+                                            Productos del Pedido
+                                        </h3>
+                                        <div className="space-y-4">
+                                            {finalOrderData?.items.map((item, idx) => (
+                                                <div key={idx} className="flex gap-4 p-3 rounded-xl border border-gray-50 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                                                    <div className="w-20 h-20 bg-white rounded-lg overflow-hidden border border-gray-100 shrink-0">
+                                                        <img src={item.producto?.imagen} alt={item.producto?.nombre} className="w-full h-full object-cover" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h4 className="text-sm font-bold text-gray-900 line-clamp-1">{item.producto?.nombre}</h4>
+                                                        {item.variacion && (
+                                                            <p className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-sm inline-block mt-1">
+                                                                {item.variacion.atributos?.map(a => a.valor).join(' - ')}
+                                                            </p>
+                                                        )}
+                                                        <div className="flex justify-between items-center mt-2">
+                                                            <span className="text-xs text-gray-500 font-medium">Cant: {item.cantidad}</span>
+                                                            <span className="text-sm font-bold text-gray-900">{formatCurrency(parseFloat(item.precio) * item.cantidad)}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Shipping info */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-orange-50/50 p-6 rounded-2xl border border-orange-100">
+                                        <div>
+                                            <h4 className="text-xs font-bold text-orange-900 flex items-center gap-2 mb-3">
+                                                <MapPin size={16} /> Datos de Entrega
+                                            </h4>
+                                            <div className="space-y-2">
+                                                <p className="text-sm font-bold text-gray-900 capitalize">{finalOrderData?.envío.metodo === 'tienda' ? 'Retiro en Tienda' : 'Envio a Domicilio'}</p>
+                                                <div className="text-sm text-gray-600 space-y-0.5">
+                                                    <p className="font-bold text-gray-800">{finalOrderData?.envío.direccion.direccion}</p>
+                                                    <p className="text-xs italic">{finalOrderData?.envío.direccion.referencia}</p>
+                                                    <p>{finalOrderData?.envío.ubigeo.distrito}, {finalOrderData?.envío.ubigeo.provincia}, {finalOrderData?.envío.ubigeo.departamento}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col justify-center">
+                                            <div className="flex items-start gap-3 p-4 bg-white rounded-xl shadow-sm border border-orange-100">
+                                                <Truck size={24} className="text-orange-500 shrink-0" />
+                                                <div>
+                                                    <p className="text-xs font-bold text-gray-900">Tiempo Estimado</p>
+                                                    <p className="text-sm text-orange-600 font-bold">
+                                                        {(() => {
+                                                            const locStr = `${finalOrderData?.envío.ubigeo.distrito} ${finalOrderData?.envío.ubigeo.provincia} ${finalOrderData?.envío.ubigeo.departamento}`;
+                                                            const estimate = formatDeliveryEstimate(new Date(), locStr, finalOrderData?.envío.metodo === 'tienda');
+                                                            const label = getDeliveryLabel('pendiente', finalOrderData?.envío.metodo === 'tienda', estimate);
+                                                            return `${label} ${estimate}`;
+                                                        })()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-xs font-bold text-gray-900">Preparando Envío</p>
-                                    <p className="text-[10px] text-gray-500">Entrega esperada: 3-5 Días Hábiles</p>
+
+                                {/* Summary Column (Right) */}
+                                <div className="space-y-6">
+                                    <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                                        <h3 className="text-sm font-bold text-gray-900 mb-6 pb-2 border-b border-gray-200">Datos de Contacto</h3>
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+                                                    <User size={14} className="text-gray-400" />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Nombre</p>
+                                                    <p className="text-xs font-bold text-gray-900 truncate">{finalOrderData?.cliente.nombre}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+                                                    <Mail size={14} className="text-gray-400" />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Correo</p>
+                                                    <p className="text-xs font-bold text-gray-900 truncate">{finalOrderData?.cliente.correo || usuario?.email}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+                                                    <Phone size={14} className="text-gray-400" />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Teléfono</p>
+                                                    <p className="text-xs font-bold text-gray-900">{finalOrderData?.cliente.telefono}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white rounded-2xl p-6 border-2 border-gray-50 shadow-sm">
+                                        <h3 className="text-sm font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100">Resumen Económico</h3>
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between text-xs text-gray-500">
+                                                <span>Subtotal</span>
+                                                <span className="font-bold">{formatCurrency(finalOrderData?.pago.subtotal)}</span>
+                                            </div>
+                                            <div className="flex justify-between text-xs text-gray-500">
+                                                <span>Envío</span>
+                                                <span className="font-bold text-green-600">GRATIS</span>
+                                            </div>
+                                            {finalOrderData?.pago.descuento > 0 && (
+                                                <div className="flex justify-between text-xs text-red-500">
+                                                    <span>Descuento</span>
+                                                    <span className="font-bold">-{formatCurrency(finalOrderData?.pago.descuento)}</span>
+                                                </div>
+                                            )}
+                                            <div className="pt-3 border-t border-gray-100 flex justify-between items-center mt-3">
+                                                <span className="text-sm font-extrabold text-gray-900">Total Final</span>
+                                                <span className="text-xl font-extrabold text-orange-500">{formatCurrency(finalOrderData?.pago.total)}</span>
+                                            </div>
+                                            <p className="text-[9px] text-gray-400 text-center mt-4">Incluye IGV (18%)</p>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={() => { showLoader(); navigate('/'); setTimeout(hideLoader, 500); }}
+                                        className="w-full py-4 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 transition-all shadow-md hover:shadow-lg active:scale-[0.98] flex items-center justify-center gap-2 mt-4"
+                                    >
+                                        Continuar Comprando <ChevronRight size={18} />
+                                    </button>
                                 </div>
                             </div>
                         </div>
-
-                        <button
-                            onClick={() => { showLoader(); navigate('/'); setTimeout(hideLoader, 500); }}
-                            className="px-8 py-3 bg-orange-500 text-white rounded-full font-bold hover:bg-orange-600 transition-colors flex items-center gap-2 mx-auto"
-                        >
-                            Continuar Comprando <span>→</span>
-                        </button>
                     </motion.div>
                 ) : (
                     // Grid Layout for Step 1 & 2
@@ -477,15 +849,34 @@ const Checkout = () => {
 
                                                     {/* Formulario Manual (On the fly) */}
                                                     <div className="space-y-4">
-                                                        <div>
-                                                            <label className="block text-xs font-bold text-gray-700 mb-1">Nombre Completo</label>
-                                                            <input
-                                                                type="text"
-                                                                name="nombre"
-                                                                value={formData.nombre}
-                                                                onChange={handleInputChange}
-                                                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
-                                                            />
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <div>
+                                                                <label className="block text-xs font-bold text-gray-700 mb-1">Nombre Completo</label>
+                                                                <input
+                                                                    type="text"
+                                                                    name="nombre"
+                                                                    value={formData.nombre}
+                                                                    onChange={handleInputChange}
+                                                                    placeholder="Ej: Juan Pérez"
+                                                                    className={`w-full px-4 py-3 bg-gray-50 border rounded-lg focus:outline-none focus:ring-1 transition-colors ${errors.nombre ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-orange-500 focus:ring-orange-500'}`}
+                                                                />
+                                                                {errors.nombre && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.nombre}</p>}
+                                                            </div>
+                                                            {!usuario && (
+                                                                <div>
+                                                                    <label className="block text-xs font-bold text-gray-700 mb-1">Correo Electrónico</label>
+                                                                    <input
+                                                                        type="email"
+                                                                        name="correo"
+                                                                        value={formData.correo}
+                                                                        onChange={handleInputChange}
+                                                                        placeholder="tu@email.com"
+                                                                        className={`w-full px-4 py-3 bg-gray-50 border rounded-lg focus:outline-none focus:ring-1 transition-colors ${errors.correo ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-orange-500 focus:ring-orange-500'}`}
+                                                                        required
+                                                                    />
+                                                                    {errors.correo && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.correo}</p>}
+                                                                </div>
+                                                            )}
                                                         </div>
 
                                                         {/* Selectores de Ubicación Perú */}
@@ -496,13 +887,14 @@ const Checkout = () => {
                                                                     name="departamento"
                                                                     value={formData.departamento}
                                                                     onChange={handleUbicacionChange}
-                                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors appearance-none"
+                                                                    className={`w-full px-4 py-3 bg-gray-50 border rounded-lg focus:outline-none focus:ring-1 transition-colors appearance-none ${errors.departamento ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-orange-500 focus:ring-orange-500'}`}
                                                                 >
                                                                     <option value="">Seleccionar</option>
                                                                     {ubigeoPeru.departamentos.map(d => (
                                                                         <option key={d.id} value={d.id}>{d.name}</option>
                                                                     ))}
                                                                 </select>
+                                                                {errors.departamento && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.departamento}</p>}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-xs font-bold text-gray-700 mb-1">Provincia</label>
@@ -511,13 +903,14 @@ const Checkout = () => {
                                                                     value={formData.provincia}
                                                                     onChange={handleUbicacionChange}
                                                                     disabled={!formData.departamento}
-                                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors appearance-none disabled:opacity-50"
+                                                                    className={`w-full px-4 py-3 bg-gray-50 border rounded-lg focus:outline-none focus:ring-1 transition-colors appearance-none disabled:opacity-50 ${errors.provincia ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-orange-500 focus:ring-orange-500'}`}
                                                                 >
                                                                     <option value="">Seleccionar</option>
                                                                     {getProvincias(formData.departamento).map(p => (
                                                                         <option key={p.id} value={p.id}>{p.name}</option>
                                                                     ))}
                                                                 </select>
+                                                                {errors.provincia && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.provincia}</p>}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-xs font-bold text-gray-700 mb-1">Distrito</label>
@@ -526,13 +919,14 @@ const Checkout = () => {
                                                                     value={formData.distrito}
                                                                     onChange={handleUbicacionChange}
                                                                     disabled={!formData.provincia}
-                                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors appearance-none disabled:opacity-50"
+                                                                    className={`w-full px-4 py-3 bg-gray-50 border rounded-lg focus:outline-none focus:ring-1 transition-colors appearance-none disabled:opacity-50 ${errors.distrito ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-orange-500 focus:ring-orange-500'}`}
                                                                 >
                                                                     <option value="">Seleccionar</option>
                                                                     {getDistritos(formData.provincia).map(d => (
                                                                         <option key={d.id} value={d.id}>{d.name}</option>
                                                                     ))}
                                                                 </select>
+                                                                {errors.distrito && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.distrito}</p>}
                                                             </div>
                                                         </div>
 
@@ -543,8 +937,9 @@ const Checkout = () => {
                                                                 name="direccion"
                                                                 value={formData.direccion}
                                                                 onChange={handleInputChange}
-                                                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
+                                                                className={`w-full px-4 py-3 bg-gray-50 border rounded-lg focus:outline-none focus:ring-1 transition-colors ${errors.direccion ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-orange-500 focus:ring-orange-500'}`}
                                                             />
+                                                            {errors.direccion && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.direccion}</p>}
                                                         </div>
 
                                                         <div>
@@ -555,8 +950,9 @@ const Checkout = () => {
                                                                 placeholder="Ej: Frente al parque, puerta azul"
                                                                 value={formData.referencia}
                                                                 onChange={handleInputChange}
-                                                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
+                                                                className={`w-full px-4 py-3 bg-gray-50 border rounded-lg focus:outline-none focus:ring-1 transition-colors ${errors.referencia ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-orange-500 focus:ring-orange-500'}`}
                                                             />
+                                                            {errors.referencia && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.referencia}</p>}
                                                         </div>
 
                                                         <div className="grid grid-cols-2 gap-4">
@@ -577,8 +973,9 @@ const Checkout = () => {
                                                                     name="telefono"
                                                                     value={formData.telefono}
                                                                     onChange={handleInputChange}
-                                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
+                                                                    className={`w-full px-4 py-3 bg-gray-50 border rounded-lg focus:outline-none focus:ring-1 transition-colors ${errors.telefono ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-orange-500 focus:ring-orange-500'}`}
                                                                 />
+                                                                {errors.telefono && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.telefono}</p>}
                                                             </div>
                                                         </div>
 
@@ -604,29 +1001,35 @@ const Checkout = () => {
                                             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                                                 <MapPin className="text-orange-500" size={32} />
                                             </div>
-                                            <h3 className="text-lg font-bold text-gray-900 mb-2">Tienda Central - Lima</h3>
-                                            <p className="text-gray-600 mb-4">Av. Wilson 1234, Cercado de Lima<br />Horario: Lunes a Sábado 10:00am - 8:00pm</p>
+                                            <h3 className="text-lg font-bold text-gray-900 mb-2">Tienda Central - Chachapoyas</h3>
+                                            <p className="text-gray-600 mb-4">Jr. Amazonas 720, Chachapoyas<br />Horario: Lunes a Sábado 10:00am - 8:00pm</p>
 
                                             <div className="text-left border-t border-gray-200 pt-4 mt-4">
                                                 <label className="block text-xs font-bold text-gray-700 mb-1">Persona que recoge</label>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <input
-                                                        type="text"
-                                                        name="nombre"
-                                                        placeholder="Nombre completo"
-                                                        value={formData.nombre}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
-                                                    />
-                                                    <input
-                                                        type="text"
-                                                        name="dni"
-                                                        placeholder="DNI (Obligatorio)"
-                                                        value={formData.dni}
-                                                        onChange={handleInputChange}
-                                                        maxLength={8}
-                                                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
-                                                    />
+                                                    <div className="flex flex-col gap-1 w-full">
+                                                        <input
+                                                            type="text"
+                                                            name="nombre"
+                                                            placeholder="Nombre completo"
+                                                            value={formData.nombre}
+                                                            onChange={handleInputChange}
+                                                            className={`w-full px-4 py-3 bg-white border rounded-lg focus:outline-none focus:ring-1 transition-colors ${errors.nombre ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-orange-500 focus:ring-orange-500'}`}
+                                                        />
+                                                        {errors.nombre && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.nombre}</p>}
+                                                    </div>
+                                                    <div className="flex flex-col gap-1 w-full">
+                                                        <input
+                                                            type="text"
+                                                            name="dni"
+                                                            placeholder="DNI (Obligatorio)"
+                                                            value={formData.dni}
+                                                            onChange={handleInputChange}
+                                                            maxLength={8}
+                                                            className={`w-full px-4 py-3 bg-white border rounded-lg focus:outline-none focus:ring-1 transition-colors ${errors.dni ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-orange-500 focus:ring-orange-500'}`}
+                                                        />
+                                                        {errors.dni && <p className="text-[10px] text-red-500 mt-1 font-medium">{errors.dni}</p>}
+                                                    </div>
                                                 </div>
                                                 <p className="text-xs text-orange-600 mt-2">* Debes mostrar tu DNI al momento de recoger. El DNI ingresado aquí será verificado.</p>
                                             </div>
@@ -635,7 +1038,14 @@ const Checkout = () => {
 
                                     <div className="mt-8">
                                         <button
-                                            onClick={() => { showLoader(); handleNextStep(); setTimeout(hideLoader, 300); }}
+                                            onClick={() => {
+                                                if (step === 1 && !validateStep1()) return;
+                                                showLoader();
+                                                setTimeout(() => {
+                                                    handleNextStep();
+                                                    hideLoader();
+                                                }, 300);
+                                            }}
                                             className="w-full py-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-all shadow-md hover:shadow-lg active:scale-[0.99]"
                                         >
                                             Continuar al Pago
@@ -678,62 +1088,416 @@ const Checkout = () => {
                                             <button onClick={handleBackStep} className="text-sm text-gray-400 hover:text-gray-600">Editar Envío</button>
                                         </div>
 
-                                        <div className="mb-6 p-4 border border-orange-200 bg-orange-50 rounded-lg flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-4 h-4 rounded-full border-[5px] border-orange-500 bg-white"></div>
-                                                <span className="font-bold text-gray-800">Tarjeta de Crédito / Débito</span>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <div className="w-8 h-5 bg-gray-200 rounded"></div>
-                                                <div className="w-8 h-5 bg-gray-200 rounded"></div>
-                                            </div>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+                                            {[
+                                                { id: 'mercadopago', label: 'Mercado Pago', icon: <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-[8px] text-white font-bold">MP</div> },
+                                                { id: 'tarjeta', label: 'Tarjeta (Directa)', icon: <CreditCard size={20} /> },
+                                                { id: 'yape_manual', label: 'Yape Manual', icon: <div className="w-5 h-5 bg-purple-600 rounded-full" /> },
+                                                { id: 'plin', label: 'Plin', icon: <div className="w-5 h-5 bg-blue-400 rounded-full" /> },
+                                                { id: 'transferencia', label: 'Banco', icon: <Store size={20} /> },
+                                                { id: 'pagoefectivo', label: 'Agentes', icon: <Truck size={20} /> },
+                                                { id: 'contraentrega', label: 'Efectivo', icon: <Home size={20} /> },
+                                                { id: 'paypal', label: 'PayPal', icon: <CreditCard size={20} className="text-blue-600" /> },
+                                            ].map((method) => (
+                                                <div
+                                                    key={method.id}
+                                                    onClick={() => setMetodoPago(method.id)}
+                                                    className={`cursor-pointer p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center ${metodoPago === method.id
+                                                        ? 'border-orange-500 bg-orange-50'
+                                                        : 'border-gray-100 hover:border-orange-100'
+                                                        }`}
+                                                >
+                                                    <div className={`p-2 rounded-lg ${metodoPago === method.id ? 'bg-orange-500 text-white' : 'bg-gray-50 text-gray-500'}`}>
+                                                        {method.icon}
+                                                    </div>
+                                                    <span className={`text-[9px] font-black uppercase tracking-tighter ${metodoPago === method.id ? 'text-orange-800' : 'text-gray-500'}`}>
+                                                        {method.label}
+                                                    </span>
+                                                </div>
+                                            ))}
                                         </div>
 
-                                        <div className="space-y-4 border-t border-gray-100 pt-6">
-                                            <div>
-                                                <label className="block text-xs font-bold text-gray-700 mb-1">Número de Tarjeta</label>
-                                                <div className="relative">
-                                                    <CreditCard className="absolute left-3 top-3 text-gray-400" size={20} />
-                                                    <input
-                                                        type="text"
-                                                        placeholder="0000 0000 0000 0000"
-                                                        className="w-full pl-10 pr-4 py-3 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
-                                                        defaultValue=""
-                                                    />
+                                        {metodoPago === 'mercadopago' && (
+                                            <div className="mb-6 p-6 border border-blue-200 bg-blue-50 rounded-2xl animate-in fade-in slide-in-from-top-2">
+                                                <div className="flex items-center gap-4 mb-4">
+                                                    <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center border border-blue-100">
+                                                        <CreditCard className="text-blue-600" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-black text-blue-900 text-sm italic">MERCADO PAGO (RECOMENDADO)</h3>
+                                                        <p className="text-[10px] text-blue-500">Paga con Yape, Tarjetas de Crédito/Débito o Efectivo de forma segura.</p>
+                                                    </div>
+                                                </div>
+                                                <div className="bg-white/60 p-4 rounded-xl border border-blue-100">
+                                                    <p className="text-[11px] text-blue-700 font-bold mb-2">• Pago inmediato y automático.</p>
+                                                    <p className="text-[11px] text-blue-700 font-bold">• No necesitas subir comprobantes.</p>
+                                                    <p className="text-[11px] text-blue-700 font-bold">• Tu pedido se procesa al instante.</p>
                                                 </div>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="block text-xs font-bold text-gray-700 mb-1">Expiración</label>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="MM/YY"
-                                                        className="w-full px-4 py-3 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
-                                                        defaultValue=""
-                                                    />
+                                        )}
+
+                                        {metodoPago === 'tarjeta' && (
+                                            <div className="mb-6 p-4 border border-orange-200 bg-orange-50 rounded-lg flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-4 h-4 rounded-full border-[5px] border-orange-500 bg-white"></div>
+                                                    <span className="font-bold text-gray-800">Tarjeta de Crédito / Débito</span>
                                                 </div>
-                                                <div>
-                                                    <label className="block text-xs font-bold text-gray-700 mb-1">CVV</label>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="123"
-                                                        className="w-full px-4 py-3 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
-                                                        defaultValue=""
-                                                    />
+                                                <div className="flex gap-2">
+                                                    <div className="w-8 h-5 bg-gray-200 rounded"></div>
+                                                    <div className="w-8 h-5 bg-gray-200 rounded"></div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        )}
+
+                                        {metodoPago === 'yape_manual' && (
+                                            <div className="mb-6 p-6 border border-purple-200 bg-purple-50 rounded-2xl animate-in fade-in slide-in-from-top-2">
+                                                <div className="flex flex-col items-center gap-4">
+                                                    <div className="p-2 bg-white rounded-2xl shadow-sm border border-purple-100">
+                                                        <img
+                                                            src="file:///C:/Users/ASUS/.gemini/antigravity/brain/054a8fe8-b84a-447c-a318-3634bef565df/yape_qr_placeholder_1766357309904.png"
+                                                            alt="Yape QR"
+                                                            className="w-48 h-48 object-contain"
+                                                        />
+                                                    </div>
+
+                                                    <div className="w-full space-y-3">
+                                                        <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-purple-100 shadow-sm">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="p-1.5 bg-purple-100 rounded-lg text-purple-600">
+                                                                    <Phone size={14} />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-[8px] font-black text-purple-400 uppercase tracking-widest">Número</p>
+                                                                    <p className="text-sm font-black text-purple-900">999 888 777</p>
+                                                                </div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => handleCopy('999888777', 'Número Yape')}
+                                                                className="p-2 hover:bg-purple-50 rounded-lg text-purple-400 hover:text-purple-600 transition-colors"
+                                                            >
+                                                                <Copy size={16} />
+                                                            </button>
+                                                        </div>
+
+                                                        <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-purple-100 shadow-sm">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="p-1.5 bg-purple-100 rounded-lg text-purple-600">
+                                                                    <Check size={14} />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-[8px] font-black text-purple-400 uppercase tracking-widest">Monto a pagar</p>
+                                                                    <p className="text-sm font-black text-purple-900">{formatCurrency(getTotal())}</p>
+                                                                </div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => handleCopy(getTotal(), 'Monto')}
+                                                                className="p-2 hover:bg-purple-50 rounded-lg text-purple-400 hover:text-purple-600 transition-colors"
+                                                            >
+                                                                <Copy size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="w-full space-y-4 pt-4 border-t border-purple-100">
+                                                        <div className="text-center">
+                                                            <p className="text-[10px] font-black text-purple-900 uppercase tracking-widest mb-1">Paso Final: Adjunta tu Comprobante</p>
+                                                            <p className="text-[9px] text-purple-400">Captura la pantalla de tu Yape exitoso y súbela aquí.</p>
+                                                        </div>
+
+                                                        <label className="relative group cursor-pointer block">
+                                                            <input
+                                                                type="file"
+                                                                className="hidden"
+                                                                accept="image/*"
+                                                                onChange={(e) => setComprobante(e.target.files[0])}
+                                                            />
+                                                            <div className={`w-full py-4 border-2 border-dashed rounded-2xl transition-all flex flex-col items-center gap-2 ${comprobante ? 'border-purple-500 bg-purple-100/50' : 'border-purple-200 bg-white hover:border-purple-400'}`}>
+                                                                {comprobante ? (
+                                                                    <>
+                                                                        <Check size={24} className="text-purple-600" />
+                                                                        <span className="text-[10px] font-bold text-purple-700">{comprobante.name}</span>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <Plus size={24} className="text-purple-300 group-hover:text-purple-500 transition-colors" />
+                                                                        <span className="text-[10px] font-bold text-purple-400 group-hover:text-purple-600 transition-colors">SUBIR CAPTURA / FOTO</span>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {metodoPago === 'plin' && (
+                                            <div className="mb-6 p-6 border border-blue-200 bg-blue-50 rounded-2xl animate-in fade-in slide-in-from-top-2">
+                                                <div className="flex flex-col items-center gap-4">
+                                                    <div className="p-2 bg-white rounded-2xl shadow-sm border border-blue-100">
+                                                        <img
+                                                            src="file:///C:/Users/ASUS/.gemini/antigravity/brain/054a8fe8-b84a-447c-a318-3634bef565df/plin_qr_placeholder_1766357330298.png"
+                                                            alt="Plin QR"
+                                                            className="w-48 h-48 object-contain"
+                                                        />
+                                                    </div>
+
+                                                    <div className="w-full space-y-3">
+                                                        <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="p-1.5 bg-blue-100 rounded-lg text-blue-600">
+                                                                    <Phone size={14} />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest">Número</p>
+                                                                    <p className="text-sm font-black text-blue-900">999 888 777</p>
+                                                                </div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => handleCopy('999888777', 'Número Plin')}
+                                                                className="p-2 hover:bg-blue-50 rounded-lg text-blue-400 hover:text-blue-600 transition-colors"
+                                                            >
+                                                                <Copy size={16} />
+                                                            </button>
+                                                        </div>
+
+                                                        <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="p-1.5 bg-blue-100 rounded-lg text-blue-600">
+                                                                    <Check size={14} />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest">Monto a pagar</p>
+                                                                    <p className="text-sm font-black text-blue-900">{formatCurrency(getTotal())}</p>
+                                                                </div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => handleCopy(getTotal(), 'Monto')}
+                                                                className="p-2 hover:bg-blue-50 rounded-lg text-blue-400 hover:text-blue-600 transition-colors"
+                                                            >
+                                                                <Copy size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="w-full space-y-4 pt-4 border-t border-blue-100">
+                                                        <div className="text-center">
+                                                            <p className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1">Adjunta tu Comprobante de Plin</p>
+                                                        </div>
+                                                        <label className="relative group cursor-pointer block">
+                                                            <input
+                                                                type="file"
+                                                                className="hidden"
+                                                                accept="image/*"
+                                                                onChange={(e) => setComprobante(e.target.files[0])}
+                                                            />
+                                                            <div className={`w-full py-4 border-2 border-dashed rounded-2xl transition-all flex flex-col items-center gap-2 ${comprobante ? 'border-blue-500 bg-blue-100/50' : 'border-blue-200 bg-white hover:border-blue-400'}`}>
+                                                                {comprobante ? (
+                                                                    <>
+                                                                        <Check size={24} className="text-blue-600" />
+                                                                        <span className="text-[10px] font-bold text-blue-700">{comprobante.name}</span>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <Plus size={24} className="text-blue-300 group-hover:text-blue-500 transition-colors" />
+                                                                        <span className="text-[10px] font-bold text-blue-400 group-hover:text-blue-600 transition-colors">SUBIR CAPTURA PLIN</span>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {metodoPago === 'transferencia' && (
+                                            <div className="mb-6 p-6 border border-indigo-200 bg-indigo-50 rounded-2xl animate-in fade-in slide-in-from-top-2">
+                                                <div className="space-y-6">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-2 bg-white rounded-xl shadow-sm border border-indigo-100 text-indigo-600">
+                                                            <Store size={20} />
+                                                        </div>
+                                                        <h3 className="text-xs font-black text-indigo-900 uppercase tracking-widest">Cuentas Bancarias</h3>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div className="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm space-y-3">
+                                                            <div>
+                                                                <p className="text-[9px] font-black text-indigo-400 uppercase tracking-tighter">Banco de Crédito (BCP)</p>
+                                                                <div className="flex items-center justify-between mt-1">
+                                                                    <p className="text-[11px] font-black text-indigo-900">191-22334455-0-99</p>
+                                                                    <button onClick={() => handleCopy('19122334455099', 'Cuenta BCP')} className="text-indigo-400 hover:text-indigo-600"><Copy size={12} /></button>
+                                                                </div>
+                                                                <div className="flex items-center justify-between mt-1 pt-1 border-t border-indigo-50">
+                                                                    <p className="text-[9px] text-indigo-500 font-bold">CCI: 002-191-22334455099-52</p>
+                                                                    <button onClick={() => handleCopy('0021912233445509952', 'CCI BCP')} className="text-indigo-400 hover:text-indigo-600"><Copy size={12} /></button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm space-y-3">
+                                                            <div>
+                                                                <p className="text-[9px] font-black text-indigo-400 uppercase tracking-tighter">BBVA Perú</p>
+                                                                <div className="flex items-center justify-between mt-1">
+                                                                    <p className="text-[11px] font-black text-indigo-900">0011-0422-0100033445</p>
+                                                                    <button onClick={() => handleCopy('001104220100033445', 'Cuenta BBVA')} className="text-indigo-400 hover:text-indigo-600"><Copy size={12} /></button>
+                                                                </div>
+                                                                <div className="flex items-center justify-between mt-1 pt-1 border-t border-indigo-50">
+                                                                    <p className="text-[9px] text-indigo-500 font-bold">CCI: 011-422-000100033445-55</p>
+                                                                    <button onClick={() => handleCopy('01142200010003344555', 'CCI BBVA')} className="text-indigo-400 hover:text-indigo-600"><Copy size={12} /></button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="p-3 bg-white/50 rounded-xl border border-indigo-100 flex items-center justify-between group">
+                                                        <div>
+                                                            <p className="text-[10px] text-indigo-700 font-bold">Titular: RED HARD SAC</p>
+                                                            <p className="text-[9px] text-indigo-400 mt-1 uppercase tracking-tighter italic">Envía tu comprobante a pagos@redhard.com.pe</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-indigo-100 shadow-inner">
+                                                            <p className="text-xs font-black text-indigo-900">{formatCurrency(getTotal())}</p>
+                                                            <button onClick={() => handleCopy(getTotal(), 'Monto')} className="text-indigo-400 hover:text-indigo-600"><Copy size={12} /></button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="w-full space-y-4 pt-4 border-t border-indigo-100">
+                                                        <div className="text-center">
+                                                            <p className="text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1">Adjunta Comprobante de Transferencia</p>
+                                                        </div>
+                                                        <label className="relative group cursor-pointer block">
+                                                            <input
+                                                                type="file"
+                                                                className="hidden"
+                                                                accept="image/*"
+                                                                onChange={(e) => setComprobante(e.target.files[0])}
+                                                            />
+                                                            <div className={`w-full py-4 border-2 border-dashed rounded-2xl transition-all flex flex-col items-center gap-2 ${comprobante ? 'border-indigo-500 bg-indigo-100/50' : 'border-indigo-200 bg-white hover:border-indigo-400'}`}>
+                                                                {comprobante ? (
+                                                                    <>
+                                                                        <Check size={24} className="text-indigo-600" />
+                                                                        <span className="text-[10px] font-bold text-indigo-700">{comprobante.name}</span>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <Plus size={24} className="text-indigo-300 group-hover:text-indigo-500 transition-colors" />
+                                                                        <span className="text-[10px] font-bold text-indigo-400 group-hover:text-indigo-600 transition-colors">SUBIR VOUCHER</span>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {metodoPago === 'pagoefectivo' && (
+                                            <div className="mb-6 p-6 border border-yellow-200 bg-yellow-50 rounded-2xl animate-in fade-in slide-in-from-top-2 text-center">
+                                                <div className="mb-4">
+                                                    <div className="w-16 h-16 bg-yellow-400 rounded-full mx-auto flex items-center justify-center shadow-lg border-4 border-white">
+                                                        <Truck size={32} className="text-white" />
+                                                    </div>
+                                                </div>
+                                                <h3 className="text-sm font-black text-yellow-900 uppercase tracking-widest mb-2">Pago en Agentes</h3>
+                                                <p className="text-[10px] text-yellow-700 font-medium mb-6 px-4">
+                                                    Generaremos un código <span className="font-bold">CIP de PagoEfectivo</span> que podrás pagar en cualquier agente o banca por internet.
+                                                </p>
+                                                <div className="grid grid-cols-4 gap-2 opacity-60">
+                                                    {['BCP', 'BBVA', 'Interbank', 'Scotiabank'].map(b => (
+                                                        <div key={b} className="bg-white py-1.5 rounded-lg border border-yellow-100 text-[8px] font-black text-yellow-600 uppercase italic">{b}</div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {metodoPago === 'contraentrega' && (
+                                            <div className="mb-6 p-6 border border-emerald-200 bg-emerald-50 rounded-2xl animate-in fade-in slide-in-from-top-2 text-center">
+                                                <div className="mb-4">
+                                                    <div className="w-16 h-16 bg-emerald-500 rounded-full mx-auto flex items-center justify-center shadow-lg border-4 border-white">
+                                                        <Home size={32} className="text-white" />
+                                                    </div>
+                                                </div>
+                                                <h3 className="text-sm font-black text-emerald-900 uppercase tracking-widest mb-2">Pago Contra Entrega</h3>
+                                                <p className="text-[10px] text-emerald-700 font-medium px-4">
+                                                    ¡Perfecto! Paga en <span className="font-bold">efectivo o con tarjeta</span> directamente al repartidor cuando recibas tus productos en casa.
+                                                </p>
+                                                <div className="mt-6 inline-flex items-center gap-2 py-2 px-4 bg-white rounded-full border border-emerald-100 shadow-sm">
+                                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                                    <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Disponible para Lima</span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {metodoPago === 'tarjeta' && (
+                                            <div className="space-y-4 border-t border-gray-100 pt-6 animate-in fade-in slide-in-from-top-4">
+                                                <div>
+                                                    <label className="block text-xs font-bold text-gray-700 mb-1">Número de Tarjeta</label>
+                                                    <div className="relative">
+                                                        <CreditCard className="absolute left-3 top-3 text-gray-400" size={20} />
+                                                        <input
+                                                            type="text"
+                                                            name="tarjetaNumero"
+                                                            value={formData.tarjetaNumero}
+                                                            onChange={handleInputChange}
+                                                            placeholder="0000 0000 0000 0000"
+                                                            className="w-full pl-10 pr-4 py-3 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-700 mb-1">Expiración</label>
+                                                        <input
+                                                            type="text"
+                                                            name="tarjetaExpiracion"
+                                                            value={formData.tarjetaExpiracion}
+                                                            onChange={handleInputChange}
+                                                            placeholder="MM/YY"
+                                                            className="w-full px-4 py-3 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-700 mb-1">CVV</label>
+                                                        <input
+                                                            type="text"
+                                                            name="tarjetaCvv"
+                                                            value={formData.tarjetaCvv}
+                                                            onChange={handleInputChange}
+                                                            placeholder="123"
+                                                            className="w-full px-4 py-3 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {metodoPago === 'paypal' && (
+                                            <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-2xl text-center animate-in zoom-in-95">
+                                                <div className="mb-4">
+                                                    <CreditCard size={40} className="text-blue-600 mx-auto" strokeWidth={1} />
+                                                </div>
+                                                <h3 className="text-sm font-bold text-blue-900 mb-2">PayPal Checkout</h3>
+                                                <p className="text-[10px] text-blue-700 mb-6">Paga de forma rápida y segura con tu cuenta PayPal o tarjeta vinculada.</p>
+                                                <button className="w-full py-3 bg-[#FFC439] hover:bg-[#F2BA36] rounded-full flex items-center justify-center gap-2 shadow-sm transition-all group">
+                                                    <span className="font-black italic text-blue-800 text-lg">PayPal</span>
+                                                    <span className="text-xs font-bold text-blue-900 group-hover:underline">Pagar ahora</span>
+                                                </button>
+                                            </div>
+                                        )}
 
                                         <div className="mt-8">
                                             <button
                                                 onClick={handlePayment}
                                                 disabled={loading}
-                                                className="w-full py-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-all shadow-md hover:shadow-lg active:scale-[0.99] flex justify-center items-center gap-2"
+                                                className={`w-full py-4 text-white font-black rounded-xl transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${metodoPago === 'mercadopago' ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-100' : 'bg-orange-500 hover:bg-orange-600 shadow-orange-100'}`}
                                             >
                                                 {loading ? (
-                                                    <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>
+                                                    <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
                                                 ) : (
-                                                    `Pagar ${formatCurrency(getTotal())}`
+                                                    <>
+                                                        {metodoPago === 'mercadopago' ? <CreditCard size={20} /> : <Check size={20} />}
+                                                        {metodoPago === 'mercadopago' ? 'PAGAR AHORA CON MERCADO PAGO' : (['yape_manual', 'plin', 'transferencia', 'pagoefectivo'].includes(metodoPago)
+                                                            ? 'YA PAGUÉ, CONFIRMAR PEDIDO'
+                                                            : 'PAGAR AHORA')}
+                                                    </>
                                                 )}
                                             </button>
                                             <p className="text-center text-xs text-gray-400 mt-4 flex items-center justify-center gap-1">
@@ -793,22 +1557,45 @@ const Checkout = () => {
                                         <span className="text-gray-500">Envío</span>
                                         <span className="font-bold text-green-600">GRATIS</span>
                                     </div>
+                                    {getTotalDiscount() > 0 && (
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-500 text-red-500">Descuento</span>
+                                            <span className="font-medium text-red-500">-{formatCurrency(getTotalDiscount())}</span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500 text-red-500">Descuento</span>
-                                        <span className="font-medium text-red-500">-{formatCurrency(getTotalDiscount())}</span>
+                                        <span className="text-gray-500">IGV (18%)</span>
+                                        <span className="font-medium text-gray-900">{formatCurrency(getTotal() * 0.18)}</span>
                                     </div>
 
                                     <div className="flex justify-between text-xl font-bold pt-3 border-t border-gray-100">
                                         <span className="text-gray-900">Total</span>
-                                        <span className="text-orange-500">{formatCurrency(getTotal())}</span>
+                                        <span className="text-orange-500">{formatCurrency(getTotal() * 1.18)}</span>
                                     </div>
                                 </div>
 
                                 <div className="mt-6 bg-orange-50 rounded-lg p-3 flex gap-3 items-start border border-orange-100">
                                     <Truck className="text-orange-500 shrink-0 mt-0.5" size={16} />
                                     <div>
-                                        <p className="text-xs font-bold text-orange-800">¡Envío Express Gratis aplicado!</p>
-                                        <p className="text-[10px] text-orange-700">Entrega estimada: 3-5 días</p>
+                                        <p className="text-xs font-bold text-orange-800">
+                                            {metodoEnvio === 'tienda' ? '¡Recojo en Tienda!' : '¡Envío Express Gratis aplicado!'}
+                                        </p>
+                                        <p className="text-[10px] text-orange-700">
+                                            {(() => {
+                                                const dir = direcciones.find(d => d.id === direccionSeleccionada);
+                                                const locationStr = dir
+                                                    ? `${dir.distrito} ${dir.provincia} ${dir.departamento}`
+                                                    : (() => {
+                                                        const depName = ubigeoPeru.departamentos.find(d => d.id === formData.departamento)?.name || formData.departamento;
+                                                        const provName = getProvincias(formData.departamento).find(p => p.id === formData.provincia)?.name || '';
+                                                        const distName = getDistritos(formData.provincia).find(d => d.id === formData.distrito)?.name || formData.distrito;
+                                                        return `${distName} ${provName} ${depName}`;
+                                                    })();
+                                                const estimate = formatDeliveryEstimate(new Date(), locationStr, metodoEnvio === 'tienda');
+                                                const label = getDeliveryLabel('pendiente', metodoEnvio === 'tienda', estimate);
+                                                return `${label} ${estimate}`;
+                                            })()}
+                                        </p>
                                     </div>
                                 </div>
                             </div>

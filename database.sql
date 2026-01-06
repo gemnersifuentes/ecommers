@@ -53,7 +53,8 @@ CREATE TABLE productos (
     INDEX idx_nombre (nombre),
     INDEX idx_categoria (categoria_id),
     INDEX idx_marca (marca_id),
-    INDEX idx_precio (precio_base)
+    INDEX idx_precio (precio_base),
+    FULLTEXT INDEX idx_search (nombre, descripcion, modelo, sku, etiquetas)
 );
 
 -- Tabla de variaciones de productos

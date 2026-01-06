@@ -1,7 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Swal from 'sweetalert2';
+import {
+    Wrench,
+    Info,
+    Clock,
+    DollarSign,
+    Upload,
+    Save,
+    X,
+    LayoutGrid,
+    Image as ImageIcon
+} from 'lucide-react';
 import { serviciosService } from '../../../services';
+import Breadcrumb from '../../../components/Breadcrumb';
 
 const FormServicio = ({ id = null }) => {
     const navigate = useNavigate();
@@ -12,6 +25,8 @@ const FormServicio = ({ id = null }) => {
         precio: '',
         duracion: ''
     });
+    const [imagenFile, setImagenFile] = useState(null);
+    const [imagenPreview, setImagenPreview] = useState('');
 
     useEffect(() => {
         if (id) {
@@ -29,6 +44,9 @@ const FormServicio = ({ id = null }) => {
                 precio: data.precio,
                 duracion: data.duracion || ''
             });
+            if (data.imagen) {
+                setImagenPreview(data.imagen.startsWith('http') ? data.imagen : `http://localhost:8000${data.imagen}`);
+            }
         } catch (error) {
             console.error('Error al cargar servicio:', error);
             Swal.fire('Error', 'No se pudo cargar el servicio', 'error');
@@ -45,16 +63,33 @@ const FormServicio = ({ id = null }) => {
         });
     };
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImagenFile(file);
+            setImagenPreview(URL.createObjectURL(file));
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
+            const data = new FormData();
+            data.append('nombre', formData.nombre);
+            data.append('descripcion', formData.descripcion);
+            data.append('precio', formData.precio);
+            data.append('duracion', formData.duracion);
+            if (imagenFile) {
+                data.append('imagen', imagenFile);
+            }
+
             if (id) {
-                await serviciosService.update(id, formData);
-                Swal.fire('Actualizado', 'Servicio actualizado exitosamente', 'success');
+                await serviciosService.update(id, data);
+                Swal.fire({ title: '¡Actualizado!', text: 'Servicio actualizado correctamente', icon: 'success', timer: 2000, showConfirmButton: false });
             } else {
-                await serviciosService.create(formData);
-                Swal.fire('Creado', 'Servicio creado exitosamente', 'success');
+                await serviciosService.create(data);
+                Swal.fire({ title: '¡Creado!', text: 'Servicio creado correctamente', icon: 'success', timer: 2000, showConfirmButton: false });
             }
             navigate('/admin/servicios');
         } catch (error) {
@@ -67,85 +102,175 @@ const FormServicio = ({ id = null }) => {
 
     if (loading && id && !formData.nombre) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="flex flex-col items-center justify-center h-64 space-y-4">
+                <div className="w-12 h-12 border-4 border-orange-100 border-t-orange-600 rounded-full animate-spin"></div>
+                <p className="text-xs text-gray-500 font-medium font-black uppercase tracking-widest">Cargando datos...</p>
             </div>
         );
     }
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-6">
-            <div className="grid grid-cols-1 gap-6">
+        <div className="p-6 space-y-6 min-h-screen">
+            {/* Header */}
+            <div className="flex items-center justify-between">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Nombre <span className="text-red-500">*</span></label>
-                    <input
-                        type="text"
-                        name="nombre"
-                        value={formData.nombre}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Ej: Mantenimiento Preventivo"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
-                    <textarea
-                        name="descripcion"
-                        value={formData.descripcion}
-                        onChange={handleChange}
-                        rows="4"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                        placeholder="Descripción del servicio..."
-                    ></textarea>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Precio <span className="text-red-500">*</span></label>
-                        <input
-                            type="number"
-                            name="precio"
-                            value={formData.precio}
-                            onChange={handleChange}
-                            step="0.01"
-                            required
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="0.00"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Duración</label>
-                        <input
-                            type="text"
-                            name="duracion"
-                            value={formData.duracion}
-                            onChange={handleChange}
-                            placeholder="Ej: 2 horas"
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
+                    <h1 className="text-sm font-bold text-gray-900">{id ? 'Editar Servicio' : 'Nuevo Servicio de Soporte'}</h1>
+                    <Breadcrumb items={[
+                        { label: 'Admin', link: '/admin', isHome: true },
+                        { label: 'Servicios', link: '/admin/servicios' },
+                        { label: id ? 'Editar' : 'Nuevo' }
+                    ]} />
                 </div>
             </div>
 
-            <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">
-                <Link
-                    to="/admin/servicios"
-                    className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
-                >
-                    Cancelar
-                </Link>
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50"
-                >
-                    {loading ? 'Guardando...' : (id ? 'Actualizar Servicio' : 'Crear Servicio')}
-                </button>
-            </div>
-        </form>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-20">
+                {/* Lado Izquierdo: Información del Servicio */}
+                <div className="space-y-6">
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                        <h3 className="text-sm font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200 flex items-center gap-2">
+                            <Info size={16} className="text-blue-600" /> Información Principal
+                        </h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-2 uppercase tracking-wider">Nombre del Servicio <span className="text-red-500">*</span></label>
+                                <input
+                                    type="text"
+                                    name="nombre"
+                                    value={formData.nombre}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
+                                    placeholder="Ej: Mantenimiento Preventivo PC"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-2 uppercase tracking-wider">Descripción Detallada</label>
+                                <textarea
+                                    name="descripcion"
+                                    value={formData.descripcion}
+                                    onChange={handleChange}
+                                    rows="4"
+                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all resize-none"
+                                    placeholder="Detalla en qué consiste el servicio..."
+                                ></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                        <h3 className="text-sm font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200 flex items-center gap-2">
+                            <ImageIcon size={16} className="text-blue-600" /> Imagen del Servicio
+                        </h3>
+                        <div className="flex flex-col sm:flex-row items-center gap-6">
+                            <div className="relative group w-32 h-32 flex-shrink-0">
+                                <div className="w-full h-full rounded-2xl bg-gray-50 border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden transition-all group-hover:border-orange-300">
+                                    {imagenPreview ? (
+                                        <img src={imagenPreview} alt="Preview" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <Upload size={24} className="text-gray-300" />
+                                    )}
+                                </div>
+                                {imagenPreview && (
+                                    <button
+                                        type="button"
+                                        onClick={() => { setImagenFile(null); setImagenPreview(''); }}
+                                        className="absolute -top-2 -right-2 p-1 bg-white border border-gray-200 rounded-full text-gray-400 hover:text-red-500 hover:shadow-md transition-all"
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                )}
+                            </div>
+                            <div className="flex-1 space-y-2">
+                                <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-orange-50 text-orange-600 text-xs font-black rounded-lg border border-orange-100 hover:bg-orange-100 transition-all uppercase tracking-widest whitespace-nowrap">
+                                    <Upload size={14} />
+                                    Subir nueva imagen
+                                    <input type="file" onChange={handleFileChange} accept="image/*" className="hidden" />
+                                </label>
+                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight leading-relaxed">
+                                    Formatos: PNG, JPG, WEBP. <br />
+                                    Tamaño recomendado: 600x600px.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Lado Derecho: Precio y Tiempos */}
+                <div className="space-y-6">
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                        <h3 className="text-sm font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200 flex items-center gap-2">
+                            <LayoutGrid size={16} className="text-blue-600" /> Costos y Logística
+                        </h3>
+                        <div className="space-y-6">
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-2 uppercase tracking-wider">Precio Final <span className="text-red-500">*</span></label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        name="precio"
+                                        value={formData.precio}
+                                        onChange={handleChange}
+                                        required
+                                        step="0.01"
+                                        className="w-full pl-8 pr-3 py-2 text-sm font-bold rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all placeholder:font-normal"
+                                        placeholder="0.00"
+                                    />
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs">$</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-2 uppercase tracking-wider">Duración Estimada</label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        name="duracion"
+                                        value={formData.duracion}
+                                        onChange={handleChange}
+                                        className="w-full pl-8 pr-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all font-medium"
+                                        placeholder="Ej: 2 horas, 1 día..."
+                                    />
+                                    <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                </div>
+                                <p className="mt-2 text-[10px] text-gray-400 font-bold uppercase">Esto ayudará al cliente a planificar su visita.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Quick Tips Card */}
+                    <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100/50">
+                        <div className="flex gap-3">
+                            <Wrench size={20} className="text-blue-500 flex-shrink-0" />
+                            <div className="space-y-2">
+                                <h4 className="text-xs font-black text-blue-900 uppercase tracking-widest">Consejo de Ventas</h4>
+                                <p className="text-xs text-blue-800 leading-relaxed font-medium">
+                                    Asegúrate de detallar los repuestos incluidos o si el diagnóstico tiene un costo base. Los servicios claros generan más confianza.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Footer Flotante de Acciones */}
+                <div className="fixed bottom-0 right-0 w-[calc(100%-250px)] bg-white/90 backdrop-blur-md border-t border-gray-200 p-4 transition-all z-40 flex justify-end">
+                    <div className="flex items-center gap-4">
+                        <Link
+                            to="/admin/servicios"
+                            className="text-xs font-black text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-widest"
+                        >
+                            Cancelar
+                        </Link>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="flex items-center gap-2 px-8 py-2 bg-orange-500 text-white text-xs font-black rounded-lg hover:bg-orange-600 transition-all shadow-lg active:scale-95 disabled:opacity-50 uppercase tracking-widest"
+                        >
+                            {loading ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div> : <Save size={14} />}
+                            {id ? 'Actualizar' : 'Guardar Servicio'}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
     );
 };
 

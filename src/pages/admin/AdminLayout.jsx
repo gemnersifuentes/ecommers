@@ -13,6 +13,11 @@ const Icons = {
       <rect x="3" y="14" width="7" height="7"></rect>
     </svg>
   ),
+  Message: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+  ),
   Ecommerce: () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="9" cy="21" r="1"></circle>
@@ -69,6 +74,12 @@ const Icons = {
       <polyline points="12 6 12 12 16 14"></polyline>
     </svg>
   ),
+  Settings: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3"></circle>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+    </svg>
+  ),
   SubItem: () => (
     <svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" strokeWidth="1.5">
       <rect x="2.5" y="2.5" width="3" height="3" transform="rotate(45 4 4)" />
@@ -86,8 +97,9 @@ const AdminLayout = () => {
   // State for open menus
   const [openMenus, setOpenMenus] = useState({});
 
-  // Remos Brand Colors
-  const brandColor = '#2F80ED';
+  // Remos Brand Colors - Estilo Industrial (Sincronizado con Servicios)
+  const brandColor = '#ea580c'; // orange-600
+  const darkBrand = '#111827'; // gray-900
 
   const customScrollbarStyles = `
     /* SHARED SCROLLBAR BASE STYLES */
@@ -111,7 +123,7 @@ const AdminLayout = () => {
 
     /* --- SIDEBAR ISOLATION --- */
     .sidebar-scrollbar:hover::-webkit-scrollbar-thumb {
-      background: rgba(47, 128, 237, 0.2);
+      background: rgba(234, 88, 12, 0.2);
     }
     .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
       background: ${brandColor};
@@ -119,7 +131,7 @@ const AdminLayout = () => {
 
     /* --- MAIN CONTENT ISOLATION --- */
     .main-scrollbar:hover::-webkit-scrollbar-thumb {
-      background: rgba(47, 128, 237, 0.2);
+      background: rgba(234, 88, 12, 0.2);
     }
     .main-scrollbar::-webkit-scrollbar-thumb:hover {
       background: ${brandColor};
@@ -131,7 +143,7 @@ const AdminLayout = () => {
       scrollbar-color: transparent transparent;
     }
     .sidebar-scrollbar:hover, .main-scrollbar:hover {
-      scrollbar-color: rgba(47, 128, 237, 0.2) transparent;
+      scrollbar-color: rgba(234, 88, 12, 0.2) transparent;
     }
   `;
 
@@ -172,7 +184,8 @@ const AdminLayout = () => {
     {
       title: "PRINCIPAL",
       items: [
-        { id: 'dashboard', path: '/admin', icon: Icons.Dashboard, label: 'Dashboard' }
+        { id: 'dashboard', path: '/admin', icon: Icons.Dashboard, label: 'Dashboard' },
+        { id: 'messages', path: '/admin/mensajes', icon: Icons.Message, label: 'Mensajes' }
       ]
     },
     {
@@ -213,9 +226,12 @@ const AdminLayout = () => {
         },
         {
           id: 'servicios',
-          path: '/admin/servicios',
+          label: 'Servicios',
           icon: Icons.Order,
-          label: 'Servicios'
+          subItems: [
+            { path: '/admin/servicios', label: 'Lista de Servicios' },
+            { path: '/admin/servicios/reservaciones', label: 'Reservaciones' }
+          ]
         },
         {
           id: 'usuarios',
@@ -231,6 +247,12 @@ const AdminLayout = () => {
           path: '/admin/reportes',
           icon: Icons.Report,
           label: 'Reportes'
+        },
+        {
+          id: 'ajustes',
+          path: '/admin/ajustes',
+          icon: Icons.Settings,
+          label: 'Ajustes'
         }
       ]
     }
@@ -244,10 +266,10 @@ const AdminLayout = () => {
     const isOpen = openMenus[item.id];
     const Icon = item.icon;
 
-    // Parent Item Styles
+    // Parent Item Styles - Industrial Style
     const parentClasses = `
       relative flex items-center gap-3 px-4 py-3 transition-all duration-200 group cursor-pointer select-none
-      ${(active || groupActive) ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-500 hover:text-blue-600 hover:bg-gray-50'}
+      ${active ? 'bg-orange-600 text-white shadow-lg shadow-orange-100' : (groupActive ? 'bg-orange-50 text-orange-600' : 'text-gray-500 hover:text-orange-600 hover:bg-orange-50')}
       rounded-xl
     `;
 
@@ -256,24 +278,24 @@ const AdminLayout = () => {
         {hasSubItems ? (
           // Collapsible Parent
           <div onClick={() => toggleMenu(item.id)} className={parentClasses}>
-            <div className={`w-6 flex justify-center transition-colors ${(active || groupActive) ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`}>
+            <div className={`w-6 flex justify-center transition-colors ${(active || groupActive) ? 'text-white' : 'text-gray-400 group-hover:text-orange-600'}`}>
               <Icon />
             </div>
 
             {sidebarOpen && (
               <>
-                <span className="text-sm tracking-wide flex-1 font-medium">{item.label}</span>
-                <i className={`fas fa-chevron-${isOpen ? 'up' : 'right'} text-[10px] transition-transform duration-200 ${(active || groupActive) ? 'text-blue-600' : 'text-gray-400'}`}></i>
+                <span className={`text-xs font-bold tracking-tight flex-1 ${active || groupActive ? 'text-white' : 'text-gray-700'}`}>{item.label}</span>
+                <i className={`fas fa-chevron-${isOpen ? 'up' : 'right'} text-[9px] transition-transform duration-200 ${(active || groupActive) ? 'text-white' : 'text-gray-400'}`}></i>
               </>
             )}
           </div>
         ) : (
           // Single Link
           <Link to={item.path} className={parentClasses}>
-            <div className={`w-6 flex justify-center transition-colors ${active ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`}>
+            <div className={`w-6 flex justify-center transition-colors ${active ? 'text-white' : 'text-gray-400 group-hover:text-orange-600'}`}>
               <Icon />
             </div>
-            {sidebarOpen && <span className="text-sm tracking-wide flex-1 font-medium">{item.label}</span>}
+            {sidebarOpen && <span className={`text-xs font-bold tracking-tight flex-1 ${active ? 'text-white' : 'text-gray-700'}`}>{item.label}</span>}
           </Link>
         )}
 
@@ -295,15 +317,15 @@ const AdminLayout = () => {
                       key={idx}
                       to={subItem.path}
                       className={`
-                        flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm
-                        ${isSubActive ? 'text-blue-600 font-medium' : 'text-gray-500 hover:text-blue-600'}
+                        flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-xs font-medium tracking-tight
+                        ${isSubActive ? 'text-orange-600 bg-orange-50' : 'text-gray-500 hover:text-orange-600 hover:bg-gray-50'}
                       `}
                     >
                       {/* Remos style: Small diamond/rhombus icon for subitems */}
-                      <div className={`w-4 flex justify-center ${isSubActive ? 'text-blue-600' : 'text-gray-300'}`}>
+                      <div className={`w-4 flex justify-center ${isSubActive ? 'text-orange-600' : 'text-gray-300 group-hover:text-orange-600'}`}>
                         <Icons.SubItem />
                       </div>
-                      <span className="font-medium">{subItem.label}</span>
+                      <span>{subItem.label}</span>
                     </Link>
                   );
                 })}
@@ -316,7 +338,7 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="h-screen bg-[#F4F7FE] flex font-['Public_Sans'] overflow-hidden selection:bg-blue-100 selection:text-blue-600">
+    <div className="h-screen bg-[#F4F7FE] flex font-['Public_Sans'] overflow-hidden selection:bg-orange-100 selection:text-orange-600">
       <style>{customScrollbarStyles}</style>
 
       {/* Mobile Overlay */}
@@ -339,17 +361,17 @@ const AdminLayout = () => {
         {/* Logo Area */}
         <div className="h-20 flex items-center justify-between px-6 flex-shrink-0">
           <div className={`flex items-center gap-3 overflow-hidden ${!sidebarOpen && 'justify-center w-full'}`}>
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-200">
-              <span className="text-white font-bold text-xl">R</span>
+            <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-orange-100">
+              <span className="text-white font-bold text-xl">T</span>
             </div>
             {sidebarOpen && (
-              <span className="text-gray-900 font-bold text-2xl tracking-tight">Remos</span>
+              <span className="text-gray-950 font-bold text-xl tracking-tighter">Tienda<span className="text-orange-600">Tec</span></span>
             )}
           </div>
           {sidebarOpen && (
             <button
               onClick={() => setSidebarOpen(false)}
-              className="text-gray-400 hover:text-blue-600 transition-colors"
+              className="text-gray-400 hover:text-orange-600 transition-colors"
             >
               <i className="fas fa-indent text-lg"></i>
             </button>
@@ -361,7 +383,7 @@ const AdminLayout = () => {
           {menuGroups.map((group, index) => (
             <div key={index} className="mb-6">
               {sidebarOpen && group.title && (
-                <div className="px-4 mb-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                <div className="px-4 mb-3 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
                   {group.title}
                 </div>
               )}
@@ -388,7 +410,7 @@ const AdminLayout = () => {
               setSidebarOpen(!sidebarOpen);
               setMobileMenuOpen(!mobileMenuOpen);
             }}
-            className="mr-4 w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-all lg:hidden"
+            className="mr-4 w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-orange-50 hover:text-orange-600 transition-all lg:hidden"
           >
             <i className="fas fa-bars"></i>
           </button>
@@ -396,7 +418,7 @@ const AdminLayout = () => {
           {!sidebarOpen && (
             <button
               onClick={() => setSidebarOpen(true)}
-              className="hidden lg:flex mr-4 w-10 h-10 rounded-xl bg-gray-50 items-center justify-center text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-all"
+              className="hidden lg:flex mr-4 w-10 h-10 rounded-xl bg-gray-50 items-center justify-center text-gray-500 hover:bg-orange-50 hover:text-orange-600 transition-all"
             >
               <i className="fas fa-bars"></i>
             </button>
@@ -409,9 +431,9 @@ const AdminLayout = () => {
               <input
                 type="text"
                 placeholder="Buscar aquí..."
-                className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl text-sm text-gray-600 placeholder-gray-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all font-['Public_Sans']"
+                className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl text-sm text-gray-600 placeholder-gray-400 focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all font-['Public_Sans']"
               />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600">
+              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-600">
                 <i className="fas fa-search"></i>
               </button>
             </div>
@@ -420,29 +442,29 @@ const AdminLayout = () => {
           {/* Right Actions */}
           <div className="flex items-center gap-6 ml-4">
             {/* Theme Toggle (Mock) */}
-            <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-all">
+            <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-orange-50 hover:text-orange-600 transition-all">
               <i className="far fa-moon"></i>
             </button>
 
             {/* Notifications */}
-            <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-all relative">
+            <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-orange-50 hover:text-orange-600 transition-all relative">
               <i className="far fa-bell"></i>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+              <span className="absolute top-2 right-2 w-2 h-2 bg-orange-600 rounded-full border-2 border-white"></span>
             </button>
 
             {/* Messages */}
-            <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-all relative">
+            <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-orange-50 hover:text-orange-600 transition-all relative">
               <i className="far fa-comment-alt"></i>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>
+              <span className="absolute top-2 right-2 w-2 h-2 bg-orange-600 rounded-full border-2 border-white"></span>
             </button>
 
             {/* Fullscreen */}
-            <button className="hidden sm:flex w-10 h-10 rounded-full bg-gray-50 items-center justify-center text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-all">
+            <button className="hidden sm:flex w-10 h-10 rounded-full bg-gray-50 items-center justify-center text-gray-500 hover:bg-orange-50 hover:text-orange-600 transition-all">
               <i className="fas fa-expand"></i>
             </button>
 
             {/* Grid */}
-            <button className="hidden sm:flex w-10 h-10 rounded-full bg-gray-50 items-center justify-center text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-all">
+            <button className="hidden sm:flex w-10 h-10 rounded-full bg-gray-50 items-center justify-center text-gray-500 hover:bg-orange-50 hover:text-orange-600 transition-all">
               <i className="fas fa-th"></i>
             </button>
 
@@ -454,7 +476,7 @@ const AdminLayout = () => {
               </div>
               <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm">
                 <img
-                  src={`https://ui-avatars.com/api/?name=${usuario?.nombre || 'Admin'}&background=2F80ED&color=fff`}
+                  src={`https://ui-avatars.com/api/?name=${usuario?.nombre || 'Admin'}&background=ea580c&color=fff`}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />

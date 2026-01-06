@@ -5,6 +5,92 @@ import api from '../services/api'; // Necesitamos api para llamar a filtros.php 
 import ProductFilters from '../components/products/ProductFilters';
 import MobileProductFilters from '../components/products/MobileProductFilters';
 import ProductGrid from '../components/products/ProductGrid';
+
+// Componente Interno de Paginación (Estilo Clean/Dark)
+const PaginationComponent = ({ paginaActual, totalPaginas, onPageChange }) => {
+  if (totalPaginas <= 1) return null;
+
+  const getPageNumbers = () => {
+    const pages = [];
+    // Siempre mostrar la primera
+    pages.push(1);
+
+    let start = Math.max(2, paginaActual - 1);
+    let end = Math.min(totalPaginas - 1, paginaActual + 1);
+
+    // Ajustar si estamos cerca de los extremos para mostrar siempre 3 números si es posible
+    if (paginaActual <= 3) {
+      end = Math.min(totalPaginas - 1, 4);
+    }
+    if (paginaActual >= totalPaginas - 2) {
+      start = Math.max(2, totalPaginas - 3);
+    }
+
+    if (start > 2) {
+      pages.push('...');
+    }
+
+    for (let i = start; i <= end; i++) {
+      if (i > 1 && i < totalPaginas) {
+        pages.push(i);
+      }
+    }
+
+    if (end < totalPaginas - 1) {
+      pages.push('...');
+    }
+
+    // Siempre mostrar la última si es mayor a 1
+    if (totalPaginas > 1) {
+      pages.push(totalPaginas);
+    }
+
+    return [...new Set(pages)];
+  };
+
+  return (
+    <div className="flex items-center gap-1 md:gap-2">
+      <button
+        onClick={() => onPageChange(Math.max(1, paginaActual - 1))}
+        disabled={paginaActual === 1}
+        className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+      >
+        <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+      {getPageNumbers().map((page, idx) => (
+        typeof page === 'number' ? (
+          <button
+            key={idx}
+            onClick={() => onPageChange(page)}
+            className={`w-7 h-7 md:w-9 md:h-9 flex items-center justify-center rounded-full text-xs md:text-sm font-medium transition-all
+              ${paginaActual === page
+                ? 'bg-orange-500 text-white shadow-md shadow-orange-200'
+                : 'text-gray-500 hover:bg-gray-100'
+              }`}
+          >
+            {page}
+          </button>
+        ) : (
+          <span key={idx} className="text-gray-400 px-0.5 md:px-1 pb-1 md:pb-2 text-xs md:text-sm">...</span>
+        )
+      ))}
+
+      <button
+        onClick={() => onPageChange(Math.min(totalPaginas, paginaActual + 1))}
+        disabled={paginaActual === totalPaginas}
+        className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+      >
+        <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  );
+};
+import { FullScreenLoader } from '../components/FullScreenLoader';
 import { ChevronDown } from 'lucide-react';
 
 const sortOptions = [
@@ -24,6 +110,8 @@ const Productos = () => {
   const [marcasList, setMarcasList] = useState([]);
   const [condicionesList, setCondicionesList] = useState([]);
   const [atributosList, setAtributosList] = useState([]);
+  const [relevantCategories, setRelevantCategories] = useState([]);
+  const [relevantBrands, setRelevantBrands] = useState([]);
 
   const [filters, setFilters] = useState({
     categoria_id: searchParams.get('categoria') && !isNaN(searchParams.get('categoria')) ? parseInt(searchParams.get('categoria')) : null,
@@ -36,6 +124,8 @@ const Productos = () => {
     busqueda: searchParams.get('busqueda') || '',
     ofertas_flash: searchParams.get('ofertas') === '1',
     envio_gratis: searchParams.get('envio_gratis') === '1',
+    envio_domicilio: searchParams.get('envio_domicilio') === '1',
+    retiro_punto: searchParams.get('retiro_punto') === '1',
     condicion: [],
     calificacion: null,
     totalResultados: 0
@@ -75,6 +165,15 @@ const Productos = () => {
 
   useEffect(() => {
     cargarProductos();
+
+    // NUCLEAR OPTION: Kill smooth scroll globally while loading
+    document.documentElement.style.scrollBehavior = 'auto';
+    document.body.style.scrollBehavior = 'auto';
+
+    // Scroll inmediato al tope (con pequeño timeout para asegurar que el render ocurra)
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 10);
   }, [
     filters.categoria_id,
     filters.marcas,
@@ -84,7 +183,10 @@ const Productos = () => {
     filters.busqueda,
     filters.condicion,
     filters.ofertas_flash,
+    filters.ofertas_flash,
     filters.envio_gratis,
+    filters.envio_domicilio,
+    filters.retiro_punto,
     filters.calificacion,
     ordenamiento,
     paginaActual
@@ -113,6 +215,8 @@ const Productos = () => {
       precio_max: searchParams.get('max') || '',
       ofertas_flash: searchParams.get('ofertas') === '1',
       envio_gratis: searchParams.get('envio_gratis') === '1',
+      envio_domicilio: searchParams.get('envio_domicilio') === '1',
+      retiro_punto: searchParams.get('retiro_punto') === '1',
       condicion: searchParams.get('condicion') ? searchParams.get('condicion').split(',') : [],
       calificacion: searchParams.get('calificacion') ? parseInt(searchParams.get('calificacion')) : null
     }));
@@ -135,6 +239,8 @@ const Productos = () => {
       if (filters.condicion && filters.condicion.length > 0) params.condicion = filters.condicion.join(',');
       if (filters.ofertas_flash) params.ofertas_flash = 1;
       if (filters.envio_gratis) params.envio_gratis = 1;
+      if (filters.envio_domicilio) params.envio_domicilio = 1;
+      if (filters.retiro_punto) params.retiro_punto = 1;
       if (filters.calificacion) params.calificacion = filters.calificacion;
       if (ordenamiento !== 'recomendados') params.ordenar = ordenamiento;
 
@@ -154,11 +260,28 @@ const Productos = () => {
       });
 
       if (data && Array.isArray(data.data)) {
-        setProductos(data.data);
+        let finalProducts = data.data;
+
+        // Ensure final state update uses the processed list
+        setProductos(data.data || []);
         setTotalProductos(data.total || 0);
+
+        // Identify Relevant Categories and Brands from results for filters
+        if (filters.busqueda && data.data?.length > 0) {
+          const catsInResults = new Set(data.data.map(p => p.categoria_id).filter(Boolean));
+          setRelevantCategories(Array.from(catsInResults).map(id => parseInt(id)));
+
+          const brandsInResults = new Set(data.data.map(p => p.marca_id).filter(Boolean));
+          setRelevantBrands(Array.from(brandsInResults).map(id => parseInt(id)));
+        } else {
+          setRelevantCategories([]);
+          setRelevantBrands([]);
+        }
+
       } else {
         setProductos([]);
         setTotalProductos(0);
+        setRelevantCategories([]);
       }
     } catch (error) {
       console.error('Error al cargar productos:', error);
@@ -194,9 +317,15 @@ const Productos = () => {
     if (updatedFilters.ofertas_flash) params.set('ofertas', '1');
     else params.delete('ofertas');
 
-    // 4. Envio Gratis
+    // 4. Envio Gratis y Tipos de Entrega
     if (updatedFilters.envio_gratis) params.set('envio_gratis', '1');
     else params.delete('envio_gratis');
+
+    if (updatedFilters.envio_domicilio) params.set('envio_domicilio', '1');
+    else params.delete('envio_domicilio');
+
+    if (updatedFilters.retiro_punto) params.set('retiro_punto', '1');
+    else params.delete('retiro_punto');
 
     // 5. Condicion
     if (updatedFilters.condicion && updatedFilters.condicion.length > 0) params.set('condicion', updatedFilters.condicion.join(','));
@@ -259,6 +388,8 @@ const Productos = () => {
             atributosDisponibles={atributosList}
             ordenamiento={ordenamiento}
             setOrdenamiento={setOrdenamiento}
+            relevantCategories={relevantCategories}
+            relevantBrands={relevantBrands}
           />
         </div>
 
@@ -274,139 +405,103 @@ const Productos = () => {
               condiciones={condicionesList}
               categorias={categoriasList}
               atributosDisponibles={atributosList}
+              relevantCategories={relevantCategories}
+              relevantBrands={relevantBrands}
+              title={`${categoriaActual ? categoriaActual : 'Todo El Catálogo'}${marcaActual ? ' - ' + marcaActual : ''}`}
             />
           </div>
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Header / Banner moved here */}
-            <div className="bg-white rounded-xl p-3 md:p-4 mb-4 md:mb-6 shadow-sm flex flex-row items-center justify-between gap-2">
-              <div>
-                <h1 className="text-sm font-bold text-gray-900">
-                  {categoriaActual ? categoriaActual : 'Todo El Catálogo'}
-                  {marcaActual ? ' - ' + marcaActual : ''}
-                </h1>
-                <p className="text-gray-500 text-xs mt-1">{totalProductos} productos encontrados</p>
-              </div>
+            <div className={loading ? 'hidden' : 'block'}>
+              {/* Header / Banner moved here - Simplified for Sort only */}
+              <div className="bg-white rounded-xl p-3 md:p-4 mb-4 md:mb-6 shadow-sm flex flex-row items-center justify-between gap-2">
 
-              <div className="flex flex-col items-end gap-1 relative z-30">
-                <span className="text-[10px] text-gray-500 font-medium">Ordenar:</span>
+                {/* Sort Dropdown aligned to left */}
+                <div className="flex flex-col md:flex-row md:items-center items-start gap-0.5 md:gap-2 relative z-30">
+                  <span className="text-[10px] text-gray-500 font-medium whitespace-nowrap pl-1 md:pl-0">Ordenar por:</span>
 
-                <div className="relative">
-                  <button
-                    onClick={() => setShowSort(!showSort)}
-                    className="flex items-center justify-between gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-gray-100 rounded-lg text-xs md:text-xs font-medium text-gray-900 border border-transparent focus:border-orange-500 transition-all min-w-[130px] md:min-w-[180px]"
-                  >
-                    <span className="truncate">{sortOptions.find(o => o.value === ordenamiento)?.label}</span>
-                    <ChevronDown className={`w-3 h-3 text-gray-500 transition-transform ${showSort ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {showSort && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-40"
-                        onClick={() => setShowSort(false)}
-                      />
-                      <div className="absolute top-full right-0 mt-1 w-full bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-50 flex flex-col">
-                        {sortOptions.map((option) => (
-                          <button
-                            key={option.value}
-                            onClick={() => {
-                              setOrdenamiento(option.value);
-                              setShowSort(false);
-                            }}
-                            className={`px-3 py-2 text-left text-xs hover:bg-orange-50 transition-colors ${ordenamiento === option.value ? 'text-orange-500 font-bold bg-orange-50/50' : 'text-gray-700'
-                              }`}
-                          >
-                            {option.label}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-            {/* Grid de productos */}
-            <ProductGrid
-              productos={productos}
-              loading={loading}
-              onClearFilters={() => handleFilterChange({
-                categoria_id: null,
-                marcas: [],
-                precio_min: '',
-                precio_max: '',
-                atributos: {},
-                condicion: null,
-                ofertas_flash: false,
-                envio_gratis: false,
-                calificacion: null
-              })}
-            />
-
-            {/* Paginación inferior */}
-            {totalPaginas > 1 && (
-              <div className="mt-12 flex justify-center items-center gap-2">
-                <button
-                  onClick={() => setPaginaActual(Math.max(1, paginaActual - 1))}
-                  disabled={paginaActual === 1}
-                  className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-gray-600"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-
-                <button
-                  onClick={() => setPaginaActual(1)}
-                  className={`w-10 h-10 flex items-center justify-center rounded-full font-medium transition-all ${paginaActual === 1 ? 'bg-orange-500 text-white shadow-md' : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                >
-                  1
-                </button>
-
-                {paginaActual > 3 && <span className="text-gray-400 px-1">...</span>}
-
-                {Array.from({ length: totalPaginas }, (_, i) => i + 1)
-                  .filter(page => page !== 1 && page !== totalPaginas && Math.abs(page - paginaActual) <= 1)
-                  .map(page => (
+                  <div className="relative">
                     <button
-                      key={page}
-                      onClick={() => setPaginaActual(page)}
-                      className={`w-10 h-10 flex items-center justify-center rounded-full font-medium transition-all ${paginaActual === page ? 'bg-orange-500 text-white shadow-md' : 'text-gray-700 hover:bg-gray-100'
-                        }`}
+                      onClick={() => setShowSort(!showSort)}
+                      className="flex items-center justify-between gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-gray-100 rounded-lg text-xs md:text-xs font-medium text-gray-900 border border-transparent focus:border-orange-500 transition-all min-w-[130px] md:min-w-[180px]"
                     >
-                      {page}
+                      <span className="truncate">{sortOptions.find(o => o.value === ordenamiento)?.label}</span>
+                      <ChevronDown className={`w-3 h-3 text-gray-500 transition-transform ${showSort ? 'rotate-180' : ''}`} />
                     </button>
-                  ))}
 
-                {paginaActual < totalPaginas - 2 && <span className="text-gray-400 px-1">...</span>}
+                    {showSort && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setShowSort(false)}
+                        />
+                        <div className="absolute top-full right-0 mt-1 w-full bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-50 flex flex-col">
+                          {sortOptions.map((option) => (
+                            <button
+                              key={option.value}
+                              onClick={() => {
+                                setOrdenamiento(option.value);
+                                setShowSort(false);
+                              }}
+                              className={`px-3 py-2 text-left text-xs hover:bg-orange-50 transition-colors ${ordenamiento === option.value ? 'text-orange-500 font-bold bg-orange-50/50' : 'text-gray-700'
+                                }`}
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
 
+                {/* Paginación Superior (Diseño Premium) */}
+                {/* Paginación Superior (Unified Premium) */}
                 {totalPaginas > 1 && (
-                  <button
-                    onClick={() => setPaginaActual(totalPaginas)}
-                    className={`w-10 h-10 flex items-center justify-center rounded-full font-medium transition-all ${paginaActual === totalPaginas ? 'bg-orange-500 text-white shadow-md' : 'text-gray-400 hover:bg-gray-100'
-                      }`}
-                  >
-                    {totalPaginas}
-                  </button>
+                  <div className="flex justify-end">
+                    <PaginationComponent paginaActual={paginaActual} totalPaginas={totalPaginas} onPageChange={setPaginaActual} />
+                  </div>
                 )}
-
-                <button
-                  onClick={() => setPaginaActual(Math.min(totalPaginas, paginaActual + 1))}
-                  disabled={paginaActual === totalPaginas}
-                  className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-gray-600"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
               </div>
-            )}
+
+              {/* Grid de productos */}
+              <ProductGrid
+                productos={productos}
+                loading={loading}
+                onClearFilters={() => handleFilterChange({
+                  categoria_id: null,
+                  marcas: [],
+                  precio_min: '',
+                  precio_max: '',
+                  atributos: {},
+                  condicion: null,
+                  ofertas_flash: false,
+                  envio_gratis: false,
+                  envio_domicilio: false,
+                  retiro_punto: false,
+                  calificacion: null
+                })}
+              />
+
+
+              {/* Paginación inferior (Unified Premium Design) */}
+              {/* Paginación inferior (Unified Premium) */}
+              {totalPaginas > 1 && (
+                <div className="mt-12 flex justify-center">
+                  <PaginationComponent paginaActual={paginaActual} totalPaginas={totalPaginas} onPageChange={setPaginaActual} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      {loading && (
+        <div className="loader-override-white">
+          <FullScreenLoader />
+        </div>
+      )}
+    </div >
   );
 };
 

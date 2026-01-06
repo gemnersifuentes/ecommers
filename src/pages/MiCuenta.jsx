@@ -56,9 +56,7 @@ const MiCuenta = () => {
         }
         try {
             setLoadingPedidos(true);
-            console.log('Fetching pedidos for user:', usuario.id);
             const data = await tiendaService.getPedidos(usuario.id);
-            console.log('Pedidos received:', data);
             setPedidos(data);
         } catch (error) {
             console.error("Error fetching pedidos:", error);

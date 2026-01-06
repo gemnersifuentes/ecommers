@@ -12,7 +12,10 @@ const ProductFilters = ({
     marcas: initialMarcas = [],
     condiciones: initialCondiciones = [],
     categorias: initialCategorias = [],
-    atributosDisponibles: initialAtributos = []
+    atributosDisponibles: initialAtributos = [],
+    relevantCategories = [],
+    relevantBrands = [],
+    title = ''
 }) => {
     const [marcas, setMarcas] = useState(initialMarcas);
     const [condiciones, setCondiciones] = useState(initialCondiciones);
@@ -23,7 +26,8 @@ const ProductFilters = ({
         categoria: true,
         marca: true,
         precio: true,
-        condicion: true
+        condicion: true,
+        tipoEntrega: true
     });
     const { showLoader, hideLoader } = useLoader();
 
@@ -98,6 +102,130 @@ const ProductFilters = ({
 
     return (
         <div className="bg-white rounded-lg p-4 shadow-sm">
+            {/* Header del Sidebar (Título y Contador) */}
+            <div className="mb-6 pb-4 border-b border-gray-100">
+                <h1 className="text-base font-bold text-gray-900 leading-tight">
+                    {title || 'Todo El Catálogo'}
+                </h1>
+                <p className="text-gray-500 text-xs mt-1 font-medium">{totalResultados} productos encontrados</p>
+            </div>
+            {/* Active Filters Section */}
+            {(filters.marcas?.length > 0 || filters.categoria_id) && (
+                <div className="mb-6 pb-6 border-b border-gray-100">
+                    <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-bold text-gray-900 text-sm">Filtro seleccionado</h3>
+                        {/* Clear All Button (X) */}
+                        <button
+                            onClick={() => {
+                                showLoader();
+                                onFilterChange({ marcas: [], categoria_id: null });
+                                setTimeout(hideLoader, 600);
+                            }}
+                            className="text-gray-400 hover:text-gray-600 text-[10px] transition-colors"
+                        >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        {/* Selected Categories */}
+                        {filters.categoria_id && (() => {
+                            const catName = categorias.find(c => parseInt(c.id) === parseInt(filters.categoria_id))?.nombre;
+                            if (!catName) return null;
+                            return (
+                                <button
+                                    onClick={() => {
+                                        showLoader();
+                                        onFilterChange({ categoria_id: null });
+                                        setTimeout(hideLoader, 600);
+                                    }}
+                                    className="group flex items-center justify-between px-3 py-1.5 bg-white border border-gray-200 rounded text-[10px] text-gray-700 hover:border-orange-200 hover:text-orange-600 transition-all uppercase"
+                                >
+                                    <span className="font-medium">{catName}</span>
+                                    <svg className="w-3 h-3 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            );
+                        })()}
+
+                        {/* Selected Brands */}
+                        {filters.marcas?.map(marcaId => {
+                            const marcaName = marcas.find(m => parseInt(m.id) === parseInt(marcaId))?.nombre;
+                            if (!marcaName) return null;
+                            return (
+                                <button
+                                    key={`selected-brand-${marcaId}`}
+                                    onClick={() => {
+                                        showLoader();
+                                        const newMarcas = filters.marcas.filter(id => id !== marcaId);
+                                        onFilterChange({ marcas: newMarcas });
+                                        setTimeout(hideLoader, 600);
+                                    }}
+                                    className="group flex items-center justify-between px-3 py-1.5 bg-white border border-gray-200 rounded text-[10px] text-gray-700 hover:border-orange-200 hover:text-orange-600 transition-all uppercase"
+                                >
+                                    <span className="font-medium">{marcaName}</span>
+                                    <svg className="w-3 h-3 text-gray-400 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+            <div className="mb-8">
+                <h3 className="font-bold text-gray-900 text-sm mb-4">Tipo de Entrega</h3>
+
+                <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                        {/* Icono de camión limpio */}
+                        <div className="w-4 h-4 mt-0.5 rounded border border-gray-300 bg-white flex items-center justify-center flex-shrink-0">
+                            <svg className="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                                <svg className="w-4 h-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1-1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+                                </svg>
+                                <span className="text-xs font-medium text-gray-700">Envío a domicilio</span>
+                            </div>
+                            <span className="inline-block px-2 py-0.5 bg-white border border-gray-200 rounded text-[10px] text-gray-600">
+                                Llegada mañana
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                        {/* Icono de check - estático */}
+                        <div className="w-4  h-4 mt-0.5 rounded border border-gray-300 bg-white flex items-center justify-center flex-shrink-0">
+                            <svg className="w-2 h-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                                <svg className="w-4 h-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span className="text-xs font-medium text-gray-700">Retiro en un punto</span>
+                            </div>
+                            <span className="inline-block px-2 py-0.5 bg-white border border-gray-200 rounded text-[10px] text-gray-600">
+                                Retira mañana
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* Categorías */}
             <div className="mb-8">
                 <button
@@ -128,23 +256,37 @@ const ProductFilters = ({
                         </label>
 
                         {/* Lista de categorías */}
-                        {categorias.map(categoria => (
-                            <label key={categoria.id} className="flex items-center gap-3 cursor-pointer group text-xs">
-                                <div className={`w-5 h-5 rounded-full border flex items-center text-xs justify-center transition-colors ${filters.categoria_id === parseInt(categoria.id) ? 'border-orange-500' : 'border-gray-300 group-hover:border-orange-400'}`}>
-                                    {filters.categoria_id === parseInt(categoria.id) && <div className="w-2.5 h-2.5 text-xs rounded-full bg-orange-500" />}
-                                </div>
-                                <input
-                                    type="radio"
-                                    name="categoria"
-                                    checked={filters.categoria_id === parseInt(categoria.id)}
-                                    onChange={() => { showLoader(); onFilterChange({ categoria_id: parseInt(categoria.id) }); setTimeout(hideLoader, 600); }}
-                                    className="hidden"
-                                />
-                                <span className={`text-xs ${filters.categoria_id === parseInt(categoria.id) ? 'font-bold text-orange-500' : 'text-gray-600 group-hover:text-gray-900'}`}>
-                                    {categoria.nombre}
-                                </span>
-                            </label>
-                        ))}
+                        {categorias.map(categoria => {
+                            const isSelected = filters.categoria_id === parseInt(categoria.id);
+                            const isRelevant = relevantCategories.length > 0 && relevantCategories.includes(parseInt(categoria.id));
+
+                            // Strict Filtering: If searching, only show relevant categories
+                            if (filters.busqueda && relevantCategories.length > 0 && !isRelevant && !isSelected) {
+                                return null;
+                            }
+
+                            // If searching and no relevant categories found (0 results), maybe hide all? 
+                            // Or if user selected one, keep it shown.
+
+                            return (
+                                <label key={categoria.id} className="flex items-center gap-3 cursor-pointer group text-xs">
+                                    <div className={`w-5 h-5 rounded-full border flex items-center text-xs justify-center transition-colors ${isSelected ? 'border-orange-500' : 'border-gray-300 group-hover:border-orange-400'} ${isRelevant ? 'ring-2 ring-orange-100 border-orange-400' : ''}`}>
+                                        {isSelected && <div className="w-2.5 h-2.5 text-xs rounded-full bg-orange-500" />}
+                                        {!isSelected && isRelevant && <div className="w-1.5 h-1.5 rounded-full bg-orange-300" />}
+                                    </div>
+                                    <input
+                                        type="radio"
+                                        name="categoria"
+                                        checked={isSelected}
+                                        onChange={() => { showLoader(); onFilterChange({ categoria_id: parseInt(categoria.id) }); setTimeout(hideLoader, 600); }}
+                                        className="hidden"
+                                    />
+                                    <span className={`text-xs flex-1 ${isSelected ? 'font-bold text-orange-500' : (isRelevant ? 'font-bold text-gray-800' : 'text-gray-600 group-hover:text-gray-900')}`}>
+                                        {categoria.nombre}
+                                    </span>
+                                </label>
+                            );
+                        })}
                     </div>
                 )}
             </div>
@@ -232,31 +374,41 @@ const ProductFilters = ({
 
                 {expandedSections.marca && (
                     <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                        {marcas.map(marca => (
-                            <label key={marca.id} className="flex items-center gap-3 cursor-pointer group">
-                                <div className={`w-4 h-4 rounded border flex items-center justify-center text-xs transition-colors ${filters.marcas?.includes(parseInt(marca.id)) ? 'bg-orange-500 border-orange-500' : 'border-gray-300 bg-white'}`}>
-                                    {filters.marcas?.includes(parseInt(marca.id)) && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-                                </div>
-                                <input
-                                    type="checkbox"
-                                    checked={filters.marcas?.includes(parseInt(marca.id))}
-                                    onChange={(e) => {
-                                        showLoader();
-                                        const marcaId = parseInt(marca.id);
-                                        const currentMarcas = filters.marcas || [];
-                                        const newMarcas = e.target.checked
-                                            ? [...currentMarcas, marcaId]
-                                            : currentMarcas.filter(id => parseInt(id) !== marcaId);
-                                        onFilterChange({ marcas: newMarcas });
-                                        setTimeout(hideLoader, 600);
-                                    }}
-                                    className="hidden"
-                                />
-                                <span className={`text-xs ${filters.marcas?.includes(parseInt(marca.id)) ? 'font-medium text-gray-900' : 'text-gray-600 group-hover:text-gray-800'}`}>
-                                    {marca.nombre}
-                                </span>
-                            </label>
-                        ))}
+                        {marcas.map(marca => {
+                            const isSelected = filters.marcas?.includes(parseInt(marca.id));
+                            const isRelevant = relevantBrands.length > 0 && relevantBrands.includes(parseInt(marca.id));
+
+                            // Strict Filtering for Brands during search
+                            if (filters.busqueda && relevantBrands.length > 0 && !isRelevant && !isSelected) {
+                                return null;
+                            }
+
+                            return (
+                                <label key={marca.id} className="flex items-center gap-3 cursor-pointer group">
+                                    <div className={`w-4 h-4 rounded border flex items-center justify-center text-xs transition-colors ${isSelected ? 'bg-orange-500 border-orange-500' : 'border-gray-300 bg-white'}`}>
+                                        {isSelected && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        checked={isSelected}
+                                        onChange={(e) => {
+                                            showLoader();
+                                            const marcaId = parseInt(marca.id);
+                                            const currentMarcas = filters.marcas || [];
+                                            const newMarcas = e.target.checked
+                                                ? [...currentMarcas, marcaId]
+                                                : currentMarcas.filter(id => parseInt(id) !== marcaId);
+                                            onFilterChange({ marcas: newMarcas });
+                                            setTimeout(hideLoader, 600);
+                                        }}
+                                        className="hidden"
+                                    />
+                                    <span className={`text-xs ${isSelected ? 'font-medium text-gray-900' : 'text-gray-600 group-hover:text-gray-800'}`}>
+                                        {marca.nombre}
+                                    </span>
+                                </label>
+                            );
+                        })}
                     </div>
                 )}
             </div>
@@ -496,7 +648,7 @@ const ProductFilters = ({
                     </button>
                 )
             }
-        </div >
+        </div>
     );
 };
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { reportesService, productosService } from '../../services';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import { Line, Bar, Doughnut, Radar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,7 +12,9 @@ import {
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
+  RadarController,
+  RadialLinearScale
 } from 'chart.js';
 
 ChartJS.register(
@@ -25,23 +27,34 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
+  RadarController,
+  RadialLinearScale
 );
 
 const Dashboard = () => {
   const [data, setData] = useState(null);
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [chartPeriod, setChartPeriod] = useState('4M'); // Estado para el período del gráfico
+  const [chartPeriod, setChartPeriod] = useState('12M'); // Estado para el período del gráfico
+
+  const periods = [
+    { id: '7D', label: '7D' },
+    { id: '1M', label: '1M' },
+    { id: '6M', label: '6M' },
+    { id: '12M', label: '12M' },
+    { id: '24M', label: 'Todo' }
+  ];
+
 
   useEffect(() => {
     cargarDatos();
-  }, []);
+  }, [chartPeriod]);
 
   const cargarDatos = async () => {
     try {
       const [dashboardData, productosResponse] = await Promise.all([
-        reportesService.getDashboard(),
+        reportesService.getDashboard(chartPeriod),
         productosService.getAll()
       ]);
       setData(dashboardData);
@@ -77,16 +90,7 @@ const Dashboard = () => {
   const totalProductos = productos.length;
 
 
-  // Debug: Ver datos reales
-  console.log('📊 Dashboard Data:', {
-    productos: productos.length,
-    productosBajoStock,
-    totalVentas: data.estadisticas?.totalVentas,
-    ventasDia: data.estadisticas?.ventasDia,
-    totalClientes: data.estadisticas?.totalClientes,
-    productosConStock: productos.map(p => ({ nombre: p.nombre, stock: p.stock })),
-    estadisticas: data.estadisticas
-  });
+
 
   // Sparkline Options (Mini charts in cards) - WITH TOOLTIPS
   const sparklineOptions = {
@@ -132,40 +136,61 @@ const Dashboard = () => {
         radius: 0,
         hoverRadius: 5,
         hitRadius: 30,
-        hoverBackgroundColor: '#2F80ED',
+        hoverBackgroundColor: '#6366f1',
         hoverBorderColor: '#fff',
         hoverBorderWidth: 2
       },
-      line: { borderWidth: 2 }
+      line: {
+        borderWidth: 3,
+        tension: 0.4,
+        borderColor: '#6366f1',
+        capBezierPoints: true
+      }
     }
   };
 
   // Revenue Chart (Ingresos mensuales) - SIEMPRE 12 MESES
   const ventasPorMes = data?.ventasPorMes || [];
   const recentOrderData = {
-    labels: ventasPorMes.slice(-12).map(v => {
+    labels: ventasPorMes.map(v => {
       const [year, month] = v.mes.split('-');
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      return monthNames[parseInt(month) - 1];
+      const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      const monthAbbr = monthNames[parseInt(month) - 1];
+      return chartPeriod === '24M' ? `${monthAbbr} ${year.slice(2)}` : monthAbbr;
     }),
     datasets: [{
-      label: 'Revenue',
-      data: ventasPorMes.slice(-12).map(v => parseFloat(v.total) || 0),
-      borderColor: '#2F80ED',
+      label: 'Ventas',
+      data: ventasPorMes.map(v => parseFloat(v.total)),
+      fill: true,
       backgroundColor: (context) => {
         const ctx = context.chart.ctx;
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(47, 128, 237, 0.2)');
-        gradient.addColorStop(1, 'rgba(47, 128, 237, 0)');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.2)');
+        gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
         return gradient;
       },
-      fill: true,
-      tension: 0.4,
-      pointRadius: 0,
+      borderColor: '#6366f1',
+      pointBackgroundColor: '#fff',
+      pointBorderColor: '#6366f1',
+      pointBorderWidth: 2,
+      pointRadius: 4,
       pointHoverRadius: 6,
-      pointHoverBackgroundColor: '#2F80ED',
-      pointHoverBorderColor: '#ffffff',
-      pointHoverBorderWidth: 3
+      tension: 0.4
+    }]
+  };
+
+  // AOV Trend Chart (Average Order Value per Month)
+  const aovTrendData = {
+    labels: recentOrderData.labels,
+    datasets: [{
+      label: 'Ticket Promedio (S/)',
+      data: ventasPorMes.map(v => v.pedidos > 0 ? parseFloat(v.total) / parseInt(v.pedidos) : 0),
+      borderColor: '#10b981',
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      pointRadius: 3,
+      tension: 0.3,
+      fill: false
     }]
   };
 
@@ -450,61 +475,191 @@ const Dashboard = () => {
       status: (p.stock || 0) === 0 ? 'out' : 'low'
     }));
 
-  // Stats Cards Data (Using ONLY real data from DB - Last 6 days)
+  // --- NEW ANALYTICS DATASETS ---
+
+  // 1. Order Status Distribution (Doughnut)
+  const orderStatusData = {
+    labels: data?.pedidosPorEstado?.map(p => {
+      const configs = {
+        'pendiente': 'Pendiente',
+        'pendiente_verificacion': 'P. Verificación',
+        'pagado': 'Pagado',
+        'en_preparacion': 'En Preparación',
+        'enviado': 'Enviado',
+        'listo_recoger': 'Listo Recoger',
+        'entregado': 'Entregado',
+        'completado': 'Completado',
+        'cancelado': 'Cancelado',
+        'devuelto': 'Devuelto'
+      };
+      return configs[p.estado] || p.estado;
+    }) || [],
+    datasets: [{
+      data: data?.pedidosPorEstado?.map(p => parseInt(p.cantidad)) || [],
+      backgroundColor: data?.pedidosPorEstado?.map(p => {
+        const colors = {
+          'pendiente': '#f59e0b',             // Amber
+          'pendiente_verificacion': '#f97316', // Orange
+          'pagado': '#22c55e',                // Green
+          'en_preparacion': '#6366f1',        // Indigo
+          'enviado': '#3b82f6',               // Blue
+          'listo_recoger': '#8b5cf6',         // Purple
+          'entregado': '#10b981',             // Teal
+          'completado': '#0ea5e9',            // Sky
+          'cancelado': '#ef4444',             // Red
+          'devuelto': '#9ca3af'               // Gray
+        };
+        return colors[p.estado] || '#cad1d7';
+      }) || [],
+      borderWidth: 0,
+      hoverOffset: 4
+    }]
+  };
+
+  // 2. Sales by Brand (Bar)
+  const brandSalesData = {
+    labels: data?.ventasPorMarca?.map(m => m.marca) || [],
+    datasets: [{
+      label: 'Ventas por Marca',
+      data: data?.ventasPorMarca?.map(m => parseFloat(m.total_ventas)) || [],
+      backgroundColor: 'rgba(139, 92, 246, 0.8)',
+      borderRadius: 6,
+      hoverBackgroundColor: '#8b5cf6'
+    }]
+  };
+
+  // 3. Weekly Activity Patterns (Radar)
+  const dayLabels = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const weeklyActivityData = {
+    labels: dayLabels,
+    datasets: [{
+      label: 'Ventas Semanales',
+      data: dayLabels.map((_, i) => {
+        const found = data?.ventasPorDiaSemana?.find(v => parseInt(v.num_dia) === (i + 1));
+        return found ? parseFloat(found.total) : 0;
+      }),
+      backgroundColor: 'rgba(16, 185, 129, 0.2)',
+      borderColor: '#10b981',
+      pointBackgroundColor: '#10b981',
+      pointBorderColor: '#fff',
+      pointHoverBackgroundColor: '#fff',
+      pointHoverBorderColor: '#10b981',
+      borderWidth: 2,
+      fill: true
+    }]
+  };
+
+  // 4. Hourly Peaks (Line)
+  const hourlyPeaksData = {
+    labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
+    datasets: [{
+      label: 'Actividad por Hora',
+      data: Array.from({ length: 24 }, (_, h) => {
+        const found = data?.ventasPorHora?.find(v => parseInt(v.hora) === h);
+        return found ? parseFloat(found.total) : 0;
+      }),
+      borderColor: '#f59e0b',
+      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+      borderWidth: 2,
+      tension: 0.4,
+      fill: true,
+      pointRadius: 0,
+      pointHoverRadius: 4
+    }]
+  };
+
+  // 5. Customer Retention Trend (Stacked Area)
+  const retentionTrendData = {
+    labels: data?.clientesTrend?.map(t => t.mes) || [],
+    datasets: [
+      {
+        label: 'Nuevos',
+        data: data?.clientesTrend?.map(t => parseInt(t.nuevos)) || [],
+        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+        borderColor: '#3b82f6',
+        fill: true,
+        tension: 0.4
+      },
+      {
+        label: 'Recurrentes',
+        data: data?.clientesTrend?.map(t => parseInt(t.recurrentes)) || [],
+        backgroundColor: 'rgba(139, 92, 246, 0.6)',
+        borderColor: '#8b5cf6',
+        fill: true,
+        tension: 0.4
+      }
+    ]
+  };
+
+  // 6. Payment Method Distribution (Doughnut)
+  const paymentMethodsData = {
+    labels: data?.metodosPago?.map(m => m.metodo) || [],
+    datasets: [{
+      data: data?.metodosPago?.map(m => parseFloat(m.total)) || [],
+      backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899'],
+      borderWidth: 0,
+      hoverOffset: 10
+    }]
+  };
+
+
+  // --- END OF NEW ANALYTICS DATASETS ---
+
+
+  // BI Stats Cards (Strategic Perspective)
   const statsCards = [
     {
-      title: "Ventas Totales",
-      value: `S/ ${(data?.estadisticas?.totalVentas || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
-      trend: data?.estadisticas?.ventasTrend || "0.00%",
-      trendUp: parseFloat(data?.estadisticas?.ventasTrend || "0") >= 0,
-      icon: "fas fa-shopping-bag",
-      iconColor: "text-green-500",
-      iconBg: "bg-green-100",
-      chartColor: "#22C55E", // Green
+      title: "Margen Estimado",
+      value: `S/ ${(data?.estadisticas?.margenEstimado || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+      trend: "25% s/ ventas",
+      trendUp: true,
+      icon: "fas fa-chart-line",
+      iconColor: "text-purple-500",
+      iconBg: "bg-purple-100",
+      chartColor: "#A855F7",
       chartData: (data?.ventasPorDia && data.ventasPorDia.length > 0)
-        ? data.ventasPorDia.map(v => parseFloat(v.total) || 0)
+        ? data.ventasPorDia.map(v => parseFloat(v.total) * 0.25)
         : []
     },
     {
-      title: "Productos Vendidos",
-      value: `${(data?.estadisticas?.productosVendidos || 0).toLocaleString('en-US')}`,
-      trend: data?.estadisticas?.productosVendidosTrend || "0.00%",
-      trendUp: parseFloat(data?.estadisticas?.productosVendidosTrend || "0") >= 0,
-      icon: "fas fa-box",
-      iconColor: "text-orange-500",
-      iconBg: "bg-orange-100",
-      chartColor: "#F97316", // Orange
-      chartData: (data?.productosVendidosPorDia && data.productosVendidosPorDia.length > 0)
-        ? data.productosVendidosPorDia.map(v => parseInt(v.cantidad) || 0)
+      title: "Ticket Promedio",
+      value: `S/ ${(data?.estadisticas?.ticketPromedio || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      trend: "Valor por pedido",
+      trendUp: true,
+      icon: "fas fa-receipt",
+      iconColor: "text-indigo-500",
+      iconBg: "bg-indigo-100",
+      chartColor: "#6366F1",
+      chartData: (data?.ventasPorDia && data.ventasPorDia.length > 0)
+        ? data.ventasPorDia.map(v => parseFloat(v.total) / (data?.estadisticas?.totalPedidosMes || 1))
         : []
     },
     {
-      title: "Pedidos Pagados",
-      value: `${(data?.estadisticas?.totalPedidos || 0).toLocaleString('en-US')}`,
-      trend: data?.estadisticas?.pedidosTrend || "0.00%",
-      trendUp: parseFloat(data?.estadisticas?.pedidosTrend || "0") >= 0,
-      icon: "fas fa-file-alt",
-      iconColor: "text-gray-500",
-      iconBg: "bg-gray-100",
-      chartColor: "#9CA3AF", // Gray
-      chartData: (data?.pedidosPorDia && data.pedidosPorDia.length > 0)
-        ? data.pedidosPorDia.map(p => parseInt(p.cantidad) || 0)
-        : []
+      title: "Tasa de Retención",
+      value: `${(data?.estadisticas?.tasaRetencion || 0).toFixed(1)}%`,
+      trend: "Clientes recurrentes",
+      trendUp: (data?.estadisticas?.tasaRetencion || 0) > 20,
+      icon: "fas fa-sync-alt",
+      iconColor: "text-teal-500",
+      iconBg: "bg-teal-100",
+      chartColor: "#14B8A6",
+      chartData: [20, 22, 21, 23, 24, 25, (data?.estadisticas?.tasaRetencion || 0)]
     },
     {
-      title: "Nuevos Clientes",
-      value: `${(data?.estadisticas?.clientesNuevos || 0).toLocaleString('en-US')}`,
-      trend: data?.estadisticas?.clientesNuevosTrend || "0.00%",
-      trendUp: parseFloat(data?.estadisticas?.clientesNuevosTrend || "0") >= 0,
-      icon: "fas fa-user-plus",
-      iconColor: "text-blue-500",
-      iconBg: "bg-blue-100",
-      chartColor: "#3B82F6", // Blue
-      chartData: (data?.clientesNuevosPorDia && data.clientesNuevosPorDia.length > 0)
-        ? data.clientesNuevosPorDia.map(c => parseInt(c.cantidad) || 0)
+      title: "Crecimiento Mensual",
+      value: `${data?.estadisticas?.ventasTrend || "0.00%"}`,
+      trend: "vs Mes Anterior",
+      trendUp: !data?.estadisticas?.ventasTrend?.startsWith('-'),
+      icon: "fas fa-rocket",
+      iconColor: "text-fuchsia-500",
+      iconBg: "bg-fuchsia-100",
+      chartColor: "#D946EF",
+      chartData: (data?.ventasPorMes && data.ventasPorMes.length > 0)
+        ? data.ventasPorMes.map(v => parseFloat(v.total) || 0)
         : []
     }
   ];
+
 
   return (
     <div className="space-y-6" >
@@ -562,213 +717,465 @@ const Dashboard = () => {
         }
       </div >
 
-      {/* Middle Row: Recent Order (40%), Top Products (40%), Top Countries (20%) */}
-      < div className="grid grid-cols-1 lg:grid-cols-10 gap-6" >
-        {/* Revenue Chart - Takes 4 columns (40%) */}
-        < div className="lg:col-span-4 bg-white rounded-2xl p-6 shadow-sm" >
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-sm font-bold text-gray-900">Resumen de Ingresos (Últimos 12 Meses)</h3>
-          </div>
-          <div className="h-[300px] w-full relative">
-            <Line data={recentOrderData} options={recentOrderOptions} plugins={[crosshairPlugin]} />
-          </div>
-        </div >
-
-        {/* Top Products List - Takes 4 columns (40%) */}
-        < div className="lg:col-span-3 bg-white rounded-2xl p-6 shadow-sm" >
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-sm font-bold text-gray-900">Productos Más Vendidos</h3>
-            <button className="text-xs text-gray-400 hover:text-blue-600">Ver todo <i className="fas fa-chevron-down ml-1"></i></button>
-          </div>
-          <div className="space-y-4">
-            {topProducts.length > 0 ? topProducts.map((product, idx) => (
-              <div key={idx} className="flex items-center justify-between">
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    {product.image ? (
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                      </svg>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-bold text-gray-900 truncate">{product.name}</h4>
-                    <p className="text-xs text-gray-500">{product.items}</p>
-                  </div>
-                </div>
-                <span className="text-sm font-bold text-indigo-600">{product.price}</span>
-              </div>
-            )) : (
-              <p className="text-gray-400 text-center py-4">No products data</p>
-            )}
-          </div>
-        </div >
-
-        {/* Low Stock Alert - DATOS REALES */}
-        < div className="lg:col-span-3 bg-white rounded-2xl p-6 shadow-sm" >
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
-                <i className="fas fa-exclamation-triangle text-white text-xl"></i>
-              </div>
+      {/* SECTION: FINANCIAL INTELLIGENCE */}
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="flex justify-between items-center mb-6">
               <div>
-                <h3 className="text-sm font-bold text-gray-900">Alerta de Stock Bajo</h3>
-                <p className="text-xs text-gray-500">Productos necesitan atención</p>
+                <h3 className="text-xl font-bold text-gray-900">Rendimiento Financiero</h3>
+                <p className="text-sm text-gray-500">Tendencias de ingresos y tickets</p>
+              </div>
+              <div className="flex bg-gray-50 p-1 rounded-xl">
+                {periods.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => setChartPeriod(p.id)}
+                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${chartPeriod === p.id
+                      ? 'bg-white text-indigo-600 shadow-sm border border-gray-100'
+                      : 'text-gray-400 hover:text-gray-600'
+                      }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="h-[300px] w-full relative">
+              <Line data={recentOrderData} options={recentOrderOptions} plugins={[crosshairPlugin]} />
+            </div>
+          </div>
+
+          <div className="lg:col-span-1 bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col">
+            <div className="mb-6">
+              <h3 className="text-base font-bold text-gray-900">Ticket Promedio</h3>
+              <p className="text-xs text-gray-500">Evolución del valor de pedido</p>
+            </div>
+            <div className="flex-1 h-[200px] w-full">
+              <Line
+                data={aovTrendData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { legend: { display: false } },
+                  scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+                    y: { border: { dash: [5, 5] }, grid: { color: '#f3f4f6' }, ticks: { font: { size: 9 } } }
+                  }
+                }}
+              />
+            </div>
+            <div className="mt-4 pt-4 border-t border-gray-50">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-gray-500">Valor Actual:</span>
+                <span className="font-bold text-gray-900">S/ {data?.estadisticas?.ticketPromedio?.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Order Status */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col">
+            <div className="mb-4">
+              <h3 className="text-base font-bold text-gray-900">Estado de Pedidos</h3>
+              <p className="text-xs text-gray-500">Distribución operativa</p>
+            </div>
+            <div className="flex-1 flex items-center justify-center relative">
+              <div className="h-[180px] w-full">
+                <Doughnut
+                  data={orderStatusData}
+                  options={{
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                      legend: {
+                        position: 'bottom',
+                        labels: { usePointStyle: true, padding: 10, font: { size: 9 } }
+                      }
+                    }
+                  }}
+                />
+              </div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-8">
+                <span className="text-2xl font-bold text-gray-900">{data?.estadisticas?.totalPedidos || 0}</span>
+                <span className="text-[10px] text-gray-400 font-bold uppercase">Total</span>
               </div>
             </div>
           </div>
 
-          <div className="mb-4 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-100">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">Productos con Stock Bajo</span>
-              <span className="text-3xl font-bold text-red-600">{productosBajoStock}</span>
+          {/* Brand Sales */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="mb-4">
+              <h3 className="text-base font-bold text-gray-900">Ventas por Marca</h3>
+              <p className="text-xs text-gray-500">Volumen por fabricante</p>
+            </div>
+            <div className="h-[200px] w-full">
+              <Bar
+                data={brandSalesData}
+                options={{
+                  indexAxis: 'y',
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { legend: { display: false } },
+                  scales: {
+                    x: { display: false, grid: { display: false } },
+                    y: { grid: { display: false }, ticks: { font: { size: 9 } } }
+                  }
+                }}
+              />
             </div>
           </div>
 
-          <div className="space-y-3">
-            {lowStockProducts.length > 0 ? lowStockProducts.map((product, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${product.status === 'out' ? 'bg-red-500 animate-pulse' : 'bg-orange-500'}`}></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{product.name}</p>
-                    <p className="text-xs text-gray-500">{product.status === 'out' ? 'Sin stock' : 'Stock bajo'}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${product.status === 'out'
-                    ? 'bg-red-100 text-red-700'
-                    : 'bg-orange-100 text-orange-700'
-                    }`}>
-                    {product.stock} {product.status === 'out' ? 'unidades' : 'quedan'}
+          {/* Payment Methods */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="mb-4">
+              <h3 className="text-base font-bold text-gray-900">Métodos de Pago</h3>
+              <p className="text-xs text-gray-500">Preferencia de clientes</p>
+            </div>
+            <div className="h-[200px] w-full">
+              <Doughnut
+                data={paymentMethodsData}
+                options={{
+                  maintainAspectRatio: false,
+                  cutout: '60%',
+                  plugins: {
+                    legend: {
+                      position: 'right',
+                      labels: { boxWidth: 8, font: { size: 9 } }
+                    }
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION: GEOGRAPHIC ANALYSIS (Expanded) */}
+      <div className="bg-white rounded-3xl p-8 shadow-md border border-gray-100 ring-4 ring-indigo-50/50">
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <i className="fas fa-map-marked-alt text-indigo-500"></i>
+              Análisis Geográfico de Rendimiento
+            </h3>
+            <p className="text-sm text-gray-500">Distribución de ingresos y volumen operativo por región</p>
+          </div>
+          <div className="flex gap-2">
+            <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full">
+              {data?.ventasPorUbicacion?.length} Regiones Activas
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Chart 1: Revenue Breakdown */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Ingresos por Región (S/)</h4>
+              <i className="fas fa-chart-bar text-gray-300"></i>
+            </div>
+            <div className="h-[300px] w-full">
+              <Bar
+                data={{
+                  labels: data?.ventasPorUbicacion?.map(v => v.region) || [],
+                  datasets: [{
+                    label: 'Ventas (S/)',
+                    data: data?.ventasPorUbicacion?.map(v => parseFloat(v.total)) || [],
+                    backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                    borderRadius: 12,
+                    hoverBackgroundColor: 'rgba(99, 102, 241, 1)',
+                  }]
+                }}
+                options={{
+                  indexAxis: 'y',
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { legend: { display: false } },
+                  scales: {
+                    x: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 10 } } },
+                    y: { grid: { display: false }, ticks: { font: { weight: 'bold', size: 11 } } }
+                  }
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Chart 2: Order Volume Breakdown */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Volumen de Pedidos</h4>
+              <i className="fas fa-shopping-cart text-gray-300"></i>
+            </div>
+            <div className="h-[300px] w-full">
+              <Bar
+                data={{
+                  labels: data?.ventasPorUbicacion?.map(v => v.region) || [],
+                  datasets: [{
+                    label: 'Pedidos',
+                    data: data?.ventasPorUbicacion?.map(v => v.pedidos) || [],
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                    borderRadius: 12,
+                    hoverBackgroundColor: 'rgba(16, 185, 129, 1)',
+                  }]
+                }}
+                options={{
+                  indexAxis: 'y',
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { legend: { display: false } },
+                  scales: {
+                    x: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 10 } } },
+                    y: { grid: { display: false }, ticks: { font: { weight: 'bold', size: 11 } } }
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Region stats table below */}
+        <div className="mt-10 pt-8 border-t border-gray-100">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {data?.ventasPorUbicacion?.map((loc, i) => (
+              <div key={i} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:shadow-sm transition-shadow">
+                <p className="text-xs font-bold text-gray-500 mb-1 truncate">{loc.region}</p>
+                <p className="text-sm font-black text-gray-900">S/ {parseFloat(loc.total).toLocaleString()}</p>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-[10px] text-gray-500 font-medium">{loc.pedidos} ord.</span>
+                  <span className="text-[10px] text-indigo-600 font-bold">
+                    {Math.round((parseFloat(loc.total) / data?.ventasPorUbicacion?.reduce((a, b) => a + parseFloat(b.total), 0)) * 100)}%
                   </span>
                 </div>
               </div>
-            )) : (
-              <div className="text-center py-8">
-                <i className="fas fa-check-circle text-green-500 text-4xl mb-2"></i>
-                <p className="text-gray-600 font-medium">¡Todos los productos tienen stock!</p>
-                <p className="text-gray-400 text-sm">No se necesita reabastecimiento</p>
-              </div>
-            )}
+            ))}
           </div>
-        </div >
-      </div >
+        </div>
+      </div>
 
-      {/* Bottom Row: Sales by Category & Recent Orders */}
-      < div className="grid grid-cols-1 lg:grid-cols-3 gap-6" >
-        {/* Sales by Category - Donut Chart */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h3 className="text-lg font-bold text-gray-900">Ventas por Categoría</h3>
-              <p className="text-xs text-gray-500">Total 20 Mar, 2023</p>
-            </div>
-            <button className="text-gray-400 hover:text-gray-600">
-              <i className="fas fa-ellipsis-h"></i>
-            </button>
-          </div>
-
+      {/* SECTION: CUSTOMER INTELLIGENCE */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="mb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-3xl font-bold text-gray-900">S/ {(data?.ventasPorCategoria?.reduce((sum, cat) => sum + parseFloat(cat.total_ventas || 0), 0) || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
-            </div>
-            <p className="text-xs text-gray-500">Total Histórico</p>
+            <h3 className="text-base font-bold text-gray-900">Ciclo de Vida del Cliente</h3>
+            <p className="text-xs text-gray-500">Nuevos vs Recurrentes por mes</p>
           </div>
-
-          <div className="h-[200px] w-full flex items-center justify-center mb-4">
-            <Doughnut
-              data={{
-                labels: data?.ventasPorCategoria?.map(cat => cat.categoria || 'Sin categoría') || ['Sin datos'],
-                datasets: [{
-                  data: data?.ventasPorCategoria?.map(cat => parseFloat(cat.total_ventas || 0)) || [0],
-                  backgroundColor: data?.ventasPorCategoria?.map((_, index) => {
-                    const colors = [
-                      '#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#6366F1',
-                      '#EC4899', '#8B5CF6', '#14B8A6', '#F97316', '#06B6D4',
-                      '#84CC16', '#A855F7', '#FB7185', '#22D3EE', '#F472B6'
-                    ];
-                    return colors[index % colors.length];
-                  }) || ['#3B82F6'],
-                  borderWidth: 0,
-                  cutout: '70%'
-                }]
-              }}
+          <div className="h-[250px] w-full">
+            <Line
+              data={retentionTrendData}
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                  legend: { display: false }
+                  legend: { position: 'top', labels: { usePointStyle: true, font: { size: 10 } } }
+                },
+                scales: {
+                  x: { grid: { display: false } },
+                  y: { border: { dash: [5, 5] }, grid: { color: '#f3f4f6' } }
                 }
               }}
             />
           </div>
+        </div>
 
-          <div className="grid grid-cols-2 gap-3 max-h-[150px] overflow-y-auto custom-scrollbar">
-            {data?.ventasPorCategoria?.map((cat, index) => {
-              const colors = [
-                '#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#6366F1',
-                '#EC4899', '#8B5CF6', '#14B8A6', '#F97316', '#06B6D4',
-                '#84CC16', '#A855F7', '#FB7185', '#22D3EE', '#F472B6'
-              ];
-              const color = colors[index % colors.length];
-              return (
-                <div key={index} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }}></div>
-                  <span className="text-xs text-gray-600 truncate" title={cat.categoria}>{cat.categoria}</span>
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-base font-bold text-gray-900">Top Clientes por Gasto</h3>
+            <button className="text-xs text-indigo-600 font-bold">Ver reporte</button>
+          </div>
+          <div className="space-y-4">
+            {data?.topClientes?.length > 0 ? data.topClientes.map((cliente, idx) => (
+              <div key={idx} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-xl transition-colors border-b border-gray-50 last:border-0">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br ${idx === 0 ? 'from-yellow-400 to-orange-500' :
+                    idx === 1 ? 'from-gray-300 to-gray-500' :
+                      idx === 2 ? 'from-orange-300 to-orange-600' :
+                        'from-indigo-400 to-purple-500'
+                    }`}>
+                    {cliente.nombre.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-gray-900">{cliente.nombre}</h4>
+                    <p className="text-[10px] text-gray-500">{cliente.email}</p>
+                  </div>
                 </div>
-              );
-            })}
+                <div className="text-right">
+                  <p className="text-sm font-bold text-gray-900">S/ {parseFloat(cliente.total_gastado).toLocaleString()}</p>
+                  <p className="text-[10px] text-indigo-600 font-bold">{cliente.pedidos} pedidos</p>
+                </div>
+              </div>
+            )) : (
+              <p className="text-gray-400 text-center py-4">Cargando datos de clientes...</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION: OPERATIONAL PATTERNS */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <div className="mb-4">
+            <h3 className="text-base font-bold text-gray-900">Patrón de Actividad Semanal</h3>
+            <p className="text-xs text-gray-500">Intensidad de demanda</p>
+          </div>
+          <div className="h-[250px] w-full flex justify-center">
+            <Radar
+              data={weeklyActivityData}
+              options={{
+                maintainAspectRatio: false,
+                scales: {
+                  r: {
+                    grid: { color: '#f3f4f6' },
+                    angleLines: { color: '#f3f4f6' },
+                    pointLabels: { font: { size: 10, weight: 'bold' } },
+                    ticks: { display: false }
+                  }
+                },
+                plugins: { legend: { display: false } }
+              }}
+            />
           </div>
         </div>
 
-        {/* Recent Orders Table */}
-        < div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm" >
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <div className="mb-4">
+            <h3 className="text-base font-bold text-gray-900">Picos de Venta por Hora</h3>
+            <p className="text-xs text-gray-500">Análisis operativo 24h</p>
+          </div>
+          <div className="h-[250px] w-full">
+            <Line
+              data={hourlyPeaksData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                  x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+                  y: { display: false }
+                }
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION: INVENTORY & SALES MIX */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-gray-900">Pedidos Recientes</h3>
-            <button className="text-xs text-gray-400 hover:text-blue-600">Ver todo <i className="fas fa-chevron-right ml-1"></i></button>
+            <h3 className="text-sm font-bold text-gray-900">Productos Más Vendidos</h3>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">ID Pedido</th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Cliente</th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Fecha</th>
-                  <th className="text-right py-3 px-4 text-xs font-semibold text-gray-600">Total</th>
-                  <th className="text-center py-3 px-4 text-xs font-semibold text-gray-600">Estado</th>
+          <div className="space-y-4">
+            {topProducts.map((product, idx) => (
+              <div key={idx} className="flex items-center justify-between">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center flex-shrink-0">
+                    {product.image ? (
+                      <img src={product.image} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <i className="fas fa-box text-gray-300"></i>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-xs font-bold text-gray-900 truncate">{product.name}</h4>
+                    <p className="text-[10px] text-gray-500">{product.items}</p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold text-indigo-600">{product.price}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <div className="mb-4">
+            <h3 className="text-sm font-bold text-gray-900">Alerta de Stock Bajo</h3>
+          </div>
+          <div className="space-y-3">
+            {lowStockProducts.slice(0, 4).map((product, idx) => (
+              <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-100">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-gray-900 truncate">{product.name}</p>
+                  <p className={`text-[10px] font-bold ${product.status === 'out' ? 'text-red-500' : 'text-orange-500'}`}>
+                    Stock: {product.stock}
+                  </p>
+                </div>
+                <div className={`w-2 h-2 rounded-full ${product.status === 'out' ? 'bg-red-500' : 'bg-orange-500'}`}></div>
+              </div>
+            ))}
+            {lowStockProducts.length === 0 && (
+              <p className="text-xs text-gray-400 text-center py-8">No hay alertas de stock</p>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h3 className="text-sm font-bold text-gray-900 mb-4">Mix de Categorías</h3>
+          <div className="h-[150px] w-full flex items-center justify-center mb-4">
+            <Doughnut
+              data={{
+                labels: data?.ventasPorCategoria?.map(cat => cat.categoria) || [],
+                datasets: [{
+                  data: data?.ventasPorCategoria?.map(cat => parseFloat(cat.total_ventas)) || [],
+                  backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'],
+                  cutout: '70%'
+                }]
+              }}
+              options={{ maintainAspectRatio: false, plugins: { legend: { display: false } } }}
+            />
+          </div>
+          <div className="space-y-1 overflow-y-auto max-h-[80px]">
+            {data?.ventasPorCategoria?.slice(0, 5).map((cat, i) => (
+              <div key={i} className="flex justify-between items-center text-[10px]">
+                <span className="text-gray-500 line-clamp-1">{cat.categoria}</span>
+                <span className="font-bold text-gray-900">S/ {parseFloat(cat.total_ventas).toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-lg font-bold text-gray-900">Pedidos Recientes</h3>
+          <button className="text-xs text-indigo-600 font-bold hover:underline">Ver todo</button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="text-left border-b border-gray-100">
+                <th className="pb-3 text-xs font-bold text-gray-400 uppercase tracking-wider">ID</th>
+                <th className="pb-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Cliente</th>
+                <th className="pb-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Fecha</th>
+                <th className="pb-3 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Total</th>
+                <th className="pb-3 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">Estado</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {data?.ultimosPedidos?.slice(0, 6).map((pedido, idx) => (
+                <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                  <td className="py-4 text-sm font-bold text-gray-900">#{pedido.id}</td>
+                  <td className="py-4 text-sm text-gray-600">{pedido.cliente_nombre || 'N/A'}</td>
+                  <td className="py-4 text-sm text-gray-400">{new Date(pedido.fecha).toLocaleDateString()}</td>
+                  <td className="py-4 text-sm font-bold text-right text-gray-900">S/ {parseFloat(pedido.total).toFixed(2)}</td>
+                  <td className="py-4 text-center">
+                    <span className={`px-2 py-1 rounded-lg text-[10px] font-bold ${pedido.estado === 'Completado' ? 'bg-green-100 text-green-700' :
+                      pedido.estado === 'En proceso' ? 'bg-blue-100 text-blue-700' :
+                        pedido.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-red-100 text-red-700'
+                      }`}>
+                      {pedido.estado}
+                    </span>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {data?.ultimosPedidos?.slice(0, 8).map((pedido, idx) => (
-                  <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 text-sm font-medium text-gray-900">#{pedido.id}</td>
-                    <td className="py-3 px-4 text-sm text-gray-700">{pedido.cliente_nombre || 'N/A'}</td>
-                    <td className="py-3 px-4 text-sm text-gray-500">{new Date(pedido.fecha).toLocaleDateString()}</td>
-                    <td className="py-3 px-4 text-sm font-bold text-right text-gray-900">S/ {parseFloat(pedido.total).toFixed(2)}</td>
-                    <td className="py-3 px-4 text-center">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${pedido.estado === 'Completado' ? 'bg-green-100 text-green-700' :
-                        pedido.estado === 'En proceso' ? 'bg-blue-100 text-blue-700' :
-                          pedido.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-red-100 text-red-700'
-                        }`}>
-                        {pedido.estado}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div >
-      </div >
-    </div >
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
   );
 };
 

@@ -4,6 +4,7 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import Home from './pages/Home'
 import Login from './pages/Login'
+
 import Register from './pages/Register'
 import Productos from './pages/Productos'
 import ProductoDetalle from './pages/ProductoDetalle'
@@ -12,8 +13,14 @@ import Carrito from './pages/Carrito'
 import MiCuenta from './pages/MiCuenta'
 import Checkout from './pages/Checkout'
 import Chatbot from './components/Chatbot'
+import { SettingsProvider } from './context/SettingsContext'
+import Nosotros from './pages/Nosotros'
+import Contacto from './pages/Contacto'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import AdminLayout from './pages/admin/AdminLayout'
 import Dashboard from './pages/admin/Dashboard'
+import MensajesAdmin from './pages/admin/MensajesAdmin'
 import ProductosIndex from './pages/admin/productos/index'
 import ProductosNew from './pages/admin/productos/new'
 import ProductosEdit from './pages/admin/productos/edit'
@@ -38,11 +45,14 @@ import PedidosIndex from './pages/admin/pedidos/index'
 import PedidosShow from './pages/admin/pedidos/show'
 import PedidosEdit from './pages/admin/pedidos/edit'
 import ClientesIndex from './pages/admin/clientes/index'
+import ClientesShow from './pages/admin/clientes/show'
 import UsuariosIndex from './pages/admin/usuarios/index'
 import UsuariosNew from './pages/admin/usuarios/new'
 import UsuariosEdit from './pages/admin/usuarios/edit'
 import AdminBanners from './pages/admin/banners/index'
 import AdminReportes from './pages/admin/AdminReportes'
+import AdminReservaciones from './pages/admin/servicios/AdminReservaciones'
+import AjustesDetalle from './pages/admin/AjustesDetalle'
 import './App.css'
 
 function App() {
@@ -66,7 +76,7 @@ function App() {
   }
 
   return (
-    <>
+    <SettingsProvider>
       <Routes>
         {/* Rutas públicas con header/footer */}
         <Route path="/" element={
@@ -89,6 +99,22 @@ function App() {
           <>
             <Header />
             <Register />
+            <Footer />
+          </>
+        } />
+
+        <Route path="/forgot-password" element={
+          <>
+            <Header />
+            <ForgotPassword />
+            <Footer />
+          </>
+        } />
+
+        <Route path="/reset-password/:token" element={
+          <>
+            <Header />
+            <ResetPassword />
             <Footer />
           </>
         } />
@@ -157,6 +183,22 @@ function App() {
           </ProtectedRoute>
         } />
 
+        <Route path="/nosotros" element={
+          <>
+            <Header />
+            <Nosotros />
+            <Footer />
+          </>
+        } />
+
+        <Route path="/contacto" element={
+          <>
+            <Header />
+            <Contacto />
+            <Footer />
+          </>
+        } />
+
         {/* Rutas del panel admin */}
         <Route path="/admin" element={
           <AdminRoute>
@@ -164,6 +206,7 @@ function App() {
           </AdminRoute>
         }>
           <Route index element={<Dashboard />} />
+          <Route path="mensajes" element={<MensajesAdmin />} />
           <Route path="productos">
             <Route index element={<ProductosIndex />} />
             <Route path="nuevo" element={<ProductosNew />} />
@@ -193,6 +236,7 @@ function App() {
             <Route path="nuevo" element={<ServiciosNew />} />
             <Route path="editar/:id" element={<ServiciosEdit />} />
             <Route path="ver/:id" element={<ServiciosShow />} />
+            <Route path="reservaciones" element={<AdminReservaciones />} />
           </Route>
           <Route path="pedidos">
             <Route index element={<PedidosIndex />} />
@@ -201,6 +245,7 @@ function App() {
           </Route>
           <Route path="clientes">
             <Route index element={<ClientesIndex />} />
+            <Route path="ver/:id" element={<ClientesShow />} />
           </Route>
           <Route path="usuarios">
             <Route index element={<UsuariosIndex />} />
@@ -209,10 +254,11 @@ function App() {
           </Route>
           <Route path="banners" element={<AdminBanners />} />
           <Route path="reportes" element={<AdminReportes />} />
+          <Route path="ajustes" element={<AjustesDetalle />} />
         </Route>
       </Routes>
       <Chatbot />
-    </>
+    </SettingsProvider>
   )
 }
 

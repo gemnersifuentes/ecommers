@@ -590,6 +590,12 @@ const AdminProductos = () => {
                   </th>
                   <th className="px-6 py-4 text-left">
                     <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">SKU / Peso</span>
+                    </div>
+                  </th>
+                  <th className="px-6 py-4 text-left">
+                    <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-pink-500"></div>
                       <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Variantes</span>
                     </div>
@@ -656,6 +662,12 @@ const AdminProductos = () => {
                             }`}></div>
                           <span className="text-xs font-semibold text-gray-900">{producto.stock}</span>
                           <span className="text-[10px] text-gray-500">unid.</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-3">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-gray-900">{producto.sku || 'N/A'}</span>
+                          <span className="text-[10px] text-gray-500">{producto.peso ? `${producto.peso} kg` : '-'}</span>
                         </div>
                       </td>
                       <td className="px-6 py-3">

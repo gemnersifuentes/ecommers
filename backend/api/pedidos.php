@@ -17,16 +17,21 @@ switch ($method) {
             $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($pedido) {
-                // Obtener detalles del pedido
+                // Obtener detalles del pedido (Corregido para consistencia con frontend)
                 $stmtDetalle = $db->prepare("
-                    SELECT dp.*, p.nombre as producto_nombre, v.atributo as variacion_nombre 
+                    SELECT 
+                        dp.*, 
+                        p.nombre as nombre, 
+                        p.imagen as imagen,
+                        v.atributo as variacion_nombre,
+                        (dp.subtotal / dp.cantidad) as precio_unitario
                     FROM detalle_pedido dp 
                     LEFT JOIN productos p ON dp.producto_id = p.id 
                     LEFT JOIN variaciones v ON dp.variacion_id = v.id 
                     WHERE dp.pedido_id = ?
                 ");
                 $stmtDetalle->execute([$id]);
-                $pedido['detalles'] = $stmtDetalle->fetchAll(PDO::FETCH_ASSOC);
+                $pedido['items'] = $stmtDetalle->fetchAll(PDO::FETCH_ASSOC);
                 
                 echo json_encode($pedido);
             } else {
@@ -48,7 +53,7 @@ switch ($method) {
                 $params[] = $estado;
             }
             
-            $sql .= " ORDER BY p.fecha DESC";
+            $sql .= " ORDER BY p.id DESC";
             
             $stmt = $db->prepare($sql);
             $stmt->execute($params);
@@ -106,7 +111,7 @@ switch ($method) {
             // Crear pedido
             $stmtPedido = $db->prepare("
                 INSERT INTO pedidos (usuario_id, total, estado, fecha, metodo_envio, datos_envio, dni) 
-                VALUES (?, ?, 'Pendiente', NOW(), ?, ?, ?)
+                VALUES (?, ?, 'pendiente', NOW(), ?, ?, ?)
             ");
             
             // Datos de envío como JSON
@@ -183,6 +188,8 @@ switch ($method) {
         break;
 
     case 'PUT':
+        require_once __DIR__ . '/../helpers/MailHelper.php';
+
         if (!$id) {
             http_response_code(400);
             echo json_encode(['message' => 'ID de pedido requerido']);
@@ -190,10 +197,71 @@ switch ($method) {
         }
 
         if (isset($input['estado'])) {
+            // Obtener información del pedido y cliente
+            $stmtInfo = $db->prepare("
+                SELECT p.numero_pedido, p.total, p.datos_envio, u.correo, u.nombre 
+                FROM pedidos p 
+                LEFT JOIN usuarios u ON p.usuario_id = u.id 
+                WHERE p.id = ?
+            ");
+            $stmtInfo->execute([$id]);
+            $info = $stmtInfo->fetch(PDO::FETCH_ASSOC);
+
             $stmt = $db->prepare("UPDATE pedidos SET estado = ? WHERE id = ?");
             
             if ($stmt->execute([$input['estado'], $id])) {
-                echo json_encode(['success' => true, 'message' => 'Estado del pedido actualizado']);
+                // Enviar correo si tenemos la información del cliente
+                if ($info) {
+                    error_log("Info encontrada para correo: " . json_encode($info));
+                    if (!empty($info['correo'])) {
+                        // Obtener items del pedido para el correo
+                        $stmtItems = $db->prepare("
+                            SELECT 
+                                dp.cantidad,
+                                dp.subtotal,
+                                dp.precio_regular,
+                                p.nombre,
+                                (dp.subtotal / dp.cantidad) as precio,
+                                v.atributo as variacion_nombre
+                            FROM detalle_pedido dp
+                            JOIN productos p ON dp.producto_id = p.id
+                            LEFT JOIN variaciones v ON dp.variacion_id = v.id
+                            WHERE dp.pedido_id = ?
+                        ");
+                        $stmtItems->execute([$id]);
+                        $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+
+                        $shipping = !empty($info['datos_envio']) ? json_decode($info['datos_envio'], true) : null;
+
+                        error_log("Iniciando envío de correo para pedido ID: $id (Estado: " . $input['estado'] . ")");
+                        $mailResult = MailHelper::sendStatusUpdateEmail(
+                            $info['correo'], 
+                            $info['nombre'] ?? 'Cliente', 
+                            $info['numero_pedido'], 
+                            $input['estado'],
+                            $info['total'] ?? 0,
+                            $items,
+                            $shipping
+                        );
+                        $email_sent = $mailResult['success'];
+                        $email_error = !$email_sent ? $mailResult['message'] : null;
+                        error_log("Resultado de MailHelper: " . ($email_sent ? 'EXITO' : 'FALLO - ' . $email_error));
+                    } else {
+                        $email_sent = false;
+                        $email_error = "El cliente no tiene un correo asociado.";
+                        error_log("No se pudo enviar correo: El pedido ID: $id no tiene un correo asociado");
+                    }
+                } else {
+                    $email_sent = false;
+                    $email_error = "No se encontró información del pedido.";
+                    error_log("No se pudo enviar correo: No se encontró el pedido con ID: $id");
+                }
+                echo json_encode([
+                    'success' => true, 
+                    'message' => 'Estado del pedido actualizado',
+                    'email_sent' => $email_sent,
+                    'email_error' => $email_error
+                ]);
             } else {
                 http_response_code(500);
                 echo json_encode(['message' => 'Error al actualizar pedido']);
@@ -208,7 +276,7 @@ switch ($method) {
             exit;
         }
 
-        $stmt = $db->prepare("UPDATE pedidos SET estado = 'Cancelado' WHERE id = ?");
+        $stmt = $db->prepare("UPDATE pedidos SET estado = 'cancelado' WHERE id = ?");
         
         if ($stmt->execute([$id])) {
             echo json_encode(['success' => true, 'message' => 'Pedido cancelado exitosamente']);

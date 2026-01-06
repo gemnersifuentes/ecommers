@@ -325,13 +325,13 @@ const ProductCard = ({ producto }) => {
                     <img
                         src={imagenPrincipal}
                         alt={producto.nombre}
-                        className={`h-28 w-auto md:w-full md:h-full object-contain transition-opacity duration-500 ${isHovered && imagenSecundaria !== imagenPrincipal ? 'opacity-0' : 'opacity-100'}`}
+                        className={`h-28 w-28 md:w-full md:h-full object-contain transition-opacity duration-500 ${isHovered && imagenSecundaria !== imagenPrincipal ? 'opacity-0' : 'opacity-100'}`}
                     />
                     {imagenSecundaria !== imagenPrincipal && (
                         <img
                             src={imagenSecundaria}
                             alt={producto.nombre}
-                            className={`absolute inset-0 h-28 w-auto md:w-full md:h-full mx-auto my-auto object-contain transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+                            className={`absolute inset-0 h-16 w-16 md:w-full md:h-full mx-auto my-auto object-contain transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
                         />
                     )}
                 </div>
