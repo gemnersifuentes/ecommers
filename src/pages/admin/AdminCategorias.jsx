@@ -96,8 +96,8 @@ const AdminCategorias = () => {
       {/* Premium Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-black text-[#1e293b] tracking-tight uppercase">Categorías</h2>
-          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-1">Arquitectura de catálogo y filtros</p>
+          <h2 className="text-3xl font-black text-[#1e293b] dark:text-white tracking-tight uppercase">Categorías</h2>
+          <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-[0.2em] mt-1">Arquitectura de catálogo y filtros</p>
         </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -119,19 +119,19 @@ const AdminCategorias = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05 }}
-              className="group bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-orange-500/5 p-6 hover:shadow-orange-500/10 transition-all relative overflow-hidden"
+              className="group bg-white dark:bg-[#111c44] rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-xl shadow-orange-500/5 p-6 hover:shadow-orange-500/10 transition-all relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={() => handleEditar(categoria)} className="w-8 h-8 flex items-center justify-center bg-orange-50 text-orange-600 rounded-xl hover:bg-orange-600 hover:text-white transition-all shadow-sm">
+                <button onClick={() => handleEditar(categoria)} className="w-8 h-8 flex items-center justify-center bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 rounded-xl hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white transition-all shadow-sm">
                   <i className="fas fa-edit text-[10px]"></i>
                 </button>
-                <button onClick={() => handleEliminar(categoria.id)} className="w-8 h-8 flex items-center justify-center bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm">
+                <button onClick={() => handleEliminar(categoria.id)} className="w-8 h-8 flex items-center justify-center bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm">
                   <i className="fas fa-trash-alt text-[10px]"></i>
                 </button>
               </div>
 
               <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-20 h-20 bg-orange-50 rounded-[1.5rem] flex items-center justify-center overflow-hidden border-2 border-transparent group-hover:border-orange-200 transition-all">
+                <div className="w-20 h-20 bg-orange-50 dark:bg-white/5 rounded-[1.5rem] flex items-center justify-center overflow-hidden border-2 border-transparent group-hover:border-orange-200 dark:group-hover:border-orange-500/30 transition-all">
                   {categoria.imagen ? (
                     <img src={`http://localhost:8000${categoria.imagen}`} alt={categoria.nombre} className="w-full h-full object-cover" />
                   ) : (
@@ -139,10 +139,10 @@ const AdminCategorias = () => {
                   )}
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-[#1e293b] uppercase tracking-tight">{categoria.nombre}</h3>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">ID #{categoria.id}</p>
+                  <h3 className="text-sm font-black text-[#1e293b] dark:text-white uppercase tracking-tight">{categoria.nombre}</h3>
+                  <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase mt-1">ID #{categoria.id}</p>
                 </div>
-                <p className="text-[11px] text-gray-500 font-medium line-clamp-2 min-h-[32px]">
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium line-clamp-2 min-h-[32px]">
                   {categoria.descripcion || 'Sin descripción detallada disponible.'}
                 </p>
                 <div className="pt-2 w-full">
@@ -157,24 +157,24 @@ const AdminCategorias = () => {
       </div>
 
       {categorias.length === 0 && (
-        <div className="py-24 text-center bg-white rounded-[3rem] border-2 border-dashed border-gray-100 flex flex-col items-center">
-          <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
-            <i className="fas fa-tags text-3xl text-gray-200"></i>
+        <div className="py-24 text-center bg-white dark:bg-[#111c44] rounded-[3rem] border-2 border-dashed border-gray-100 dark:border-white/10 flex flex-col items-center">
+          <div className="w-24 h-24 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center mb-6">
+            <i className="fas fa-tags text-3xl text-gray-200 dark:text-gray-700"></i>
           </div>
-          <h5 className="text-sm font-black text-gray-400 uppercase tracking-widest">Estantería vacía</h5>
-          <p className="text-[10px] text-gray-300 font-bold uppercase mt-2">Comience creando su primera categoría</p>
+          <h5 className="text-sm font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Estantería vacía</h5>
+          <p className="text-[10px] text-gray-300 dark:text-gray-600 font-bold uppercase mt-2">Comience creando su primera categoría</p>
         </div>
       )}
 
       {/* Modal Categoría */}
       <AnimatePresence>
         {mostrarModal && (
-          <div className="fixed inset-0 bg-[#1e293b]/60 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-[#1e293b]/60 dark:bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden"
+              className="bg-white dark:bg-[#111c44] rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden border border-white/5"
             >
               <div className="px-10 py-8 bg-gradient-to-r from-orange-500 to-amber-600 flex justify-between items-center text-white">
                 <div>
@@ -189,7 +189,7 @@ const AdminCategorias = () => {
               <form onSubmit={handleSubmit} className="p-10 space-y-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Nombre de Categoría</label>
+                    <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1">Nombre de Categoría</label>
                     <input
                       type="text"
                       name="nombre"
@@ -197,25 +197,25 @@ const AdminCategorias = () => {
                       onChange={handleChange}
                       required
                       placeholder="Ej: Smartphones, Laptops..."
-                      className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-orange-500/20 rounded-2xl text-xs font-bold text-[#1e293b] focus:outline-none focus:bg-white transition-all"
+                      className="w-full px-6 py-4 bg-gray-50 dark:bg-white/5 border-2 border-transparent focus:border-orange-500/20 rounded-2xl text-xs font-bold text-[#1e293b] dark:text-white focus:outline-none focus:bg-white dark:focus:bg-white/10 transition-all"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Descripción Breve</label>
+                    <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1">Descripción Breve</label>
                     <textarea
                       name="descripcion"
                       value={formData.descripcion}
                       onChange={handleChange}
                       placeholder="Describa el propósito de esta categoría..."
                       rows="4"
-                      className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-orange-500/20 rounded-2xl text-xs font-medium text-[#1e293b] focus:outline-none focus:bg-white transition-all resize-none"
+                      className="w-full px-6 py-4 bg-gray-50 dark:bg-white/5 border-2 border-transparent focus:border-orange-500/20 rounded-2xl text-xs font-medium text-[#1e293b] dark:text-white focus:outline-none focus:bg-white dark:focus:bg-white/10 transition-all resize-none"
                     ></textarea>
                   </div>
                 </div>
 
                 <div className="flex gap-4 pt-4">
-                  <button type="button" onClick={() => setMostrarModal(false)} className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 bg-gray-100 rounded-2xl hover:bg-gray-200 transition-all">
+                  <button type="button" onClick={() => setMostrarModal(false)} className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-white/5 rounded-2xl hover:bg-gray-200 dark:hover:bg-white/10 transition-all">
                     Cancelar
                   </button>
                   <button type="submit" className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-white bg-[#1e293b] rounded-2xl shadow-xl shadow-orange-500/20 hover:bg-orange-600 transition-all">

@@ -107,7 +107,7 @@ const UsuariosIndex = () => {
             {/* Header Mirroring Products */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-sm font-bold text-gray-800 flex items-center gap-2 uppercase tracking-tight">
+                    <h1 className="text-sm font-bold text-gray-800 dark:text-white flex items-center gap-2 uppercase tracking-tight">
                         <Users size={16} className="text-orange-500" />
                         Gestión de Usuarios
                     </h1>
@@ -119,7 +119,7 @@ const UsuariosIndex = () => {
 
                 <Link
                     to="/admin/usuarios/nuevo"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white text-xs font-semibold rounded-lg hover:bg-orange-600 transition-colors shadow-sm uppercase tracking-wider"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 dark:bg-orange-600 text-white text-xs font-semibold rounded-lg hover:bg-orange-600 dark:hover:bg-orange-500 transition-colors shadow-sm uppercase tracking-wider"
                 >
                     <UserPlus size={14} />
                     Nuevo Colaborador
@@ -130,13 +130,13 @@ const UsuariosIndex = () => {
             <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                 <div className="flex items-center gap-3 w-full lg:w-auto">
                     <div className="relative flex-1 lg:w-80">
-                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                         <input
                             type="text"
                             placeholder="Filtrar por nombre, correo o rango..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all shadow-sm"
+                            className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-xl text-xs focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all shadow-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600"
                         />
                     </div>
 
@@ -146,38 +146,38 @@ const UsuariosIndex = () => {
                             setItemsPerPage(Number(e.target.value));
                             setCurrentPage(1);
                         }}
-                        className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium text-gray-600 outline-none hover:border-gray-300 transition-all cursor-pointer shadow-sm"
+                        className="px-3 py-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-xl text-xs font-medium text-gray-600 dark:text-gray-400 outline-none hover:border-gray-300 dark:hover:border-white/20 transition-all cursor-pointer shadow-sm"
                     >
                         <option value={10}>10 Staff</option>
                         <option value={25}>25 Staff</option>
                     </select>
                 </div>
 
-                <div className="hidden lg:flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                <div className="hidden lg:flex items-center gap-2 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest bg-gray-50 dark:bg-white/5 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-white/5">
                     <ShieldCheck size={12} className="text-emerald-500" />
                     {usuariosFiltrados.length} Usuarios Activos
                 </div>
             </div>
 
             {/* Industrial Table Area */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div className="bg-white dark:bg-[#111c44] rounded-2xl border border-gray-200 dark:border-white/5 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] overflow-hidden">
                 <div className="overflow-x-auto no-scrollbar">
                     <table className="w-full text-left border-separate border-spacing-0">
-                        <thead className="bg-[#f8fafc]/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100">
+                        <thead className="bg-[#f8fafc]/80 dark:bg-[#0b1437]/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100 dark:border-white/5">
                             <tr>
-                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap">
+                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap">
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
                                         IDENTIDAD
                                     </div>
                                 </th>
-                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap">CORREO / ACCESO</th>
-                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 text-center whitespace-nowrap">RANGO CORPORATIVO</th>
-                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 text-center whitespace-nowrap">ESTADO</th>
-                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 text-right whitespace-nowrap">OPERACIONES</th>
+                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap">CORREO / ACCESO</th>
+                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-center whitespace-nowrap">RANGO CORPORATIVO</th>
+                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-center whitespace-nowrap">ESTADO</th>
+                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-right whitespace-nowrap">OPERACIONES</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-gray-50 dark:divide-white/5">
                             <AnimatePresence>
                                 {currentItems.map((u, idx) => (
                                     <motion.tr
@@ -185,7 +185,7 @@ const UsuariosIndex = () => {
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         whileHover={{
-                                            backgroundColor: "rgba(249, 115, 22, 0.02)",
+                                            backgroundColor: "rgba(249, 115, 22, 0.04)",
                                             transition: { duration: 0.2, ease: "easeOut" }
                                         }}
                                         transition={{
@@ -196,28 +196,28 @@ const UsuariosIndex = () => {
                                     >
                                         <td className="px-6 py-4 relative">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-orange-500 font-black text-xs group-hover:border-orange-200 transition-all duration-300">
+                                                <div className="w-9 h-9 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center text-orange-500 dark:text-orange-400 font-black text-xs group-hover:border-orange-200 dark:group-hover:border-orange-500 transition-all duration-300">
                                                     {u.nombre.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <p className="text-[11px] font-black text-[#1e293b] uppercase tracking-tight">
+                                                    <p className="text-[11px] font-black text-[#1e293b] dark:text-gray-200 uppercase tracking-tight">
                                                         {u.nombre}
                                                     </p>
-                                                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tight">Staff ID #{u.id.toString().padStart(4, '0')}</p>
+                                                    <p className="text-[9px] text-gray-400 dark:text-gray-600 font-bold uppercase tracking-tight">Staff ID #{u.id.toString().padStart(4, '0')}</p>
                                                 </div>
                                             </div>
                                         </td>
 
                                         <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2 text-[11px] font-bold text-gray-500">
-                                                <Mail size={12} className="text-gray-300" />
+                                            <div className="flex items-center gap-2 text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                                                <Mail size={12} className="text-gray-300 dark:text-gray-600" />
                                                 {u.correo}
                                             </div>
                                         </td>
 
                                         <td className="px-6 py-4 text-center">
-                                            <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded font-black text-[10px] tracking-wider border whitespace-nowrap uppercase ${u.rol === 'admin' ? 'bg-slate-900 text-white border-slate-900 shadow-sm' :
-                                                    'bg-indigo-50 text-indigo-600 border-indigo-100'
+                                            <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded font-black text-[10px] tracking-wider border whitespace-nowrap uppercase ${u.rol === 'admin' ? 'bg-slate-900 text-white border-slate-900 shadow-sm dark:bg-[#0b1437] dark:border-white/20' :
+                                                'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-100 dark:border-indigo-500/20'
                                                 }`}>
                                                 <Shield size={10} strokeWidth={3} />
                                                 {u.rol}
@@ -225,7 +225,7 @@ const UsuariosIndex = () => {
                                         </td>
 
                                         <td className="px-6 py-4 text-center">
-                                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm font-black text-[10px] tracking-[0.05em] border-2 bg-emerald-50 text-emerald-600 border-emerald-100/50 uppercase whitespace-nowrap">
+                                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm font-black text-[10px] tracking-[0.05em] border-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-100/50 dark:border-emerald-500/20 uppercase whitespace-nowrap">
                                                 <UserCheck size={10} />
                                                 activo
                                             </div>
@@ -233,20 +233,20 @@ const UsuariosIndex = () => {
 
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-end gap-1">
-                                                <Link
-                                                    to={`/admin/usuarios/editar/${u.id}`}
-                                                    className="p-1.5 transition-all duration-300 rounded-lg border-2 border-transparent bg-gray-50 text-[#1e293b] hover:border-blue-500/10 hover:text-blue-600 hover:bg-blue-50"
-                                                    title="Editar Staff"
-                                                >
-                                                    <Edit size={14} strokeWidth={2.5} />
-                                                </Link>
-                                                <button
-                                                    onClick={() => handleEliminar(u.id)}
-                                                    className="p-1.5 transition-all duration-300 rounded-lg border-2 border-transparent bg-gray-50 text-[#1e293b] hover:border-red-500/10 hover:text-red-600 hover:bg-red-50"
-                                                    title="Baja de Sistema"
-                                                >
-                                                    <Trash2 size={14} strokeWidth={2.5} />
-                                                </button>
+                                                {[
+                                                    { to: `/admin/usuarios/editar/${u.id}`, icon: Edit, label: 'Editar Staff', color: 'hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/5' },
+                                                    { onClick: () => handleEliminar(u.id), icon: Trash2, label: 'Baja de Sistema', color: 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/5' }
+                                                ].map((action, i) => (
+                                                    <Link
+                                                        key={i}
+                                                        to={action.to}
+                                                        onClick={action.onClick}
+                                                        className={`p-1.5 transition-all duration-300 rounded-lg border-2 border-transparent bg-gray-50 dark:bg-white/5 text-[#1e293b] dark:text-gray-400 hover:border-[#1e293b]/10 dark:hover:border-white/20 hover:shadow-md ${action.color}`}
+                                                        title={action.label}
+                                                    >
+                                                        <action.icon size={14} strokeWidth={2.5} />
+                                                    </Link>
+                                                ))}
                                             </div>
                                         </td>
                                     </motion.tr>
@@ -267,21 +267,21 @@ const UsuariosIndex = () => {
             {/* Pagination Standard */}
             {totalPages > 1 && (
                 <div className="flex items-center justify-between mt-4">
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                        Página <span className="text-gray-900">{currentPage}</span> de <span className="text-gray-900">{totalPages}</span>
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">
+                        Página <span className="text-gray-900 dark:text-white">{currentPage}</span> de <span className="text-gray-900 dark:text-white">{totalPages}</span>
                     </p>
                     <div className="flex items-center gap-1.5">
                         <button
                             onClick={() => setCurrentPage(1)}
                             disabled={currentPage === 1}
-                            className="p-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50 text-gray-600 hover:border-gray-300 transition-all shadow-sm"
+                            className="p-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg disabled:opacity-50 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-white/20 transition-all shadow-sm"
                         >
                             <ChevronsLeft size={14} />
                         </button>
                         <button
                             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                             disabled={currentPage === 1}
-                            className="p-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50 text-gray-600 hover:border-gray-300 transition-all shadow-sm"
+                            className="p-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg disabled:opacity-50 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-white/20 transition-all shadow-sm"
                         >
                             <ChevronLeft size={14} />
                         </button>
@@ -292,8 +292,8 @@ const UsuariosIndex = () => {
                                     key={i}
                                     onClick={() => setCurrentPage(i + 1)}
                                     className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all ${currentPage === i + 1
-                                            ? 'bg-orange-500 text-white shadow-md'
-                                            : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                                        ? 'bg-orange-500 text-white shadow-md'
+                                        : 'bg-white dark:bg-[#111c44] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'
                                         }`}
                                 >
                                     {i + 1}
@@ -304,14 +304,14 @@ const UsuariosIndex = () => {
                         <button
                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                             disabled={currentPage === totalPages}
-                            className="p-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50 text-gray-600 hover:border-gray-300 transition-all shadow-sm"
+                            className="p-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg disabled:opacity-50 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-white/20 transition-all shadow-sm"
                         >
                             <ChevronRight size={14} />
                         </button>
                         <button
                             onClick={() => setCurrentPage(totalPages)}
                             disabled={currentPage === totalPages}
-                            className="p-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50 text-gray-600 hover:border-gray-300 transition-all shadow-sm"
+                            className="p-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg disabled:opacity-50 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-white/20 transition-all shadow-sm"
                         >
                             <ChevronsRight size={14} />
                         </button>

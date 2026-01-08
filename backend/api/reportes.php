@@ -9,10 +9,27 @@ switch ($method) {
             // Estadísticas para el dashboard
             $periodo = isset($_GET['periodo']) ? $_GET['periodo'] : '12M';
             
-            // Determinar intervalo para la gráfica
+            // Determinar intervalo y agrupación para la gráfica principal
             $intervalo = "12 MONTH";
-            if ($periodo === '6M') $intervalo = "6 MONTH";
-            if ($periodo === '24M') $intervalo = "24 MONTH";
+            $formatoAgrupacion = "%Y-%m";
+            $labelPeriodo = "mes";
+
+            if ($periodo === '7D') {
+                $intervalo = "7 DAY";
+                $formatoAgrupacion = "%Y-%m-%d";
+                $labelPeriodo = "mes"; // Mantenemos el nombre del campo para compatibilidad
+            } elseif ($periodo === '1M') {
+                $intervalo = "1 MONTH";
+                $formatoAgrupacion = "%Y-%m-%d";
+                $labelPeriodo = "mes";
+            } elseif ($periodo === '6M') {
+                $intervalo = "6 MONTH";
+                $formatoAgrupacion = "%Y-%m";
+            } elseif ($periodo === '24M') {
+                $intervalo = "24 MONTH";
+                $formatoAgrupacion = "%Y-%m";
+            }
+
             if ($periodo === 'YEAR') {
                 $stmtVentasMesQuery = "
                     SELECT DATE_FORMAT(fecha, '%Y-%m') as mes, SUM(total) as total, COUNT(*) as pedidos 
@@ -23,24 +40,36 @@ switch ($method) {
                 ";
             } else {
                 $stmtVentasMesQuery = "
-                    SELECT DATE_FORMAT(fecha, '%Y-%m') as mes, SUM(total) as total, COUNT(*) as pedidos 
+                    SELECT DATE_FORMAT(fecha, '$formatoAgrupacion') as mes, SUM(total) as total, COUNT(*) as pedidos 
                     FROM pedidos 
                     WHERE estado != 'cancelado' AND fecha >= DATE_SUB(NOW(), INTERVAL $intervalo)
-                    GROUP BY DATE_FORMAT(fecha, '%Y-%m')
+                    GROUP BY DATE_FORMAT(fecha, '$formatoAgrupacion')
                     ORDER BY mes
                 ";
             }
-            // Ventas del mes actual (Tarjeta Principal)
-            $stmtVentasMes = $pdo->prepare("SELECT SUM(total) as total FROM pedidos WHERE estado != 'cancelado' AND MONTH(fecha) = MONTH(NOW()) AND YEAR(fecha) = YEAR(NOW())");
+            // Ventas del mes actual (Tarjeta Principal) - INCLUYE SERVICIOS COMPLETADOS
+            $stmtVentasMes = $pdo->prepare("
+                SELECT (
+                    SELECT SUM(total) FROM pedidos WHERE estado != 'cancelado' AND MONTH(fecha) = MONTH(NOW()) AND YEAR(fecha) = YEAR(NOW())
+                ) + (
+                    SELECT COALESCE(SUM(costo_final), 0) FROM reservaciones_servicios WHERE estado = 'Completado' AND MONTH(fecha_registro) = MONTH(NOW()) AND YEAR(fecha_registro) = YEAR(NOW())
+                ) as total
+            ");
             $stmtVentasMes->execute();
             $ventasMes = $stmtVentasMes->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
-            // Ventas Históricas (Para gráficas de pastel/categoría)
-            $stmtVentasTotal = $pdo->prepare("SELECT SUM(total) as total FROM pedidos WHERE estado != 'cancelado'");
+            // Ventas Históricas - INCLUYE SERVICIOS COMPLETADOS
+            $stmtVentasTotal = $pdo->prepare("
+                SELECT (
+                    SELECT SUM(total) FROM pedidos WHERE estado != 'cancelado'
+                ) + (
+                    SELECT COALESCE(SUM(costo_final), 0) FROM reservaciones_servicios WHERE estado = 'Completado'
+                ) as total
+            ");
             $stmtVentasTotal->execute();
             $totalVentasBase = $stmtVentasTotal->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
             
-            // Pedidos del mes actual
+            // Pedidos del mes actual (Solo pedidos físicos)
             $stmtPedidosMes = $pdo->prepare("SELECT COUNT(*) as total FROM pedidos WHERE MONTH(fecha) = MONTH(NOW()) AND YEAR(fecha) = YEAR(NOW())");
             $stmtPedidosMes->execute();
             $totalPedidosMes = $stmtPedidosMes->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
@@ -60,50 +89,67 @@ switch ($method) {
             $stmtClientes->execute();
             $totalClientes = $stmtClientes->fetch(PDO::FETCH_ASSOC)['total_clientes'];
             
-            // Ventas por día (últimos 6 días)
+            // ============================================
+            // GENERAR RESUMEN DIARIO (Últimos 7 días)
+            // ============================================
+            $resumenDiario = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $fechaLoop = date('Y-m-d', strtotime("-$i days"));
+                $resumenDiario[$fechaLoop] = [
+                    'dia' => $fechaLoop,
+                    'total' => 0,
+                    'pedidos' => 0,
+                    'productos' => 0,
+                    'clientes' => 0
+                ];
+            }
+
+            // 1. Ventas por día
             $stmtVentasDia = $pdo->prepare("
-                SELECT DATE(fecha) as dia, SUM(total) as total 
+                SELECT DATE(fecha) as dia, SUM(total) as total, COUNT(*) as cantidad 
                 FROM pedidos 
-                WHERE estado != 'cancelado' AND fecha >= DATE_SUB(NOW(), INTERVAL 6 DAY)
+                WHERE estado != 'cancelado' AND fecha >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
                 GROUP BY DATE(fecha)
-                ORDER BY dia
             ");
             $stmtVentasDia->execute();
-            $ventasPorDia = $stmtVentasDia->fetchAll(PDO::FETCH_ASSOC);
+            while ($row = $stmtVentasDia->fetch(PDO::FETCH_ASSOC)) {
+                if (isset($resumenDiario[$row['dia']])) {
+                    $resumenDiario[$row['dia']]['total'] = floatval($row['total']);
+                    $resumenDiario[$row['dia']]['pedidos'] = intval($row['cantidad']);
+                }
+            }
             
-            // Pedidos por día (últimos 6 días)
-            $stmtPedidosDia = $pdo->prepare("
-                SELECT DATE(fecha) as dia, COUNT(*) as cantidad 
-                FROM pedidos 
-                WHERE fecha >= DATE_SUB(NOW(), INTERVAL 6 DAY)
-                GROUP BY DATE(fecha)
-                ORDER BY dia
-            ");
-            $stmtPedidosDia->execute();
-            $pedidosPorDia = $stmtPedidosDia->fetchAll(PDO::FETCH_ASSOC);
-            
-            // Productos vendidos por día (últimos 6 días)
-            $stmtProductosVendidosDia = $pdo->prepare("
+            // 2. Productos vendidos por día
+            $stmtProdDia = $pdo->prepare("
                 SELECT DATE(ped.fecha) as dia, SUM(dp.cantidad) as cantidad 
                 FROM detalle_pedido dp
                 INNER JOIN pedidos ped ON dp.pedido_id = ped.id
-                WHERE ped.estado != 'cancelado' AND ped.fecha >= DATE_SUB(NOW(), INTERVAL 6 DAY)
+                WHERE ped.estado != 'cancelado' AND ped.fecha >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
                 GROUP BY DATE(ped.fecha)
-                ORDER BY dia
             ");
-            $stmtProductosVendidosDia->execute();
-            $productosVendidosPorDia = $stmtProductosVendidosDia->fetchAll(PDO::FETCH_ASSOC);
+            $stmtProdDia->execute();
+            while ($row = $stmtProdDia->fetch(PDO::FETCH_ASSOC)) {
+                if (isset($resumenDiario[$row['dia']])) {
+                    $resumenDiario[$row['dia']]['productos'] = intval($row['cantidad']);
+                }
+            }
             
-            // Nuevos clientes por día (últimos 6 días)
-            $stmtClientesDia = $pdo->prepare("
+            // 3. Nuevos clientes por día
+            $stmtClieDia = $pdo->prepare("
                 SELECT DATE(fecha_registro) as dia, COUNT(*) as cantidad 
                 FROM usuarios 
-                WHERE rol = 'cliente' AND fecha_registro >= DATE_SUB(NOW(), INTERVAL 6 DAY)
+                WHERE rol = 'cliente' AND fecha_registro >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
                 GROUP BY DATE(fecha_registro)
-                ORDER BY dia
             ");
-            $stmtClientesDia->execute();
-            $clientesNuevosPorDia = $stmtClientesDia->fetchAll(PDO::FETCH_ASSOC);
+            $stmtClieDia->execute();
+            while ($row = $stmtClieDia->fetch(PDO::FETCH_ASSOC)) {
+                if (isset($resumenDiario[$row['dia']])) {
+                    $resumenDiario[$row['dia']]['clientes'] = intval($row['cantidad']);
+                }
+            }
+
+            $datosDiariosArr = array_values($resumenDiario);
+            // ============================================
             
             // Productos vendidos este mes
             $stmtProductosVendidosMes = $pdo->prepare("
@@ -177,7 +223,7 @@ switch ($method) {
             
             // Productos más vendidos
             $stmtMasVendidos = $pdo->prepare("
-                SELECT p.nombre, p.precio_base as precio, p.imagen, SUM(dp.cantidad) as total_vendido 
+                SELECT p.id, p.nombre, p.precio_base as precio, p.imagen, SUM(dp.cantidad) as total_vendido 
                 FROM detalle_pedido dp
                 LEFT JOIN productos p ON dp.producto_id = p.id
                 LEFT JOIN pedidos ped ON dp.pedido_id = ped.id
@@ -243,10 +289,20 @@ switch ($method) {
                 FROM pedidos p 
                 LEFT JOIN usuarios c ON p.usuario_id = c.id 
                 ORDER BY p.fecha DESC 
-                LIMIT 10
+                LIMIT 8
             ");
             $stmtUltimosPedidos->execute();
             $ultimosPedidos = $stmtUltimosPedidos->fetchAll(PDO::FETCH_ASSOC);
+
+            // Últimas reservaciones (Tickets de servicio)
+            $stmtUltimasRes = $pdo->prepare("
+                SELECT r.id, r.fecha_registro as fecha, COALESCE(r.costo_final, r.costo_sugerido) as total, r.estado, r.nombre_cliente as cliente_nombre 
+                FROM reservaciones_servicios r 
+                ORDER BY r.fecha_registro DESC 
+                LIMIT 8
+            ");
+            $stmtUltimasRes->execute();
+            $ultimasReservaciones = $stmtUltimasRes->fetchAll(PDO::FETCH_ASSOC);
 
             // --- ADVANCED BI & FINANCIAL ANALYSIS (v2) ---
 
@@ -344,6 +400,7 @@ switch ($method) {
             // Ventas por categoría
             $stmtVentasCategoria = $pdo->prepare("
                 SELECT 
+                    c.id as categoria_id,
                     COALESCE(c.nombre, 'Sin Categoría') as categoria, 
                     SUM(dp.subtotal) as total_ventas
                 FROM detalle_pedido dp
@@ -351,7 +408,7 @@ switch ($method) {
                 LEFT JOIN productos p ON dp.producto_id = p.id
                 LEFT JOIN categorias c ON p.categoria_id = c.id
                 WHERE ped.estado != 'cancelado'
-                GROUP BY COALESCE(c.nombre, 'Sin Categoría')
+                GROUP BY COALESCE(c.nombre, 'Sin Categoría'), c.id
                 ORDER BY total_ventas DESC
             ");
             $stmtVentasCategoria->execute();
@@ -374,16 +431,17 @@ switch ($method) {
                     'margenEstimado' => floatval($margenEstimado)
                 ],
                 'ventasPorMes' => $ventasPorMes,
-                'ventasPorDia' => $ventasPorDia,
+                'ventasPorDia' => array_map(function($d) { return ['dia' => $d['dia'], 'total' => $d['total']]; }, $datosDiariosArr),
                 'ventasPorHora' => $ventasPorHora,
                 'ventasPorDiaSemana' => $ventasPorDiaSemana,
                 'ventasPorMarca' => $ventasPorMarca,
-                'pedidosPorDia' => $pedidosPorDia,
-                'productosVendidosPorDia' => $productosVendidosPorDia,
-                'clientesNuevosPorDia' => $clientesNuevosPorDia,
+                'pedidosPorDia' => array_map(function($d) { return ['dia' => $d['dia'], 'cantidad' => $d['pedidos']]; }, $datosDiariosArr),
+                'productosVendidosPorDia' => array_map(function($d) { return ['dia' => $d['dia'], 'cantidad' => $d['productos']]; }, $datosDiariosArr),
+                'clientesNuevosPorDia' => array_map(function($d) { return ['dia' => $d['dia'], 'cantidad' => $d['clientes']]; }, $datosDiariosArr),
                 'productosMasVendidos' => $productosMasVendidos,
                 'pedidosPorEstado' => $pedidosPorEstado,
                 'ultimosPedidos' => $ultimosPedidos,
+                'ultimasReservaciones' => $ultimasReservaciones,
                 'ventasPorCategoria' => $ventasPorCategoria,
                 'topClientes' => $topClientes,
                 'clientesTrend' => $clientesTrend,

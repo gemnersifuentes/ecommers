@@ -90,18 +90,18 @@ const PedidosShow = () => {
 
     const getEstadoConfig = (estado) => {
         const configs = {
-            'pendiente': { label: 'Pendiente', color: 'text-yellow-600 bg-yellow-50 border-yellow-100', icon: Clock, dot: 'bg-yellow-500' },
-            'pendiente_verificacion': { label: 'Pendiente de Verificación', color: 'text-orange-600 bg-orange-50 border-orange-100', icon: AlertCircle, dot: 'bg-orange-500' },
-            'pagado': { label: 'Pagado', color: 'text-blue-600 bg-blue-50 border-blue-100', icon: CreditCard, dot: 'bg-blue-500' },
-            'en_preparacion': { label: 'En Preparación', color: 'text-indigo-600 bg-indigo-50 border-indigo-100', icon: Box, dot: 'bg-indigo-500' },
-            'enviado': { label: 'Enviado', color: 'text-purple-600 bg-purple-50 border-purple-100', icon: Truck, dot: 'bg-purple-500' },
-            'listo_recoger': { label: 'Listo para recoger', color: 'text-amber-600 bg-amber-50 border-amber-100', icon: ShoppingBag, dot: 'bg-amber-500' },
-            'entregado': { label: 'Entregado', color: 'text-emerald-600 bg-emerald-50 border-emerald-100', icon: CheckCircle2, dot: 'bg-emerald-500' },
-            'completado': { label: 'Completado', color: 'text-green-600 bg-green-50 border-green-100', icon: CheckCircle2, dot: 'bg-green-500' },
-            'cancelado': { label: 'Cancelado', color: 'text-red-600 bg-red-50 border-red-100', icon: XCircle, dot: 'bg-red-500' },
-            'devuelto': { label: 'Devuelto', color: 'text-gray-600 bg-gray-50 border-gray-200', icon: AlertCircle, dot: 'bg-gray-500' }
+            'pendiente': { label: 'Pendiente', color: 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-500/10 border-yellow-100 dark:border-yellow-500/20', icon: Clock, dot: 'bg-yellow-500' },
+            'pendiente_verificacion': { label: 'Pendiente de Verificación', color: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-100 dark:border-orange-500/20', icon: AlertCircle, dot: 'bg-orange-500' },
+            'pagado': { label: 'Pagado', color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border-blue-100 dark:border-blue-500/20', icon: CreditCard, dot: 'bg-blue-500' },
+            'en_preparacion': { label: 'En Preparación', color: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border-indigo-100 dark:border-indigo-500/20', icon: Box, dot: 'bg-indigo-500' },
+            'enviado': { label: 'Enviado', color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 border-purple-100 dark:border-purple-500/20', icon: Truck, dot: 'bg-purple-500' },
+            'listo_recoger': { label: 'Listo para recoger', color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-amber-100 dark:border-amber-500/20', icon: ShoppingBag, dot: 'bg-amber-500' },
+            'entregado': { label: 'Entregado', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20', icon: CheckCircle2, dot: 'bg-emerald-500' },
+            'completado': { label: 'Completado', color: 'text-green-600 dark:text-emerald-400 bg-green-50 dark:bg-emerald-500/10 border-green-100 dark:border-emerald-500/20', icon: CheckCircle2, dot: 'bg-green-500' },
+            'cancelado': { label: 'Cancelado', color: 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/20', icon: XCircle, dot: 'bg-red-500' },
+            'devuelto': { label: 'Devuelto', color: 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10', icon: AlertCircle, dot: 'bg-gray-500' }
         };
-        const config = configs[estado] || { label: estado || 'Desconocido', color: 'text-gray-600 bg-gray-50 border-gray-100', icon: AlertCircle, dot: 'bg-gray-500' };
+        const config = configs[estado] || { label: estado || 'Desconocido', color: 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/10', icon: AlertCircle, dot: 'bg-gray-500' };
         return config;
     };
 
@@ -109,17 +109,17 @@ const PedidosShow = () => {
         return (
             <div className="flex flex-col items-center justify-center h-96 gap-4">
                 <div className="w-12 h-12 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Cargando detalles...</span>
+                <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Cargando detalles...</span>
             </div>
         );
     }
 
     if (!pedido) {
         return (
-            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
-                <Package size={48} className="mx-auto text-gray-200 mb-4" strokeWidth={1} />
-                <h3 className="text-sm font-black text-gray-900 uppercase tracking-tight">Pedido no encontrado</h3>
-                <Link to="/admin/pedidos" className="mt-4 inline-flex items-center gap-2 text-[10px] font-black text-orange-600 uppercase tracking-widest hover:gap-3 transition-all">
+            <div className="text-center py-20 bg-white dark:bg-[#111c44] rounded-3xl border border-dashed border-gray-200 dark:border-white/10">
+                <Package size={48} className="mx-auto text-gray-200 dark:text-gray-800 mb-4" strokeWidth={1} />
+                <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">Pedido no encontrado</h3>
+                <Link to="/admin/pedidos" className="mt-4 inline-flex items-center gap-2 text-[10px] font-black text-orange-600 dark:text-orange-500 uppercase tracking-widest hover:gap-3 transition-all">
                     <ArrowLeft size={14} /> Volver a pedidos
                 </Link>
             </div>
@@ -140,14 +140,14 @@ const PedidosShow = () => {
                         className="space-y-1"
                     >
                         <div className="flex items-center gap-3 mb-2">
-                            <Link to="/admin/pedidos" className="p-2 bg-white border border-gray-100 rounded-xl text-gray-400 hover:text-orange-500 transition-all shadow-sm">
+                            <Link to="/admin/pedidos" className="p-2 bg-white dark:bg-[#111c44] border border-gray-100 dark:border-white/5 rounded-xl text-gray-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all shadow-sm">
                                 <ArrowLeft size={16} />
                             </Link>
-                            <span className="text-[10px] font-black text-orange-500 bg-orange-50 px-2 py-0.5 rounded uppercase tracking-tighter border border-orange-100">
+                            <span className="text-[10px] font-black text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded uppercase tracking-tighter border border-orange-100 dark:border-orange-500/20">
                                 ORDEN #{pedido.id.toString().padStart(5, '0')}
                             </span>
                         </div>
-                        <h2 className="text-3xl font-black text-[#1e293b] tracking-tight uppercase">
+                        <h2 className="text-3xl font-black text-[#1e293b] dark:text-white tracking-tight uppercase">
                             Detalles del Pedido
                         </h2>
                         <Breadcrumb items={[
@@ -172,34 +172,34 @@ const PedidosShow = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
+                        className="bg-white dark:bg-[#111c44] rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm overflow-hidden"
                     >
-                        <div className="p-6 border-b border-gray-50 bg-gray-50/30 flex items-center justify-between">
+                        <div className="p-6 border-b border-gray-50 dark:border-white/5 bg-gray-50/30 dark:bg-[#0b1437]/50 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-white rounded-xl shadow-sm border border-gray-100">
-                                    <ShoppingBag size={18} className="text-orange-500" />
+                                <div className="p-2 bg-white dark:bg-[#111c44] rounded-xl shadow-sm border border-gray-100 dark:border-white/10">
+                                    <ShoppingBag size={18} className="text-orange-500 dark:text-orange-400" />
                                 </div>
-                                <h3 className="text-xs font-black text-gray-900 uppercase tracking-widest">Productos en la Orden</h3>
+                                <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Productos en la Orden</h3>
                             </div>
-                            <span className="text-[10px] font-bold text-gray-400 uppercase">{pedido.items?.length} Items</span>
+                            <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase">{pedido.items?.length} Items</span>
                         </div>
 
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-separate border-spacing-0">
                                 <thead>
                                     <tr>
-                                        <th className="px-6 py-4 text-[9px] font-black text-[#64748b] uppercase tracking-widest border-b border-gray-50">Producto</th>
-                                        <th className="px-6 py-4 text-[9px] font-black text-[#64748b] uppercase tracking-widest border-b border-gray-50 text-center">Cant.</th>
-                                        <th className="px-6 py-4 text-[9px] font-black text-[#64748b] uppercase tracking-widest border-b border-gray-50 text-right">Precio</th>
-                                        <th className="px-6 py-4 text-[9px] font-black text-orange-600 uppercase tracking-widest border-b border-gray-50 text-right">Subtotal</th>
+                                        <th className="px-6 py-4 text-[9px] font-black text-[#64748b] dark:text-gray-500 uppercase tracking-widest border-b border-gray-50 dark:border-white/5">Producto</th>
+                                        <th className="px-6 py-4 text-[9px] font-black text-[#64748b] dark:text-gray-500 uppercase tracking-widest border-b border-gray-50 dark:border-white/5 text-center">Cant.</th>
+                                        <th className="px-6 py-4 text-[9px] font-black text-[#64748b] dark:text-gray-500 uppercase tracking-widest border-b border-gray-50 dark:border-white/5 text-right">Precio</th>
+                                        <th className="px-6 py-4 text-[9px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest border-b border-gray-50 dark:border-white/5 text-right">Subtotal</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-50">
+                                <tbody className="divide-y divide-gray-50 dark:divide-white/5">
                                     {pedido.items?.map((detalle, index) => (
-                                        <tr key={index} className="group hover:bg-gray-50/50 transition-colors">
+                                        <tr key={index} className="group hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex-shrink-0">
+                                                    <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-[#0b1437] border border-gray-100 dark:border-white/10 overflow-hidden flex-shrink-0">
                                                         {detalle.imagen ? (
                                                             <img
                                                                 src={detalle.imagen.startsWith('http') ? detalle.imagen : `http://localhost:8000/public/uploads/${detalle.imagen}`}
@@ -207,15 +207,15 @@ const PedidosShow = () => {
                                                                 className="w-full h-full object-cover"
                                                             />
                                                         ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                            <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-700">
                                                                 <Package size={20} />
                                                             </div>
                                                         )}
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <p className="text-[11px] font-black text-[#1e293b] uppercase leading-tight">{detalle.nombre}</p>
+                                                        <p className="text-[11px] font-black text-[#1e293b] dark:text-white uppercase leading-tight">{detalle.nombre}</p>
                                                         {detalle.variacion_nombre && (
-                                                            <span className="text-[8px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded mt-1 inline-block uppercase tracking-wider">
+                                                            <span className="text-[8px] font-bold text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 px-1.5 py-0.5 rounded mt-1 inline-block uppercase tracking-wider">
                                                                 {detalle.variacion_nombre}
                                                             </span>
                                                         )}
@@ -223,24 +223,24 @@ const PedidosShow = () => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <span className="text-[11px] font-black text-[#1e293b] tabular-nums font-mono">
+                                                <span className="text-[11px] font-black text-[#1e293b] dark:text-white tabular-nums font-mono">
                                                     x{detalle.cantidad}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-right whitespace-nowrap">
                                                 <div className="flex flex-col items-end">
                                                     {parseFloat(detalle.precio_regular) > parseFloat(detalle.precio_unitario) && (
-                                                        <span className="text-[9px] font-bold text-gray-300 line-through tabular-nums mb-1">
+                                                        <span className="text-[9px] font-bold text-gray-300 dark:text-gray-600 line-through tabular-nums mb-1">
                                                             S/ {parseFloat(detalle.precio_regular).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                                         </span>
                                                     )}
-                                                    <span className="text-[11px] font-bold text-gray-500 tabular-nums">
+                                                    <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 tabular-nums">
                                                         S/ {parseFloat(detalle.precio_unitario || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                                     </span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-right whitespace-nowrap">
-                                                <span className="text-[11px] font-black text-orange-600 tabular-nums">
+                                                <span className="text-[11px] font-black text-orange-600 dark:text-orange-400 tabular-nums">
                                                     S/ {parseFloat(detalle.subtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                                 </span>
                                             </td>
@@ -250,27 +250,27 @@ const PedidosShow = () => {
                             </table>
                         </div>
 
-                        <div className="p-8 bg-[#f8fafc]/50 border-t border-gray-50">
+                        <div className="p-8 bg-[#f8fafc]/50 dark:bg-[#0b1437]/30 border-t border-gray-50 dark:border-white/5">
                             <div className="flex flex-col items-end gap-2">
-                                <div className="flex items-center gap-8 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                <div className="flex items-center gap-8 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
                                     <span>Subtotal</span>
-                                    <span className="w-24 text-right text-gray-600">S/ {(parseFloat(pedido.total) / 1.18).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                    <span className="w-24 text-right text-gray-600 dark:text-gray-400">S/ {(parseFloat(pedido.total) / 1.18).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                                 </div>
-                                <div className="flex items-center gap-8 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                <div className="flex items-center gap-8 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
                                     <span>IGV (18%)</span>
-                                    <span className="w-24 text-right text-gray-600">S/ {(parseFloat(pedido.total) - (parseFloat(pedido.total) / 1.18)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                    <span className="w-24 text-right text-gray-600 dark:text-gray-400">S/ {(parseFloat(pedido.total) - (parseFloat(pedido.total) / 1.18)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                                 </div>
                                 {pedido.items?.reduce((acc, item) => acc + (parseFloat(item.precio_regular || item.precio_unitario) - parseFloat(item.precio_unitario)) * item.cantidad, 0) > 0 && (
-                                    <div className="flex items-center gap-8 text-[10px] font-black text-emerald-500 uppercase tracking-widest">
+                                    <div className="flex items-center gap-8 text-[10px] font-black text-emerald-500 dark:text-emerald-400 uppercase tracking-widest">
                                         <span>Tu Ahorro Total</span>
                                         <span className="w-24 text-right">
                                             - S/ {pedido.items.reduce((acc, item) => acc + (parseFloat(item.precio_regular || item.precio_unitario) - parseFloat(item.precio_unitario)) * item.cantidad, 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                         </span>
                                     </div>
                                 )}
-                                <div className="flex items-center gap-8 mt-2 pt-2 border-t border-gray-200">
-                                    <span className="text-xs font-black text-[#1e293b] uppercase tracking-tighter">Total Final</span>
-                                    <span className="w-24 text-right text-xl font-black text-orange-600 tabular-nums">
+                                <div className="flex items-center gap-8 mt-2 pt-2 border-t border-gray-200 dark:border-white/10">
+                                    <span className="text-xs font-black text-[#1e293b] dark:text-white uppercase tracking-tighter">Total Final</span>
+                                    <span className="w-24 text-right text-xl font-black text-orange-600 dark:text-orange-500 tabular-nums">
                                         S/ {parseFloat(pedido.total).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </span>
                                 </div>
@@ -283,13 +283,13 @@ const PedidosShow = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8"
+                        className="bg-white dark:bg-[#111c44] rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm p-8"
                     >
                         <div className="flex items-center gap-3 mb-8">
-                            <div className="p-2 bg-white rounded-xl shadow-sm border border-gray-100">
-                                <RotateCcw size={18} className="text-blue-500" />
+                            <div className="p-2 bg-white dark:bg-[#111c44] rounded-xl shadow-sm border border-gray-100 dark:border-white/10">
+                                <RotateCcw size={18} className="text-blue-500 dark:text-blue-400" />
                             </div>
-                            <h3 className="text-xs font-black text-gray-900 uppercase tracking-widest">Gestionar Estado de Operación</h3>
+                            <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Gestionar Estado de Operación</h3>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -311,8 +311,8 @@ const PedidosShow = () => {
                                     className={`relative flex flex-col items-center gap-3 p-4 rounded-2xl border transition-all group overflow-hidden ${pedido.estado === st.id
                                         ? `${st.config.color} opacity-50 cursor-default shadow-inner`
                                         : updatingStatus === st.id
-                                            ? 'bg-orange-50 border-orange-200 shadow-md'
-                                            : 'bg-white border-gray-100 hover:border-orange-200 hover:shadow-lg hover:shadow-orange-500/5 cursor-pointer'
+                                            ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/30 shadow-md'
+                                            : 'bg-white dark:bg-[#0b1437] border-gray-100 dark:border-white/5 hover:border-orange-200 dark:hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/5 cursor-pointer'
                                         }`}
                                 >
                                     {(pedido.estado === st.id || updatingStatus === st.id) && (
@@ -324,10 +324,10 @@ const PedidosShow = () => {
                                             )}
                                         </div>
                                     )}
-                                    <div className={`p-2 rounded-xl transition-colors ${pedido.estado === st.id ? 'bg-white/50' : updatingStatus === st.id ? 'bg-white' : 'bg-gray-50 group-hover:bg-orange-50'}`}>
-                                        <st.config.icon size={18} className={pedido.estado === st.id ? 'opacity-80' : updatingStatus === st.id ? 'text-orange-500' : 'text-gray-400 group-hover:text-orange-500'} />
+                                    <div className={`p-2 rounded-xl transition-colors ${pedido.estado === st.id ? 'bg-white/50 dark:bg-white/5' : updatingStatus === st.id ? 'bg-white dark:bg-[#111c44]' : 'bg-gray-50 dark:bg-[#111c44] group-hover:bg-orange-50 dark:group-hover:bg-orange-500/10'}`}>
+                                        <st.config.icon size={18} className={pedido.estado === st.id ? 'opacity-80' : updatingStatus === st.id ? 'text-orange-500 dark:text-orange-400' : 'text-gray-400 group-hover:text-orange-500 dark:group-hover:text-orange-400'} />
                                     </div>
-                                    <span className="text-[9px] font-black uppercase tracking-tighter text-center leading-none">
+                                    <span className={`text-[9px] font-black uppercase tracking-tighter text-center leading-none ${pedido.estado === st.id ? '' : 'text-gray-600 dark:text-gray-400 group-hover:text-orange-600 dark:group-hover:text-orange-400'}`}>
                                         {st.config.label}
                                     </span>
                                 </button>
@@ -344,21 +344,21 @@ const PedidosShow = () => {
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.25 }}
-                            className="bg-white rounded-3xl border-2 border-orange-100 shadow-xl shadow-orange-500/5 p-8 overflow-hidden relative"
+                            className="bg-white dark:bg-[#111c44] rounded-3xl border-2 border-orange-100 dark:border-orange-500/20 shadow-xl shadow-orange-500/5 p-8 overflow-hidden relative"
                         >
-                            <div className="absolute top-0 right-0 px-4 py-1.5 bg-orange-500 text-white text-[8px] font-black uppercase tracking-widest rounded-bl-2xl">
+                            <div className="absolute top-0 right-0 px-4 py-1.5 bg-orange-500 dark:bg-orange-600 text-white text-[8px] font-black uppercase tracking-widest rounded-bl-2xl">
                                 Requiere Acción
                             </div>
 
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="p-2 bg-orange-50 rounded-xl shadow-sm border border-orange-100">
-                                    <Eye size={18} className="text-orange-600" />
+                                <div className="p-2 bg-orange-50 dark:bg-orange-500/10 rounded-xl shadow-sm border border-orange-100 dark:border-orange-500/20">
+                                    <Eye size={18} className="text-orange-600 dark:text-orange-400" />
                                 </div>
-                                <h3 className="text-xs font-black text-gray-900 uppercase tracking-widest">Verificación de Pago</h3>
+                                <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Verificación de Pago</h3>
                             </div>
 
                             <div
-                                className="group relative aspect-[3/4] rounded-2xl border border-gray-100 bg-gray-50 overflow-hidden cursor-zoom-in mb-6"
+                                className="group relative aspect-[3/4] rounded-2xl border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-[#0b1437] overflow-hidden cursor-zoom-in mb-6"
                                 onClick={() => setShowModal(true)}
                             >
                                 <img
@@ -367,7 +367,7 @@ const PedidosShow = () => {
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                 />
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <div className="bg-white p-3 rounded-full text-gray-900 shadow-xl">
+                                    <div className="bg-white dark:bg-[#111c44] p-3 rounded-full text-gray-900 dark:text-white shadow-xl">
                                         <Eye size={20} />
                                     </div>
                                 </div>
@@ -377,7 +377,7 @@ const PedidosShow = () => {
                                 <button
                                     onClick={() => cambiarEstado('pagado')}
                                     disabled={!!updatingStatus}
-                                    className="w-full py-4 bg-emerald-500 text-white font-black rounded-2xl hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-200 active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-50 disabled:active:scale-100"
+                                    className="w-full py-4 bg-emerald-500 dark:bg-emerald-600 text-white font-black rounded-2xl hover:bg-emerald-600 dark:hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20 active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-50 disabled:active:scale-100"
                                 >
                                     {updatingStatus === 'pagado' ? (
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -395,35 +395,35 @@ const PedidosShow = () => {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8"
+                        className="bg-white dark:bg-[#111c44] rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm p-8"
                     >
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-white rounded-xl shadow-sm border border-gray-100">
-                                <User size={18} className="text-gray-900" />
+                            <div className="p-2 bg-white dark:bg-[#111c44] rounded-xl shadow-sm border border-gray-100 dark:border-white/10">
+                                <User size={18} className="text-gray-900 dark:text-white" />
                             </div>
-                            <h3 className="text-xs font-black text-gray-900 uppercase tracking-widest">Perfil del Cliente</h3>
+                            <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Perfil del Cliente</h3>
                         </div>
 
                         <div className="space-y-5">
                             <div className="group">
-                                <label className="text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] block mb-1">Nombre Completo</label>
+                                <label className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] block mb-1">Nombre Completo</label>
                                 <div className="flex items-center gap-2">
-                                    <div className="w-1 h-3 bg-gray-100 rounded-full group-hover:bg-orange-500 transition-colors" />
-                                    <p className="text-[11px] font-black text-gray-800 uppercase tracking-tight">{pedido.cliente_nombre}</p>
+                                    <div className="w-1 h-3 bg-gray-100 dark:bg-white/10 rounded-full group-hover:bg-orange-500 transition-colors" />
+                                    <p className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight">{pedido.cliente_nombre}</p>
                                 </div>
                             </div>
                             <div className="group">
-                                <label className="text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] block mb-1">Contacto Digital</label>
-                                <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-xl border border-gray-100">
-                                    <Mail size={14} className="text-gray-400" />
-                                    <p className="text-[10px] font-bold text-gray-600 truncate">{pedido.correo}</p>
+                                <label className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] block mb-1">Contacto Digital</label>
+                                <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 dark:bg-[#0b1437] rounded-xl border border-gray-100 dark:border-white/5">
+                                    <Mail size={14} className="text-gray-400 dark:text-gray-500" />
+                                    <p className="text-[10px] font-bold text-gray-600 dark:text-gray-400 truncate">{pedido.correo}</p>
                                 </div>
                             </div>
                             <div className="group">
-                                <label className="text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] block mb-1">Contacto Telefónico</label>
-                                <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-xl border border-gray-100">
-                                    <Phone size={14} className="text-gray-400" />
-                                    <p className="text-[10px] font-bold text-gray-600">{pedido.telefono || 'No registrado'}</p>
+                                <label className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] block mb-1">Contacto Telefónico</label>
+                                <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 dark:bg-[#0b1437] rounded-xl border border-gray-100 dark:border-white/5">
+                                    <Phone size={14} className="text-gray-400 dark:text-gray-500" />
+                                    <p className="text-[10px] font-bold text-gray-600 dark:text-gray-400">{pedido.telefono || 'No registrado'}</p>
                                 </div>
                             </div>
                         </div>
@@ -434,10 +434,10 @@ const PedidosShow = () => {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.4 }}
-                        className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 relative overflow-hidden"
+                        className="bg-white dark:bg-[#111c44] rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm p-8 relative overflow-hidden"
                     >
                         {/* Shipping Method Indicator */}
-                        <div className={`absolute top-0 right-0 px-4 py-1.5 rounded-bl-2xl text-[8px] font-black uppercase tracking-widest ${pedido.metodo_envio === 'tienda' ? 'bg-orange-500 text-white' : 'bg-blue-600 text-white'
+                        <div className={`absolute top-0 right-0 px-4 py-1.5 rounded-bl-2xl text-[8px] font-black uppercase tracking-widest ${pedido.metodo_envio === 'tienda' ? 'bg-orange-500 dark:bg-orange-600 text-white' : 'bg-blue-600 dark:bg-blue-700 text-white'
                             }`}>
                             <div className="flex items-center gap-1.5">
                                 {pedido.metodo_envio === 'tienda' ? <Store size={10} /> : <Home size={10} />}
@@ -446,24 +446,24 @@ const PedidosShow = () => {
                         </div>
 
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-white rounded-xl shadow-sm border border-gray-100">
-                                <MapPin size={18} className="text-orange-600" />
+                            <div className="p-2 bg-white dark:bg-[#111c44] rounded-xl shadow-sm border border-gray-100 dark:border-white/10">
+                                <MapPin size={18} className="text-orange-600 dark:text-orange-400" />
                             </div>
-                            <h3 className="text-xs font-black text-gray-900 uppercase tracking-widest">Información de Entrega</h3>
+                            <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Información de Entrega</h3>
                         </div>
 
-                        <div className="p-4 bg-orange-50/50 rounded-2xl border border-orange-100/50">
+                        <div className="p-4 bg-orange-50/50 dark:bg-orange-500/5 rounded-2xl border border-orange-100/50 dark:border-orange-500/20">
                             <div className="flex gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center border border-orange-100 text-orange-600 flex-shrink-0">
+                                <div className="w-8 h-8 rounded-lg bg-white dark:bg-[#111c44] flex items-center justify-center border border-orange-100 dark:border-orange-500/20 text-orange-600 dark:text-orange-400 flex-shrink-0">
                                     <MapPin size={14} />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-[11px] font-black text-gray-800 uppercase leading-snug">
+                                    <p className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase leading-snug">
                                         {pedido.metodo_envio === 'tienda' ? 'Punto de Recojo: Tienda Principal' : pedido.direccion}
                                     </p>
                                     <div className="flex items-center gap-2 mt-2">
                                         <div className="w-1.5 h-1.5 rounded-full bg-orange-400" />
-                                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">
+                                        <span className="text-[9px] font-bold text-gray-500 dark:text-gray-500 uppercase tracking-wider">
                                             {pedido.distrito ? `${pedido.distrito}, ${pedido.departamento}` : 'Dirección verificada'}
                                         </span>
                                     </div>
@@ -471,11 +471,11 @@ const PedidosShow = () => {
                             </div>
                         </div>
 
-                        <div className="mt-6 flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl border border-gray-100">
-                            <Calendar size={14} className="text-gray-400" />
+                        <div className="mt-6 flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-[#0b1437] rounded-xl border border-gray-100 dark:border-white/5">
+                            <Calendar size={14} className="text-gray-400 dark:text-gray-500" />
                             <div className="flex-1">
-                                <span className="text-[8px] font-black text-gray-400 uppercase block tracking-widest">Fecha de Orden</span>
-                                <span className="text-[10px] font-black text-gray-600">
+                                <span className="text-[8px] font-black text-gray-400 dark:text-gray-600 uppercase block tracking-widest">Fecha de Orden</span>
+                                <span className="text-[10px] font-black text-gray-600 dark:text-gray-400">
                                     {new Date(pedido.fecha).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}
                                 </span>
                             </div>
@@ -487,15 +487,15 @@ const PedidosShow = () => {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.5 }}
-                        className="p-6 bg-[#1e293b] rounded-3xl shadow-xl shadow-slate-900/10"
+                        className="p-6 bg-[#1e293b] dark:bg-[#111c44] rounded-3xl shadow-xl shadow-slate-900/10 dark:shadow-none border dark:border-white/5"
                     >
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 bg-slate-800 rounded-xl border border-slate-700">
+                            <div className="p-2 bg-slate-800 dark:bg-[#0b1437] rounded-xl border border-slate-700 dark:border-white/10">
                                 <AlertCircle size={16} className="text-orange-500" />
                             </div>
                             <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Nota Técnica</h4>
                         </div>
-                        <p className="text-[10px] font-medium text-slate-400 leading-relaxed uppercase tracking-tight">
+                        <p className="text-[10px] font-medium text-slate-400 dark:text-gray-400 leading-relaxed uppercase tracking-tight">
                             Esta orden está vinculada al sistema de pagos seguro. Cualquier cambio de estado notificará automáticamente al cliente vía correo electrónico institucional.
                         </p>
                     </motion.div>
@@ -509,14 +509,14 @@ const PedidosShow = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm"
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 dark:bg-black/95 backdrop-blur-sm"
                         onClick={() => setShowModal(false)}
                     >
                         <motion.div
                             initial={{ scale: 0.9, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.9, y: 20 }}
-                            className="relative max-w-4xl w-full max-h-[90vh] bg-white rounded-3xl overflow-hidden shadow-2xl"
+                            className="relative max-w-4xl w-full max-h-[90vh] bg-white dark:bg-[#111c44] rounded-3xl overflow-hidden shadow-2xl border dark:border-white/10"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <button
@@ -525,21 +525,21 @@ const PedidosShow = () => {
                             >
                                 <X size={24} />
                             </button>
-                            <div className="w-full h-full overflow-auto p-4 flex items-center justify-center bg-gray-100">
+                            <div className="w-full h-full overflow-auto p-4 flex items-center justify-center bg-gray-100 dark:bg-[#0b1437]">
                                 <img
                                     src={`http://localhost:8000/uploads/comprobantes/${pedido.comprobante_pago}`}
                                     alt="Comprobante de pago"
                                     className="max-w-full h-auto rounded-xl shadow-lg"
                                 />
                             </div>
-                            <div className="p-6 border-t border-gray-100 bg-white flex items-center justify-between">
+                            <div className="p-6 border-t border-gray-100 dark:border-white/5 bg-white dark:bg-[#111c44] flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-orange-50 rounded-xl">
-                                        <AlertCircle size={18} className="text-orange-600" />
+                                    <div className="p-2 bg-orange-50 dark:bg-orange-500/10 rounded-xl">
+                                        <AlertCircle size={18} className="text-orange-600 dark:text-orange-400" />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Verificando Pedido</p>
-                                        <p className="text-xs font-black text-gray-900 uppercase">Orden #{pedido.id}</p>
+                                        <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Verificando Pedido</p>
+                                        <p className="text-xs font-black text-gray-900 dark:text-white uppercase">Orden #{pedido.id}</p>
                                     </div>
                                 </div>
                                 {pedido.estado === 'pendiente_verificacion' && (
@@ -549,7 +549,7 @@ const PedidosShow = () => {
                                             setShowModal(false);
                                         }}
                                         disabled={!!updatingStatus}
-                                        className="px-6 py-3 bg-emerald-500 text-white font-black rounded-xl hover:bg-emerald-600 transition-all shadow-lg flex items-center gap-2 disabled:opacity-50"
+                                        className="px-6 py-3 bg-emerald-500 dark:bg-emerald-600 text-white font-black rounded-xl hover:bg-emerald-600 dark:hover:bg-emerald-500 transition-all shadow-lg flex items-center gap-2 disabled:opacity-50"
                                     >
                                         {updatingStatus === 'pagado' ? (
                                             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

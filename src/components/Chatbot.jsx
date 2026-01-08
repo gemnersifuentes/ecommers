@@ -120,8 +120,8 @@ const Chatbot = () => {
 
     return (
         <>
-            {/* Botón flotante siempre visible */}
-            <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
+            {/* Botón flotante siempre visible - Movido arriba en móvil para evitar barra nav */}
+            <div className="fixed bottom-20 md:bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
                 <div className="pointer-events-auto">
                     <AnimatePresence>
                         {!isOpen && (
@@ -153,8 +153,8 @@ const Chatbot = () => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 100, scale: 0.8 }}
                         transition={{ duration: 0.3 }}
-                        className="fixed bottom-6 right-6 z-50 w-[350px] md:w-[380px] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 font-sans"
-                        style={{ maxHeight: 'calc(100vh - 100px)' }}
+                        className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-50 w-[calc(100vw-32px)] md:w-[380px] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 font-sans"
+                        style={{ maxHeight: 'calc(100vh - 120px)' }}
                     >
                         {/* Header */}
                         <div className="bg-[#0ea5e9] p-4 flex items-center justify-between text-white shrink-0">

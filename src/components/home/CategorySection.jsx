@@ -5,6 +5,8 @@ import ProductCardCompact from '../products/ProductCardCompact';
 import { ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const API_URL = 'http://localhost:8000';
+
 const CategorySection = ({ banner }) => {
     const [productos, setProductos] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -67,7 +69,7 @@ const CategorySection = ({ banner }) => {
                             {/* Background Image (Cover) */}
                             {banner.imagen && (
                                 <img
-                                    src={banner.imagen.startsWith('http') ? banner.imagen : `http://localhost:8000${banner.imagen}`}
+                                    src={banner.imagen.startsWith('http') ? banner.imagen : `${API_URL}/${banner.imagen.startsWith('/') ? banner.imagen.substring(1) : banner.imagen}`}
                                     alt={banner.titulo}
                                     className="absolute inset-0 w-full h-full object-cover z-10 transition-transform duration-700 ease-in-out group-hover:scale-110"
                                 />

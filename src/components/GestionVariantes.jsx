@@ -200,11 +200,11 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
 
     // ✅ Estilo unificado: igual que GestionEspecificaciones
     const content = (
-        <div className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden ${embedded ? '' : 'max-w-4xl w-full'}`}>
+        <div className={`bg-white dark:bg-[#111c44] rounded-xl shadow-sm border border-gray-200 dark:border-white/5 overflow-hidden ${embedded ? '' : 'max-w-4xl w-full'}`}>
             {/* Encabezado */}
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <i className="fas fa-boxes text-blue-600"></i> Variantes del Producto
+            <div className="p-6 border-b border-gray-200 dark:border-white/5 flex justify-between items-center">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <i className="fas fa-boxes text-blue-600 dark:text-blue-400"></i> Variantes del Producto
                 </h3>
 
                 {/* Botón Guardar SOLO si hay productoId y no está embebido */}
@@ -230,7 +230,7 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
                 {!embedded && !productoId && (
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                        className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-white transition-colors"
                         title="Cerrar"
                     >
                         <i className="fas fa-times"></i>
@@ -240,19 +240,19 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
 
             <div className="p-6">
                 {/* Formulario Agregar */}
-                <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
-                    <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                        <i className="fas fa-plus-circle text-blue-600"></i> Nueva Variante
+                <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-lg mb-6 border border-gray-200 dark:border-white/10">
+                    <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                        <i className="fas fa-plus-circle text-blue-600 dark:text-blue-400"></i> Nueva Variante
                     </h4>
 
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                         {/* Atributo */}
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Tipo</label>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Tipo</label>
                             <select
                                 value={nuevaVariante.atributo_id}
                                 onChange={handleAtributoChange}
-                                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                className="w-full px-3 py-2 bg-white dark:bg-[#0b1437] border dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                             >
                                 {atributosGlobales.map(attr => (
                                     <option key={attr.id} value={attr.id}>{attr.nombre}</option>
@@ -262,14 +262,14 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
 
                         {/* Valor */}
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Valor</label>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Valor</label>
                             <select
                                 value={nuevaVariante.valor_id}
                                 onChange={(e) => {
                                     setNuevaVariante({ ...nuevaVariante, valor_id: e.target.value });
                                     if (errors.valor_id) setErrors({ ...errors, valor_id: null });
                                 }}
-                                className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${errors.valor_id ? 'border-red-500' : ''}`}
+                                className={`w-full px-3 py-2 bg-white dark:bg-[#0b1437] border dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${errors.valor_id ? 'border-red-500' : ''}`}
                                 disabled={!atributoSeleccionado}
                             >
                                 <option value="">Seleccionar...</option>
@@ -283,13 +283,13 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
                         {/* Precio (condicional) */}
                         {atributoSeleccionado?.permite_precio == 1 && (
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Precio (Opcional)</label>
+                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Precio (Opcional)</label>
                                 <input
                                     type="number"
                                     placeholder="Igual al base"
                                     value={nuevaVariante.precio}
                                     onChange={(e) => setNuevaVariante({ ...nuevaVariante, precio: e.target.value })}
-                                    className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                    className="w-full px-3 py-2 bg-white dark:bg-[#0b1437] border dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                                     min="0"
                                     step="0.01"
                                 />
@@ -298,7 +298,7 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
 
                         {/* Stock */}
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Stock</label>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Stock</label>
                             <input
                                 type="number"
                                 placeholder="Cant."
@@ -307,7 +307,7 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
                                     setNuevaVariante({ ...nuevaVariante, stock: e.target.value });
                                     if (errors.stock) setErrors({ ...errors, stock: null });
                                 }}
-                                className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${errors.stock ? 'border-red-500' : ''}`}
+                                className={`w-full px-3 py-2 bg-white dark:bg-[#0b1437] border dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${errors.stock ? 'border-red-500' : ''}`}
                                 min="0"
                             />
                             {errors.stock && <p className="text-red-500 text-xs mt-1">{errors.stock}</p>}
@@ -317,17 +317,17 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
                         {/* Imagen (solo para Color) */}
                         {atributoSeleccionado?.nombre?.toLowerCase() === 'color' && (
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Imagen</label>
-                                <div className="relative border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 transition-colors">
+                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Imagen</label>
+                                <div className="relative border-2 border-dashed border-gray-300 dark:border-white/10 rounded-lg hover:border-blue-400 transition-colors">
                                     {nuevaVariante.imagen ? (
                                         <div className="p-2 flex items-center gap-2">
                                             <img
                                                 src={nuevaVariante.imagen}
                                                 alt="Preview"
-                                                className="w-16 h-16 object-contain border border-gray-200 rounded"
+                                                className="w-16 h-16 object-contain border border-gray-200 dark:border-white/10 rounded"
                                             />
                                             <div className="flex-1">
-                                                <p className="text-xs text-gray-600">Imagen cargada</p>
+                                                <p className="text-xs text-gray-600 dark:text-gray-400">Imagen cargada</p>
                                                 <button
                                                     type="button"
                                                     onClick={() => setNuevaVariante({ ...nuevaVariante, imagen: '' })}
@@ -339,8 +339,8 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
                                         </div>
                                     ) : (
                                         <div className="py-6 text-center">
-                                            <i className="fas fa-cloud-upload-alt text-gray-400 text-2xl mb-2"></i>
-                                            <p className="text-xs text-gray-500">Haz clic para subir imagen</p>
+                                            <i className="fas fa-cloud-upload-alt text-gray-400 dark:text-gray-500 text-2xl mb-2"></i>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Haz clic para subir imagen</p>
                                         </div>
                                     )}
                                     <input
@@ -367,15 +367,15 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
 
                 {/* Tabla de variantes */}
                 {loading ? (
-                    <div className="text-center py-8 text-gray-500">Cargando variantes...</div>
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">Cargando variantes...</div>
                 ) : variantes.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-500 bg-gray-50 dark:bg-white/5 rounded-lg border border-dashed border-gray-300 dark:border-white/10">
                         No hay variantes agregadas.
                     </div>
                 ) : (
-                    <div className="overflow-x-auto rounded-lg border border-gray-200">
+                    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-white/5">
                         <table className="w-full text-sm text-left">
-                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+                            <thead className="text-xs text-gray-700 dark:text-gray-400 uppercase bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
                                 <tr>
                                     <th className="px-4 py-3">Imagen</th>
                                     <th className="px-4 py-3">Variante</th>
@@ -384,42 +384,42 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
                                     <th className="px-4 py-3 text-right">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200">
+                            <tbody className="divide-y divide-gray-200 dark:divide-white/5">
                                 {variantes.map((variante) => (
-                                    <tr key={variante.id} className="bg-white hover:bg-gray-50">
+                                    <tr key={variante.id} className="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-white/5">
                                         {/* Imagen */}
                                         <td className="px-4 py-3">
                                             {variante.imagen ? (
                                                 <img
                                                     src={variante.imagen}
                                                     alt="Variante"
-                                                    className="w-12 h-12 object-contain border border-gray-200 rounded"
+                                                    className="w-12 h-12 object-contain border border-gray-200 dark:border-white/10 rounded"
                                                 />
                                             ) : (
-                                                <span className="text-xs text-gray-400 italic">Sin imagen</span>
+                                                <span className="text-xs text-gray-400 dark:text-gray-500 italic">Sin imagen</span>
                                             )}
                                         </td>
                                         {/* Variante */}
-                                        <td className="px-4 py-3 font-medium text-gray-900">
+                                        <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">
                                             {variante.valores?.map((val, idx) => (
                                                 <span
                                                     key={idx}
-                                                    className="inline-flex items-center gap-1 px-2 py-1 bg-gray-200 rounded text-xs mr-2"
+                                                    className="inline-flex items-center gap-1 px-2 py-1 bg-gray-200 dark:bg-white/10 rounded text-xs mr-2"
                                                 >
-                                                    <span className="text-gray-600">{val.atributo_nombre}:</span>
-                                                    <span className="font-semibold text-gray-800">{val.valor}</span>
+                                                    <span className="text-gray-600 dark:text-gray-400">{val.atributo_nombre}:</span>
+                                                    <span className="font-semibold text-gray-800 dark:text-gray-300">{val.valor}</span>
                                                 </span>
                                             )) || '—'}
                                         </td>
                                         <td className="px-4 py-3">
                                             {variante.precio ? (
-                                                <span className="text-green-600 font-semibold">${parseFloat(variante.precio).toFixed(2)}</span>
+                                                <span className="text-green-600 dark:text-green-400 font-semibold">${parseFloat(variante.precio).toFixed(2)}</span>
                                             ) : (
-                                                <span className="text-gray-500 italic">Base</span>
+                                                <span className="text-gray-500 dark:text-gray-500 italic">Base</span>
                                             )}
                                         </td>
-                                        <td className="px-4 py-3 text-gray-600">
-                                            <span className={variante.stock > 0 ? 'text-gray-700' : 'text-red-500 font-semibold'}>
+                                        <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
+                                            <span className={variante.stock > 0 ? 'text-gray-700 dark:text-gray-300' : 'text-red-500 dark:text-red-400 font-semibold'}>
                                                 {variante.stock} unid.
                                             </span>
                                         </td>
@@ -427,7 +427,7 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
                                             <button
                                                 type="button"
                                                 onClick={() => eliminarVariante(variante.id)}
-                                                className="text-red-600 hover:text-red-900 transition-colors"
+                                                className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
                                                 title="Eliminar"
                                             >
                                                 <i className="fas fa-trash-alt"></i>
@@ -443,10 +443,10 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
 
             {/* Botón Cerrar (solo en modal sin productoId) */}
             {!embedded && !productoId && (
-                <div className="px-6 pb-6 pt-4 border-t border-gray-200 flex justify-end">
+                <div className="px-6 pb-6 pt-4 border-t border-gray-200 dark:border-white/5 flex justify-end">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors text-sm"
+                        className="px-4 py-2 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-white/10 font-medium transition-colors text-sm"
                     >
                         Cerrar
                     </button>

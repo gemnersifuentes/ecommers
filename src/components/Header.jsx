@@ -26,10 +26,14 @@ import {
   Mail,
   Info,
   Wrench,
-  Clock // Added Clock import
+  Clock,
+  ChevronRight // Added ChevronRight import
 } from "lucide-react";
 import { useLoader } from "../context/LoaderContext";
 import { useSettings } from "../context/SettingsContext";
+import api from "../services/api";
+
+const API_URL = 'http://localhost:8000';
 
 const headerStyles = `
   .header-shadow {
@@ -63,6 +67,10 @@ const Header = () => {
   const [cartSidebarOpen, setCartSidebarOpen] = useState(false)
   const [showCategoriesMenu, setShowCategoriesMenu] = useState(false)
   const [categorias, setCategorias] = useState([])
+  const [hoveredCategoryId, setHoveredCategoryId] = useState(null)
+  const [categoryBrands, setCategoryBrands] = useState({})
+  const [isFetchingBrands, setIsFetchingBrands] = useState(false)
+  const [isHoveringMenu, setIsHoveringMenu] = useState(false)
 
   // Search states
   const [showSearchDropdown, setShowSearchDropdown] = useState(false)
@@ -112,6 +120,25 @@ const Header = () => {
     }
     loadCategorias()
   }, [])
+
+  // Lazy load brands for hovered category
+  useEffect(() => {
+    if (hoveredCategoryId && !categoryBrands[hoveredCategoryId]) {
+      const fetchBrands = async () => {
+        setIsFetchingBrands(true)
+        try {
+          const response = await categoriasService.getMarcasByCategory(hoveredCategoryId)
+          setCategoryBrands(prev => ({ ...prev, [hoveredCategoryId]: response }))
+        } catch (error) {
+          console.error('Error fetching brands for category:', error)
+          setCategoryBrands(prev => ({ ...prev, [hoveredCategoryId]: [] }))
+        } finally {
+          setIsFetchingBrands(false)
+        }
+      }
+      fetchBrands()
+    }
+  }, [hoveredCategoryId, categoryBrands])
 
   // Load search history on mount
   useEffect(() => {
@@ -242,6 +269,7 @@ const Header = () => {
   const shouldShowDropdown = showSearchDropdown && (
     (searchQuery.trim().length === 0 && searchHistory.length > 0) ||
     (searchQuery.trim().length >= 2 && (
+      isSearching ||
       (searchSuggestions.products && searchSuggestions.products.length > 0) ||
       (searchSuggestions.brands && searchSuggestions.brands.length > 0) ||
       (searchSuggestions.categories && searchSuggestions.categories.length > 0)
@@ -345,25 +373,28 @@ const Header = () => {
 
                   {/* Search Dropdown */}
                   {shouldShowDropdown && (
-                    <div className="absolute top-full left-0 right-0 mt-0 bg-white rounded-b-3xl shadow-lg border-2 border-t-0 border-orange-600 max-h-[500px] overflow-hidden z-20">
+                    <div className="absolute top-full left-0 right-0 mt-0 bg-white rounded-b-3xl shadow-xl border-2 border-t-0 border-orange-600 max-h-[600px] overflow-hidden z-20">
                       {/* Search History - Show when no query */}
                       {searchQuery.trim().length === 0 && searchHistory.length > 0 && (
-                        <div className="p-4">
-                          <div className="flex justify-between items-center mb-3">
-                            <h3 className="text-sm font-semibold text-gray-700">Buscaste recientemente</h3>
+                        <div className="p-5">
+                          <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                              <Clock size={16} className="text-gray-400" />
+                              Buscaste recientemente
+                            </h3>
                             <button
                               onClick={handleClearHistory}
-                              className="text-xs text-orange-600 hover:text-orange-700 font-medium"
+                              className="text-xs text-orange-600 hover:text-orange-700 font-bold"
                             >
-                              Limpiar
+                              Limpiar Historial
                             </button>
                           </div>
                           <div className="flex flex-wrap gap-2">
-                            {searchHistory.slice(0, 12).map((term, index) => (
+                            {searchHistory.slice(0, 10).map((term, index) => (
                               <button
                                 key={index}
                                 onClick={() => handleHistoryClick(term)}
-                                className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors"
+                                className="px-4 py-1.5 bg-gray-50 hover:bg-orange-50 border border-gray-200 hover:border-orange-200 rounded-full text-xs text-gray-700 transition-all font-medium"
                               >
                                 {term}
                               </button>
@@ -377,71 +408,95 @@ const Header = () => {
                         (searchSuggestions?.products?.length > 0 ||
                           searchSuggestions?.brands?.length > 0 ||
                           searchSuggestions?.categories?.length > 0) ? (
-                          <div className="grid grid-cols-3 gap-4 p-4">
-                            {/* Products Column */}
-                            {searchSuggestions?.products?.length > 0 && (
-                              <div>
-                                <h4 className="text-xs font-semibold text-gray-500 mb-2 uppercase">{searchQuery}</h4>
-                                <div className="space-y-2">
-                                  {searchSuggestions.products.slice(0, 5).map((product) => (
-                                    <button
-                                      key={product.id}
-                                      onClick={() => handleSuggestionClick('product', product)}
-                                      className="w-full text-left hover:bg-gray-50 p-2 rounded flex items-center gap-2"
-                                    >
-                                      {product.imagen && (
-                                        <img src={product.imagen} alt={product.nombre} className="w-10 h-10 object-contain" />
+                          <div className="grid grid-cols-12 gap-0 divide-x divide-gray-100">
+                            {/* Left Column: Products (8/12) */}
+                            <div className="col-span-8 p-5">
+                              <div className="flex justify-between items-center mb-4">
+                                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Productos</h4>
+                                <button
+                                  onClick={handleSearchClick}
+                                  className="text-[10px] font-bold text-orange-600 hover:underline uppercase"
+                                >
+                                  Ver todos
+                                </button>
+                              </div>
+                              <div className="space-y-3">
+                                {searchSuggestions.products.slice(0, 5).map((product) => (
+                                  <button
+                                    key={product.id}
+                                    onClick={() => handleSuggestionClick('product', product)}
+                                    className="w-full text-left hover:bg-orange-50/50 p-2 rounded-xl flex items-center gap-4 transition-colors group border border-transparent hover:border-orange-100"
+                                  >
+                                    <div className="w-14 h-14 bg-white rounded-lg overflow-hidden border border-gray-100 shrink-0 flex items-center justify-center p-1">
+                                      {product.imagen ? (
+                                        <img
+                                          src={product.imagen.startsWith('http') ? product.imagen : (product.imagen.startsWith('/') ? `${API_URL}${product.imagen}` : `${API_URL}/${product.imagen}`)}
+                                          alt={product.nombre}
+                                          className="w-full h-full object-contain group-hover:scale-110 transition-transform"
+                                        />
+                                      ) : (
+                                        <Package size={20} className="text-gray-200" />
                                       )}
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-sm text-gray-700 truncate">{product.nombre}</p>
-                                        <p className="text-xs text-orange-600 font-semibold">${product.precio.toFixed(2)}</p>
-                                      </div>
-                                    </button>
-                                  ))}
-                                </div>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-bold text-gray-800 truncate group-hover:text-orange-600 transition-colors">{product.nombre}</p>
+                                      <p className="text-sm font-extrabold text-orange-600">S/ {product.precio.toFixed(2)}</p>
+                                    </div>
+                                    <ChevronRight size={16} className="text-gray-300 opacity-0 group-hover:opacity-100 transition-all" />
+                                  </button>
+                                ))}
                               </div>
-                            )}
+                            </div>
 
-                            {/* Brands Column */}
-                            {searchSuggestions?.brands?.length > 0 && (
-                              <div>
-                                <h4 className="text-xs font-semibold text-gray-500 mb-2 uppercase">Marcas relacionadas</h4>
-                                <div className="space-y-1">
-                                  {searchSuggestions.brands.slice(0, 8).map((brand, index) => (
-                                    <button
-                                      key={brand.id || index}
-                                      onClick={() => handleSuggestionClick('brand', brand)}
-                                      className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded text-sm text-gray-700"
-                                    >
-                                      {brand.nombre || brand}
-                                    </button>
-                                  ))}
+                            {/* Right Column: Brands & Categories (4/12) */}
+                            <div className="col-span-4 bg-gray-50/30 p-5 space-y-6">
+                              {/* Categories */}
+                              {searchSuggestions?.categories?.length > 0 && (
+                                <div>
+                                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Categorías</h4>
+                                  <div className="space-y-1">
+                                    {searchSuggestions.categories.slice(0, 5).map((category, index) => (
+                                      <button
+                                        key={category.id || index}
+                                        onClick={() => handleSuggestionClick('category', category)}
+                                        className="w-full text-left px-3 py-2 hover:bg-white hover:shadow-sm rounded-lg text-xs font-bold text-gray-700 hover:text-orange-600 transition-all"
+                                      >
+                                        {category.nombre || category}
+                                      </button>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              )}
 
-                            {/* Categories Column */}
-                            {searchSuggestions?.categories?.length > 0 && (
-                              <div>
-                                <h4 className="text-xs font-semibold text-gray-500 mb-2 uppercase">Categorías relacionadas</h4>
-                                <div className="space-y-1">
-                                  {searchSuggestions.categories.slice(0, 8).map((category, index) => (
-                                    <button
-                                      key={category.id || index}
-                                      onClick={() => handleSuggestionClick('category', category)}
-                                      className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded text-sm text-gray-700"
-                                    >
-                                      {category.nombre || category}
-                                    </button>
-                                  ))}
+                              {/* Brands */}
+                              {searchSuggestions?.brands?.length > 0 && (
+                                <div>
+                                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Marcas</h4>
+                                  <div className="space-y-1">
+                                    {searchSuggestions.brands.slice(0, 5).map((brand, index) => (
+                                      <button
+                                        key={brand.id || index}
+                                        onClick={() => handleSuggestionClick('brand', brand)}
+                                        className="w-full text-left px-3 py-2 hover:bg-white hover:shadow-sm rounded-lg text-xs font-bold text-gray-700 hover:text-orange-600 transition-all"
+                                      >
+                                        {brand.nombre || brand}
+                                      </button>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              )}
+                            </div>
                           </div>
                         ) : (
-                          isSearching && (
-                            <div className="p-4 text-center text-sm text-gray-500">
-                              Buscando...
+                          isSearching ? (
+                            <div className="p-10 text-center">
+                              <div className="w-8 h-8 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                              <p className="text-sm text-gray-500 font-medium">Buscando los mejores productos para ti...</p>
+                            </div>
+                          ) : (
+                            <div className="p-10 text-center">
+                              <Search size={40} className="mx-auto text-gray-200 mb-2" />
+                              <p className="text-sm text-gray-500 font-medium">No encontramos resultados para "<span className="font-bold text-gray-800">{searchQuery}</span>"</p>
                             </div>
                           )
                         )
@@ -616,26 +671,29 @@ const Header = () => {
                 </button>
 
                 {/* Mobile Search Dropdown */}
-                {showSearchDropdown && ((searchQuery.trim().length === 0 && searchHistory.length > 0) || (searchQuery.trim().length >= 2 && (searchSuggestions.products?.length > 0 || searchSuggestions.brands?.length > 0 || searchSuggestions.categories?.length > 0 || isSearching))) && (
-                  <div className="absolute top-full left-0 right-0 mt-0 bg-white rounded-b-3xl shadow-lg border-2 border-t-0 border-gray-300 max-h-[400px] overflow-hidden z-20">
+                {shouldShowDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-0 bg-white rounded-b-3xl shadow-xl border-2 border-t-0 border-orange-600 max-h-[500px] overflow-y-auto z-20">
                     {/* Search History - Show when no query */}
                     {searchQuery.trim().length === 0 && searchHistory.length > 0 && (
-                      <div className="p-3">
-                        <div className="flex justify-between items-center mb-2">
-                          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Historial</h3>
+                      <div className="p-4">
+                        <div className="flex justify-between items-center mb-3">
+                          <h3 className="text-xs font-bold text-gray-800 flex items-center gap-2">
+                            <Clock size={14} className="text-gray-400" />
+                            Búsquedas recientes
+                          </h3>
                           <button
                             onClick={handleClearHistory}
-                            className="text-[10px] text-orange-600 hover:text-orange-700 font-medium"
+                            className="text-[10px] text-orange-600 font-bold"
                           >
                             Borrar
                           </button>
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-1.5">
                           {searchHistory.slice(0, 6).map((term, index) => (
                             <button
                               key={index}
                               onClick={() => handleHistoryClick(term)}
-                              className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors"
+                              className="px-3 py-1 bg-gray-50 border border-gray-100 rounded-full text-[11px] text-gray-700 transition-colors"
                             >
                               {term}
                             </button>
@@ -646,28 +704,34 @@ const Header = () => {
 
                     {/* Search Suggestions - Show when typing AND has results */}
                     {searchQuery.trim().length >= 2 && (
-                      searchSuggestions?.products?.length > 0 ||
-                      searchSuggestions?.brands?.length > 0 ||
-                      searchSuggestions?.categories?.length > 0
-                    ) && (
-                        <div className="p-3">
+                      (searchSuggestions?.products?.length > 0 ||
+                        searchSuggestions?.brands?.length > 0 ||
+                        searchSuggestions?.categories?.length > 0) ? (
+                        <div className="p-4 space-y-5">
                           {/* Products */}
                           {searchSuggestions?.products?.length > 0 && (
-                            <div className="mb-3">
-                              <h4 className="text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider">{searchQuery}</h4>
-                              <div className="space-y-0.5">
-                                {searchSuggestions.products.slice(0, 5).map((product) => (
+                            <div>
+                              <div className="flex justify-between items-center mb-3">
+                                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Productos</h4>
+                                <button onClick={handleSearchClick} className="text-[10px] font-bold text-orange-600 uppercase">Ver más</button>
+                              </div>
+                              <div className="space-y-2">
+                                {searchSuggestions.products.slice(0, 4).map((product) => (
                                   <button
                                     key={product.id}
                                     onClick={() => handleSuggestionClick('product', product)}
-                                    className="w-full text-left p-2 hover:bg-gray-50 rounded flex items-center gap-2"
+                                    className="w-full text-left p-2 bg-gray-50/50 rounded-xl flex items-center gap-3 border border-transparent active:border-orange-100"
                                   >
-                                    {product.imagen && (
-                                      <img src={product.imagen} alt={product.nombre} className="w-10 h-10 object-contain" />
-                                    )}
+                                    <div className="w-12 h-12 bg-white rounded-lg border border-gray-100 shrink-0 flex items-center justify-center p-1">
+                                      {product.imagen ? (
+                                        <img src={product.imagen} alt={product.nombre} className="w-full h-full object-contain" />
+                                      ) : (
+                                        <Package size={16} className="text-gray-200" />
+                                      )}
+                                    </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-xs text-gray-700 font-medium truncate">{product.nombre}</p>
-                                      <p className="text-[10px] text-orange-600 font-bold">${product.precio.toFixed(2)}</p>
+                                      <p className="text-xs font-bold text-gray-800 truncate">{product.nombre}</p>
+                                      <p className="text-xs font-extrabold text-orange-600">S/ {product.precio.toFixed(2)}</p>
                                     </div>
                                   </button>
                                 ))}
@@ -675,49 +739,54 @@ const Header = () => {
                             </div>
                           )}
 
-                          {/* Brands */}
-                          {searchSuggestions?.brands?.length > 0 && (
-                            <div className="mb-3 bg-gray-50/50 p-2 rounded">
-                              <h4 className="text-[10px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Marcas</h4>
-                              <div className="space-y-0.5">
-                                {searchSuggestions.brands.slice(0, 5).map((brand, index) => (
-                                  <button
-                                    key={brand.id || index}
-                                    onClick={() => handleSuggestionClick('brand', brand)}
-                                    className="w-full text-left px-2 py-1.5 hover:bg-white hover:shadow-sm rounded text-xs text-gray-600 hover:text-orange-600 transition-all"
-                                  >
-                                    {brand.nombre || brand}
-                                  </button>
-                                ))}
+                          {/* Categories/Brands */}
+                          <div className="grid grid-cols-2 gap-4">
+                            {searchSuggestions?.categories?.length > 0 && (
+                              <div>
+                                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Categorías</h4>
+                                <div className="space-y-1">
+                                  {searchSuggestions.categories.slice(0, 4).map((category, index) => (
+                                    <button
+                                      key={category.id || index}
+                                      onClick={() => handleSuggestionClick('category', category)}
+                                      className="w-full text-left py-1 text-[11px] font-bold text-gray-700 active:text-orange-600 transition-all truncate"
+                                    >
+                                      {category.nombre || category}
+                                    </button>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
-
-                          {/* Categories */}
-                          {searchSuggestions?.categories?.length > 0 && (
-                            <div className="bg-gray-50/50 p-2 rounded">
-                              <h4 className="text-[10px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Categorías</h4>
-                              <div className="space-y-0.5">
-                                {searchSuggestions.categories.slice(0, 5).map((category, index) => (
-                                  <button
-                                    key={category.id || index}
-                                    onClick={() => handleSuggestionClick('category', category)}
-                                    className="w-full text-left px-2 py-1.5 hover:bg-white hover:shadow-sm rounded text-xs text-gray-600 hover:text-orange-600 transition-all"
-                                  >
-                                    {category.nombre || category}
-                                  </button>
-                                ))}
+                            )}
+                            {searchSuggestions?.brands?.length > 0 && (
+                              <div>
+                                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Marcas</h4>
+                                <div className="space-y-1">
+                                  {searchSuggestions.brands.slice(0, 4).map((brand, index) => (
+                                    <button
+                                      key={brand.id || index}
+                                      onClick={() => handleSuggestionClick('brand', brand)}
+                                      className="w-full text-left py-1 text-[11px] font-bold text-gray-700 active:text-orange-600 transition-all truncate"
+                                    >
+                                      {brand.nombre || brand}
+                                    </button>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
-                      )}
-
-                    {/* Loading state */}
-                    {isSearching && (
-                      <div className="p-3 border-t border-gray-100 text-center text-xs text-gray-400">
-                        Buscando...
-                      </div>
+                      ) : (
+                        isSearching ? (
+                          <div className="p-8 text-center">
+                            <div className="w-6 h-6 border-3 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                            <p className="text-xs text-gray-500">Buscando...</p>
+                          </div>
+                        ) : (
+                          <div className="p-8 text-center text-xs text-gray-500">
+                            No se encontraron resultados.
+                          </div>
+                        )
+                      )
                     )}
                   </div>
                 )}
@@ -730,11 +799,11 @@ const Header = () => {
         < AnimatePresence >
           {isNavVisible && (
             <motion.nav
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="hidden lg:block bg-white border-t border-gray-200 overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="hidden lg:block bg-white border-t border-gray-200"
             >
               <div className="container mx-auto px-4">
                 <ul className="flex items-center gap-8 w-full">
@@ -753,7 +822,12 @@ const Header = () => {
                   <li
                     className="relative"
                     onMouseEnter={() => setShowCategoriesMenu(true)}
-                    onMouseLeave={() => setShowCategoriesMenu(false)}
+                    onMouseLeave={() => {
+                      // Small delay to allow moving to the menu
+                      setTimeout(() => {
+                        if (!isHoveringMenu) setShowCategoriesMenu(false);
+                      }, 100);
+                    }}
                   >
                     <button
                       onClick={() => { showLoader(); navigate('/productos'); setTimeout(hideLoader, 800); }}
@@ -765,33 +839,138 @@ const Header = () => {
                     </button>
 
                     <AnimatePresence>
-                      {showCategoriesMenu && categorias.length > 0 && (
+                      {showCategoriesMenu && (
                         <motion.div
-                          initial={{ opacity: 0, y: 10 }}
+                          initial={{ opacity: 0, y: 15 }}
                           animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 10 }}
-                          className="absolute left-0 top-full mt-0 w-64 bg-white rounded-b-lg shadow-2xl border border-gray-200 z-50"
+                          exit={{ opacity: 0, y: 15 }}
+                          className="absolute left-0 top-full mt-0 w-[800px] bg-white rounded-b-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden flex"
+                          onMouseEnter={() => setIsHoveringMenu(true)}
+                          onMouseLeave={() => {
+                            setIsHoveringMenu(false);
+                            setShowCategoriesMenu(false);
+                          }}
                         >
-                          <div className="py-2">
-                            <Link
-                              to="/productos"
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors font-bold"
-                              onClick={() => { showLoader(); setShowCategoriesMenu(false); setTimeout(hideLoader, 800); }}
-                            >
-                              Ver todas las categorías
-                            </Link>
-                            <div className="border-t border-gray-100 my-1" />
-                            {categorias.map(cat => (
-                              <Link
-                                key={cat.id}
-                                to={`/productos?categoria=${cat.id}`}
-                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
-                                onClick={() => { showLoader(); setShowCategoriesMenu(false); setTimeout(hideLoader, 800); }}
-                              >
-                                {cat.nombre}
-                              </Link>
-                            ))}
-                          </div>
+                          {categorias.length > 0 ? (
+                            <>
+                              {/* Sidebar de Categorías (Izquierda) */}
+                              <div className="w-1/3 bg-gray-50/50 border-r border-gray-100 py-4 max-h-[500px] overflow-y-auto">
+                                <div className="px-4 mb-4">
+                                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Explorar Categorías</h3>
+                                </div>
+                                <div className="space-y-0.5">
+                                  {categorias.map(cat => (
+                                    <Link
+                                      key={cat.id}
+                                      to={`/productos?categoria=${cat.id}`}
+                                      className={`flex items-center gap-3 px-4 py-3 transition-all group relative ${hoveredCategoryId === cat.id ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-700 hover:bg-orange-50/50 hover:text-orange-600'}`}
+                                      onMouseEnter={() => setHoveredCategoryId(cat.id)}
+                                      onClick={() => { showLoader(); setShowCategoriesMenu(false); setTimeout(hideLoader, 800); }}
+                                    >
+                                      <div className={`w-10 h-10 rounded-xl overflow-hidden border flex items-center justify-center p-1 transition-colors ${hoveredCategoryId === cat.id ? 'bg-orange-600 border-orange-600' : 'bg-white border-gray-100 group-hover:border-orange-200'}`}>
+                                        {cat.imagen ? (
+                                          <img
+                                            src={cat.imagen.startsWith('http') ? cat.imagen : (cat.imagen.startsWith('/') ? `${API_URL}${cat.imagen}` : `${API_URL}/${cat.imagen}`)}
+                                            alt={cat.nombre}
+                                            className="w-full h-full object-contain transition-all"
+                                          />
+                                        ) : (
+                                          <Package className={`w-5 h-5 ${hoveredCategoryId === cat.id ? 'text-white' : 'text-gray-300'}`} />
+                                        )}
+                                      </div>
+                                      <span className="text-sm font-bold flex-1">{cat.nombre}</span>
+                                      <ChevronRight size={14} className={`transition-transform ${hoveredCategoryId === cat.id ? 'translate-x-0 opacity-100' : '-translate-x-2 opacity-0'}`} />
+                                      {hoveredCategoryId === cat.id && (
+                                        <div className="absolute right-0 top-0 bottom-0 w-1 bg-orange-600 rounded-l-full" />
+                                      )}
+                                    </Link>
+                                  ))}
+                                </div>
+                                <div className="mt-4 px-4 border-t border-gray-100 pt-4">
+                                  <Link
+                                    to="/productos"
+                                    className="text-xs font-bold text-orange-600 hover:underline flex items-center gap-1"
+                                    onClick={() => setShowCategoriesMenu(false)}
+                                  >
+                                    Ver todas <ChevronRight size={12} />
+                                  </Link>
+                                </div>
+                              </div>
+
+                              {/* Contenido Dinámico (Derecha - Marcas y Destacados) */}
+                              <div className="w-2/3 p-8 bg-white max-h-[500px] overflow-y-auto">
+                                {hoveredCategoryId ? (
+                                  <div className="space-y-8 animate-in fade-in slide-in-from-left-2 duration-300">
+                                    {/* Marcas de la Categoría */}
+                                    <div>
+                                      <div className="flex items-center justify-between mb-6">
+                                        <h4 className="text-sm font-black text-gray-800 uppercase tracking-tight flex items-center gap-2">
+                                          <Zap size={16} className="text-orange-600" />
+                                          Marcas en {categorias.find(c => c.id === hoveredCategoryId)?.nombre}
+                                        </h4>
+                                      </div>
+
+                                      {isFetchingBrands ? (
+                                        <div className="grid grid-cols-3 gap-4">
+                                          {[1, 2, 3].map(i => (
+                                            <div key={i} className="h-10 bg-gray-50 rounded-lg animate-pulse" />
+                                          ))}
+                                        </div>
+                                      ) : categoryBrands[hoveredCategoryId]?.length > 0 ? (
+                                        <div className="grid grid-cols-3 gap-3">
+                                          {categoryBrands[hoveredCategoryId].map(brand => (
+                                            <Link
+                                              key={brand.id}
+                                              to={`/productos?categoria=${hoveredCategoryId}&marca=${brand.id}`}
+                                              className="px-4 py-3 bg-gray-50/50 hover:bg-orange-50 hover:text-orange-600 border border-gray-50 hover:border-orange-100 rounded-xl text-xs font-bold text-gray-700 transition-all text-center flex items-center justify-center"
+                                              onClick={() => setShowCategoriesMenu(false)}
+                                            >
+                                              {brand.nombre}
+                                            </Link>
+                                          ))}
+                                        </div>
+                                      ) : (
+                                        <div className="bg-gray-50/50 rounded-2xl p-6 text-center border border-dashed border-gray-100">
+                                          <p className="text-xs text-gray-500 font-medium">No hay marcas específicas para esta categoría aún.</p>
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {/* Banner o Info Extra (Opcional) */}
+                                    <div className="bg-gradient-to-br from-orange-600 to-orange-400 rounded-3xl p-6 text-white relative overflow-hidden group shadow-lg shadow-orange-200">
+                                      <div className="relative z-10">
+                                        <p className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-1">Especiales TIENDA-TEC</p>
+                                        <h5 className="text-lg font-black mb-3">Los mejores precios en {categorias.find(c => c.id === hoveredCategoryId)?.nombre}</h5>
+                                        <Link
+                                          to={`/productos?categoria=${hoveredCategoryId}`}
+                                          className="inline-flex items-center gap-2 bg-white text-orange-600 px-5 py-2.5 rounded-full text-xs font-black shadow-sm hover:shadow-md transition-all active:scale-95"
+                                          onClick={() => setShowCategoriesMenu(false)}
+                                        >
+                                          Comprar Ahora <ChevronRight size={14} />
+                                        </Link>
+                                      </div>
+                                      <Package className="absolute -right-6 -bottom-6 w-32 h-32 text-white/10 -rotate-12 group-hover:rotate-0 transition-transform duration-500" />
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="h-full flex flex-col items-center justify-center text-center p-12 space-y-4">
+                                    <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center">
+                                      <Menu className="w-8 h-8 text-orange-200" />
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-bold text-gray-800">Selecciona una categoría</p>
+                                      <p className="text-xs text-gray-500 max-w-[200px] mx-auto">Pasa el mouse sobre las categorías de la izquierda para explorar sus marcas.</p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          ) : (
+                            <div className="w-full p-12 text-center">
+                              <div className="w-8 h-8 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                              <p className="text-sm font-bold text-gray-800">Cargando categorías...</p>
+                            </div>
+                          )}
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -883,7 +1062,6 @@ const Header = () => {
                   {[
                     { to: '/', label: 'Inicio', Icon: Home },
                     { to: '/productos', label: 'Productos', Icon: ShoppingBag },
-                    { to: '/lista-deseos', label: 'Lista de Deseos', Icon: Heart },
                     { to: '/servicios', label: 'Servicios', Icon: Wrench },
                     { to: '/nosotros', label: 'Nosotros', Icon: Info },
                     { to: '/contacto', label: 'Contacto', Icon: Mail }
@@ -892,7 +1070,7 @@ const Header = () => {
                       <Link
                         to={item.to}
                         onClick={() => setMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActivePath(item.to)
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${isActivePath(item.to)
                           ? 'bg-orange-50 text-orange-600'
                           : 'text-gray-700 hover:bg-gray-50'
                           }`}
@@ -904,16 +1082,52 @@ const Header = () => {
                   ))}
                 </ul>
 
+                {/* Categorías en Móvil */}
+                <div className="mt-8">
+                  <h3 className="px-4 text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Nuestras Categorías</h3>
+                  <div className="grid grid-cols-1 gap-2">
+                    {categorias.slice(0, 8).map(cat => (
+                      <Link
+                        key={cat.id}
+                        to={`/productos?categoria=${cat.id}`}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-4 p-2 hover:bg-orange-50 rounded-2xl border border-transparent hover:border-orange-100 transition-all group"
+                      >
+                        <div className="w-12 h-12 bg-white rounded-xl border border-gray-100 flex items-center justify-center p-1 group-hover:border-orange-200">
+                          {cat.imagen ? (
+                            <img
+                              src={cat.imagen.startsWith('http') ? cat.imagen : (cat.imagen.startsWith('/') ? `${API_URL}${cat.imagen}` : `${API_URL}/${cat.imagen}`)}
+                              alt={cat.nombre}
+                              className="w-full h-full object-contain"
+                            />
+                          ) : (
+                            <Package className="w-5 h-5 text-gray-300" />
+                          )}
+                        </div>
+                        <span className="text-sm font-bold text-gray-800">{cat.nombre}</span>
+                      </Link>
+                    ))}
+                    <Link
+                      to="/productos"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-center p-3 text-sm font-black text-orange-600 bg-orange-50 rounded-2xl mt-2"
+                    >
+                      Ver todas las categorías
+                    </Link>
+                  </div>
+                </div>
+
                 {/* User Actions */}
                 {isAuthenticated && (
                   <>
-                    <div className="border-t border-gray-200 my-4" />
+                    <div className="border-t border-gray-100 my-8" />
+                    <h3 className="px-4 text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Mi Cuenta</h3>
                     <ul className="space-y-1">
                       <li>
                         <Link
                           to="/perfil"
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors"
                         >
                           <User className="w-5 h-5" />
                           Mi Perfil
@@ -923,7 +1137,7 @@ const Header = () => {
                         <Link
                           to="/mis-pedidos"
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors"
                         >
                           <Package className="w-5 h-5" />
                           Mis Pedidos
@@ -934,7 +1148,7 @@ const Header = () => {
                           <Link
                             to="/admin"
                             onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-orange-600 hover:bg-orange-50 transition-colors"
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-orange-600 bg-orange-50/50 hover:bg-orange-50 transition-colors"
                           >
                             <ShieldCheck className="w-5 h-5" />
                             Panel Admin
@@ -947,7 +1161,7 @@ const Header = () => {
                             handleLogout();
                             setMobileMenuOpen(false);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50 transition-colors"
                         >
                           <LogOut className="w-5 h-5" />
                           Cerrar Sesión

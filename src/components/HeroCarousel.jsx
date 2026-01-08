@@ -68,7 +68,7 @@ const HeroCarousel = () => {
                                 style={{
                                     backgroundImage: `url(${carouselBanners[currentSlide].imagen?.startsWith('http')
                                         ? carouselBanners[currentSlide].imagen
-                                        : `${API_URL}${carouselBanners[currentSlide].imagen}`
+                                        : `${API_URL}/${carouselBanners[currentSlide].imagen?.startsWith('/') ? carouselBanners[currentSlide].imagen.substring(1) : carouselBanners[currentSlide].imagen}`
                                         })`
                                 }}
                             />
@@ -165,7 +165,7 @@ const HeroCarousel = () => {
 
                             {banner.imagen && (
                                 <img
-                                    src={banner.imagen?.startsWith('http') ? banner.imagen : `${API_URL}${banner.imagen}`}
+                                    src={banner.imagen?.startsWith('http') ? banner.imagen : `${API_URL}/${banner.imagen?.startsWith('/') ? banner.imagen.substring(1) : banner.imagen}`}
                                     alt={banner.titulo}
                                     className="absolute bottom-0 right-0 w-32 h-32 bg-white/10 backdrop-blur-sm rounded-tl-[2rem] object-cover object-center transition-transform duration-500 group-hover:scale-105"
                                 />

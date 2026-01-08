@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { productosService, serviciosService, tiendaCategoriasService, tiendaService, bannersService } from '../services';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,6 +9,8 @@ import Loading from '../components/ui/Loading';
 import HeroCarousel from '../components/HeroCarousel';
 import BannerGrid from '../components/home/BannerGrid';
 import CategorySection from '../components/home/CategorySection';
+
+const API_URL = 'http://localhost:8000';
 import {
   FaShippingFast,
   FaShieldAlt,
@@ -38,10 +40,8 @@ import {
   Star,
   Heart,
   ShoppingCart as CartIcon,
-  Package,
-  Award,
-  Clock,
-  ChevronRight
+  ChevronRight,
+  ChevronLeft
 } from 'lucide-react';
 
 const CountdownTimer = ({ targetDate }) => {
@@ -128,6 +128,15 @@ const Home = () => {
   const [categorias, setCategorias] = useState([]);
   const [ofertasRelampago, setOfertasRelampago] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const categoriesRef = useRef(null);
+
+  const scrollCategories = (direction) => {
+    if (categoriesRef.current) {
+      const scrollAmount = direction === 'left' ? -400 : 400;
+      categoriesRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   // CSS para ocultar scrollbar
   useEffect(() => {
@@ -218,11 +227,35 @@ const Home = () => {
       {/* Hero Carousel */}
       <HeroCarousel />
 
-      {/* Categorías circulares - Estilo imagen de referencia */}
       <div className="py-4 md:py-8 bg-gray-50">
         <div className="max-w-7xl mx-4 md:mx-auto px-6 py-4 bg-white rounded-lg">
-          {/* Scroll horizontal */}
-          <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+          {/* Cabecera con Navegación PC */}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm md:text-base font-bold text-gray-800 uppercase tracking-wider">
+              Categorías
+            </h2>
+            <div className="hidden md:flex gap-2">
+              <button
+                onClick={() => scrollCategories('left')}
+                className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-orange-500 hover:text-white transition-all shadow-sm"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <button
+                onClick={() => scrollCategories('right')}
+                className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-orange-500 hover:text-white transition-all shadow-sm"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+
+          {/* Scroll horizontal - FIXED RESPONSIVENESS */}
+          <div
+            ref={categoriesRef}
+            className="flex gap-6 overflow-x-auto scrollbar-hide pb-2 touch-pan-x"
+            style={{ touchAction: 'pan-x', WebkitOverflowScrolling: 'touch' }}
+          >
             {categorias.map((categoria, index) => (
               <motion.div
                 key={categoria.id}
@@ -242,7 +275,7 @@ const Home = () => {
                       <div className="w-full h-full rounded-full overflow-hidden">
                         {categoria.imagen ? (
                           <img
-                            src={categoria.imagen}
+                            src={categoria.imagen.startsWith('http') ? categoria.imagen : `${API_URL}/${categoria.imagen.startsWith('/') ? categoria.imagen.substring(1) : categoria.imagen}`}
                             alt={categoria.nombre}
                             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                           />
@@ -318,7 +351,7 @@ const Home = () => {
                 </Link>
               </div>
 
-              <div className="flex lg:grid lg:grid-cols-6 gap-4 overflow-x-auto lg:overflow-visible scrollbar-hide pb-4 px-4">
+              <div className="flex lg:grid lg:grid-cols-6 gap-4 overflow-x-auto lg:overflow-visible scrollbar-hide pb-4 px-4 touch-pan-x" style={{ touchAction: 'pan-x', WebkitOverflowScrolling: 'touch' }}>
                 {ofertasRelampago.map(producto => (
                   <Link key={producto.id} to={`/producto/${producto.id}`} className="group flex-shrink-0 w-[160px] lg:w-auto">
                     <div className="bg-white rounded-lg p-3 transition-shadow relative">
@@ -331,7 +364,7 @@ const Home = () => {
                       <div className="aspect-square mb-3 overflow-hidden rounded-md bg-gray-100 relative">
                         {producto.imagen ? (
                           <img
-                            src={producto.imagen.startsWith('http') ? producto.imagen : `http://localhost:8000${producto.imagen}`}
+                            src={producto.imagen.startsWith('http') ? producto.imagen : `${API_URL}/${producto.imagen.startsWith('/') ? producto.imagen.substring(1) : producto.imagen}`}
                             alt={producto.nombre}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                           />
@@ -459,7 +492,7 @@ const Home = () => {
                 <div className="relative h-48 w-full p-6 bg-white flex items-center justify-center overflow-hidden">
                   {servicio.imagen ? (
                     <img
-                      src={servicio.imagen.startsWith('http') ? servicio.imagen : `http://localhost:8000${servicio.imagen}`}
+                      src={servicio.imagen.startsWith('http') ? servicio.imagen : `${API_URL}/${servicio.imagen.startsWith('/') ? servicio.imagen.substring(1) : servicio.imagen}`}
                       alt={servicio.nombre}
                       className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
                     />

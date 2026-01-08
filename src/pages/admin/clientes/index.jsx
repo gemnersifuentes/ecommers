@@ -62,7 +62,7 @@ const ClientesIndex = () => {
             {/* Header Mirroring Products */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-sm font-bold text-gray-800 flex items-center gap-2 uppercase tracking-tight">
+                    <h1 className="text-sm font-bold text-gray-800 dark:text-white flex items-center gap-2 uppercase tracking-tight">
                         <IdCard size={16} className="text-orange-500" />
                         Directorio de Clientes
                     </h1>
@@ -72,7 +72,7 @@ const ClientesIndex = () => {
                     ]} />
                 </div>
 
-                <div className="hidden md:flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                <div className="hidden md:flex items-center gap-2 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest bg-gray-50 dark:bg-white/5 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-white/5">
                     <Users size={12} className="text-orange-500" />
                     {clientesFiltrados.length} Registros Activos
                 </div>
@@ -81,13 +81,13 @@ const ClientesIndex = () => {
             {/* Middle Bar: Search & Page Limit */}
             <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                 <div className="relative w-full lg:w-96">
-                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                     <input
                         type="text"
                         placeholder="Identificar cliente por nombre o mail..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all shadow-sm"
+                        className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-xl text-xs focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all shadow-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600"
                     />
                 </div>
 
@@ -97,7 +97,7 @@ const ClientesIndex = () => {
                         setItemsPerPage(Number(e.target.value));
                         setCurrentPage(1);
                     }}
-                    className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium text-gray-600 outline-none hover:border-gray-300 transition-all cursor-pointer shadow-sm w-full lg:w-auto"
+                    className="px-3 py-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-xl text-xs font-medium text-gray-600 dark:text-gray-400 outline-none hover:border-gray-300 dark:hover:border-white/20 transition-all cursor-pointer shadow-sm w-full lg:w-auto"
                 >
                     <option value={10}>10 Clientes</option>
                     <option value={25}>25 Clientes</option>
@@ -105,23 +105,23 @@ const ClientesIndex = () => {
             </div>
 
             {/* Industrial Table Area */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div className="bg-white dark:bg-[#111c44] rounded-2xl border border-gray-200 dark:border-white/5 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] overflow-hidden">
                 <div className="overflow-x-auto no-scrollbar">
                     <table className="w-full text-left border-separate border-spacing-0">
-                        <thead className="bg-[#f8fafc]/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100">
+                        <thead className="bg-[#f8fafc]/80 dark:bg-[#0b1437]/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100 dark:border-white/5">
                             <tr>
-                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap">
+                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap">
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
                                         PERFIL CLIENTE
                                     </div>
                                 </th>
-                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap">CONTACTO</th>
-                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 text-center whitespace-nowrap">ANTIGÜEDAD</th>
-                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 text-right whitespace-nowrap">EXPEDIENTE</th>
+                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap">CONTACTO</th>
+                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-center whitespace-nowrap">ANTIGÜEDAD</th>
+                                <th className="px-6 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-right whitespace-nowrap">EXPEDIENTE</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-gray-50 dark:divide-white/5">
                             <AnimatePresence>
                                 {currentItems.map((cliente, idx) => (
                                     <motion.tr
@@ -129,7 +129,7 @@ const ClientesIndex = () => {
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         whileHover={{
-                                            backgroundColor: "rgba(249, 115, 22, 0.02)",
+                                            backgroundColor: "rgba(249, 115, 22, 0.04)",
                                             transition: { duration: 0.2, ease: "easeOut" }
                                         }}
                                         transition={{
@@ -140,27 +140,27 @@ const ClientesIndex = () => {
                                     >
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 rounded-lg bg-orange-50 text-orange-600 border border-orange-100 flex items-center justify-center font-black text-xs transition-all duration-300 group-hover:bg-orange-500 group-hover:text-white">
+                                                <div className="w-9 h-9 rounded-lg bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-500/20 flex items-center justify-center font-black text-xs transition-all duration-300 group-hover:bg-orange-500 group-hover:text-white dark:group-hover:bg-orange-600">
                                                     {cliente.nombre.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <p className="text-[11px] font-black text-[#1e293b] uppercase tracking-tight">
+                                                    <p className="text-[11px] font-black text-[#1e293b] dark:text-gray-200 uppercase tracking-tight">
                                                         {cliente.nombre}
                                                     </p>
-                                                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tight">CUST-ID #{cliente.id.toString().padStart(5, '0')}</p>
+                                                    <p className="text-[9px] text-gray-400 dark:text-gray-600 font-bold uppercase tracking-tight">CUST-ID #{cliente.id.toString().padStart(5, '0')}</p>
                                                 </div>
                                             </div>
                                         </td>
 
                                         <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2 text-[11px] font-bold text-gray-500">
-                                                <Mail size={12} className="text-gray-300" />
+                                            <div className="flex items-center gap-2 text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                                                <Mail size={12} className="text-gray-300 dark:text-gray-600" />
                                                 {cliente.correo}
                                             </div>
                                         </td>
 
                                         <td className="px-6 py-4 text-center">
-                                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-gray-50 text-gray-500 rounded font-black text-[10px] tracking-wider border border-gray-100 whitespace-nowrap uppercase">
+                                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-500 rounded font-black text-[10px] tracking-wider border border-gray-100 dark:border-white/5 whitespace-nowrap uppercase">
                                                 <Calendar size={10} strokeWidth={3} />
                                                 {new Date(cliente.fecha_registro).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}
                                             </div>
@@ -170,10 +170,10 @@ const ClientesIndex = () => {
                                             <div className="flex justify-end">
                                                 <Link
                                                     to={`/admin/clientes/ver/${cliente.id}`}
-                                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 text-[#1e293b] text-[10px] font-black uppercase tracking-widest rounded-lg border-2 border-transparent transition-all duration-300 hover:border-orange-500/10 hover:text-orange-600 hover:bg-orange-50 group/btn"
+                                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-white/5 text-[#1e293b] dark:text-gray-400 text-[10px] font-black uppercase tracking-widest rounded-lg border-2 border-transparent transition-all duration-300 hover:border-[#1e293b]/10 dark:hover:border-white/20 hover:shadow-md hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-500/5 group/btn"
                                                 >
                                                     Ver Historial
-                                                    <ArrowUpRight size={12} className="transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+                                                    <ArrowUpRight size={14} strokeWidth={2.5} className="transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
                                                 </Link>
                                             </div>
                                         </td>
@@ -195,21 +195,21 @@ const ClientesIndex = () => {
             {/* Pagination Standard */}
             {totalPages > 1 && (
                 <div className="flex items-center justify-between mt-4">
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                        Página <span className="text-gray-900">{currentPage}</span> de <span className="text-gray-900">{totalPages}</span>
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">
+                        Página <span className="text-gray-900 dark:text-white">{currentPage}</span> de <span className="text-gray-900 dark:text-white">{totalPages}</span>
                     </p>
                     <div className="flex items-center gap-1.5">
                         <button
                             onClick={() => setCurrentPage(1)}
                             disabled={currentPage === 1}
-                            className="p-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50 text-gray-600 hover:border-gray-300 transition-all shadow-sm"
+                            className="p-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg disabled:opacity-50 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-white/20 transition-all shadow-sm"
                         >
                             <ChevronsLeft size={14} />
                         </button>
                         <button
                             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                             disabled={currentPage === 1}
-                            className="p-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50 text-gray-600 hover:border-gray-300 transition-all shadow-sm"
+                            className="p-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg disabled:opacity-50 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-white/20 transition-all shadow-sm"
                         >
                             <ChevronLeft size={14} />
                         </button>
@@ -220,8 +220,8 @@ const ClientesIndex = () => {
                                     key={i}
                                     onClick={() => setCurrentPage(i + 1)}
                                     className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all ${currentPage === i + 1
-                                            ? 'bg-orange-500 text-white shadow-md'
-                                            : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                                        ? 'bg-orange-500 text-white shadow-md'
+                                        : 'bg-white dark:bg-[#111c44] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'
                                         }`}
                                 >
                                     {i + 1}
@@ -232,14 +232,14 @@ const ClientesIndex = () => {
                         <button
                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                             disabled={currentPage === totalPages}
-                            className="p-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50 text-gray-600 hover:border-gray-300 transition-all shadow-sm"
+                            className="p-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg disabled:opacity-50 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-white/20 transition-all shadow-sm"
                         >
                             <ChevronRight size={14} />
                         </button>
                         <button
                             onClick={() => setCurrentPage(totalPages)}
                             disabled={currentPage === totalPages}
-                            className="p-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50 text-gray-600 hover:border-gray-300 transition-all shadow-sm"
+                            className="p-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg disabled:opacity-50 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-white/20 transition-all shadow-sm"
                         >
                             <ChevronsRight size={14} />
                         </button>

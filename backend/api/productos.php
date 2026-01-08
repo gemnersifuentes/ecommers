@@ -534,6 +534,23 @@ switch ($method) {
         }
 
         try {
+            // Check for partial update (e.g., just stock)
+            if (isset($input['stock_only']) && $input['stock_only'] === true) {
+                if (!isset($input['stock'])) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'El stock es requerido para actualización rápida']);
+                    exit;
+                }
+                $stmt = $db->prepare("UPDATE productos SET stock = ? WHERE id = ?");
+                if ($stmt->execute([$input['stock'], $id])) {
+                    echo json_encode(['success' => true, 'message' => 'Stock actualizado exitosamente']);
+                } else {
+                    http_response_code(500);
+                    echo json_encode(['error' => 'Error al actualizar el stock']);
+                }
+                exit;
+            }
+
             // Sanitizar datos para evitar errores de tipo (string vacío vs null)
             $marcaId = !empty($input['marca_id']) ? $input['marca_id'] : null;
             $categoriaId = !empty($input['categoria_id']) ? $input['categoria_id'] : null;

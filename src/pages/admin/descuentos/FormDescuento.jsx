@@ -173,7 +173,7 @@ const FormDescuento = ({ id = null }) => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-sm font-bold text-gray-900">{id ? 'Editar Descuento' : 'Nueva Campaña de Oferta'}</h1>
+                    <h1 className="text-sm font-bold text-gray-900 dark:text-white">{id ? 'Editar Descuento' : 'Nueva Campaña de Oferta'}</h1>
                     <Breadcrumb items={[
                         { label: 'Admin', link: '/admin', isHome: true },
                         { label: 'Descuentos', link: '/admin/descuentos' },
@@ -184,62 +184,62 @@ const FormDescuento = ({ id = null }) => {
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-20">
                 <div className="space-y-6">
-                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                        <h3 className="text-sm font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200 flex items-center gap-2">
-                            <Info size={16} className="text-blue-600" /> Información de Campaña
+                    <div className="bg-white dark:bg-[#111c44] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-white/5">
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 pb-3 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
+                            <Info size={16} className="text-blue-600 dark:text-blue-400" /> Información de Campaña
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-2 uppercase tracking-wider">Nombre de la Promoción <span className="text-red-500">*</span></label>
+                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wider">Nombre de la Promoción <span className="text-red-500">*</span></label>
                                 <input
                                     type="text"
                                     name="nombre"
                                     value={formData.nombre}
                                     onChange={handleChange}
                                     required
-                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
+                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                     placeholder="Ej: Oferta de Invierno 2024"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-2 uppercase tracking-wider">Descripción (Interna)</label>
+                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wider">Descripción (Interna)</label>
                                 <textarea
                                     name="descripcion"
                                     value={formData.descripcion}
                                     onChange={handleChange}
                                     rows="3"
-                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all resize-none"
+                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all resize-none bg-white dark:bg-white/5 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600"
                                     placeholder="Escribe detalles sobre el objetivo de esta oferta..."
                                 ></textarea>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                        <h3 className="text-sm font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200 flex items-center gap-2">
-                            <Calendar size={16} className="text-blue-600" /> Periodo de Validez
+                    <div className="bg-white dark:bg-[#111c44] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-white/5">
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 pb-3 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
+                            <Calendar size={16} className="text-blue-600 dark:text-blue-400" /> Periodo de Validez
                         </h3>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-2 uppercase tracking-wider">Fecha Inicio <span className="text-red-500">*</span></label>
+                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wider">Fecha Inicio <span className="text-red-500">*</span></label>
                                 <input
                                     type="date"
                                     name="fecha_inicio"
                                     value={formData.fecha_inicio}
                                     onChange={handleChange}
                                     required
-                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
+                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-2 uppercase tracking-wider">Fecha Fin <span className="text-red-500">*</span></label>
+                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wider">Fecha Fin <span className="text-red-500">*</span></label>
                                 <input
                                     type="date"
                                     name="fecha_fin"
                                     value={formData.fecha_fin}
                                     onChange={handleChange}
                                     required
-                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
+                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
                                 />
                             </div>
                         </div>
@@ -247,29 +247,29 @@ const FormDescuento = ({ id = null }) => {
                 </div>
 
                 <div className="space-y-6">
-                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                        <h3 className="text-sm font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200 flex items-center gap-2">
-                            <LayoutGrid size={16} className="text-blue-600" /> Valor del Descuento
+                    <div className="bg-white dark:bg-[#111c44] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-white/5">
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 pb-3 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
+                            <LayoutGrid size={16} className="text-blue-600 dark:text-blue-400" /> Valor del Descuento
                         </h3>
                         <div className="space-y-4">
-                            <div className="flex bg-gray-50 p-1 rounded-lg border border-gray-200">
+                            <div className="flex bg-gray-50 dark:bg-white/5 p-1 rounded-lg border border-gray-200 dark:border-white/10">
                                 <button
                                     type="button"
                                     onClick={() => setFormData(p => ({ ...p, tipo: 'porcentaje' }))}
-                                    className={`flex-1 py-1.5 text-xs font-black rounded-md transition-all ${formData.tipo === 'porcentaje' ? 'bg-white text-orange-600 shadow-sm border border-gray-100' : 'text-gray-400 hover:text-gray-600 uppercase'}`}
+                                    className={`flex-1 py-1.5 text-xs font-black rounded-md transition-all ${formData.tipo === 'porcentaje' ? 'bg-white dark:bg-[#111c44] text-orange-600 dark:text-orange-400 shadow-sm border border-gray-100 dark:border-white/10' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 uppercase'}`}
                                 >
                                     PORCENTAJE (%)
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setFormData(p => ({ ...p, tipo: 'monto_fijo' }))}
-                                    className={`flex-1 py-1.5 text-xs font-black rounded-md transition-all ${formData.tipo === 'monto_fijo' ? 'bg-white text-orange-600 shadow-sm border border-gray-100' : 'text-gray-400 hover:text-gray-600 uppercase'}`}
+                                    className={`flex-1 py-1.5 text-xs font-black rounded-md transition-all ${formData.tipo === 'monto_fijo' ? 'bg-white dark:bg-[#111c44] text-orange-600 dark:text-orange-400 shadow-sm border border-gray-100 dark:border-white/10' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 uppercase'}`}
                                 >
                                     MONTO FIJO ($)
                                 </button>
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-2 uppercase tracking-wider">Valor <span className="text-red-500">*</span></label>
+                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wider">Valor <span className="text-red-500">*</span></label>
                                 <div className="relative">
                                     <input
                                         type="number"
@@ -278,10 +278,10 @@ const FormDescuento = ({ id = null }) => {
                                         onChange={handleChange}
                                         required
                                         step="0.01"
-                                        className="w-full pl-8 pr-3 py-2 text-sm font-bold rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
+                                        className="w-full pl-8 pr-3 py-2 text-sm font-bold rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                         placeholder="0.00"
                                     />
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 font-bold text-xs">
                                         {formData.tipo === 'porcentaje' ? '%' : '$'}
                                     </span>
                                 </div>
@@ -293,33 +293,33 @@ const FormDescuento = ({ id = null }) => {
                                         name="activo"
                                         checked={formData.activo === 1}
                                         onChange={handleChange}
-                                        className="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500 transition-all"
+                                        className="w-4 h-4 text-orange-500 rounded border-gray-300 dark:border-white/10 focus:ring-orange-500 bg-white dark:bg-white/5 transition-all"
                                     />
-                                    <span className="text-xs font-bold text-gray-600 uppercase tracking-widest group-hover:text-orange-600 transition-colors">Promoción Activa</span>
+                                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">Promoción Activa</span>
                                 </label>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                        <h3 className="text-sm font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200 flex items-center gap-2">
-                            <Target size={16} className="text-blue-600" /> Segmentación de Oferta
+                    <div className="bg-white dark:bg-[#111c44] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-white/5">
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 pb-3 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
+                            <Target size={16} className="text-blue-600 dark:text-blue-400" /> Segmentación de Oferta
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-2 uppercase tracking-wider">¿A quién aplica?</label>
+                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wider">¿A quién aplica?</label>
                                 <div className="relative">
                                     <select
                                         name="aplica_a"
                                         value={formData.aplica_a}
                                         onChange={handleChange}
-                                        className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white appearance-none pr-10 font-medium"
+                                        className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white dark:bg-[#111c44] dark:text-white appearance-none pr-10 font-medium"
                                     >
                                         <option value="producto">Producto Específico</option>
                                         <option value="categoria">Categoría Completa</option>
                                         <option value="marca">Marca Específica</option>
                                     </select>
-                                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" />
                                 </div>
                             </div>
 
@@ -327,23 +327,23 @@ const FormDescuento = ({ id = null }) => {
                                 <AnimatePresence mode="wait">
                                     {formData.aplica_a === 'producto' ? (
                                         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} key="prod-sel">
-                                            <label className="block text-xs font-medium text-gray-700 mb-2 uppercase tracking-wider">Buscar Producto</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wider">Buscar Producto</label>
                                             <div className="relative">
-                                                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                                                 <input
                                                     type="text"
                                                     placeholder="Nombre o SKU..."
                                                     value={searchProducto}
                                                     onChange={(e) => { setSearchProducto(e.target.value); setShowProductoDropdown(true); }}
                                                     onFocus={() => setShowProductoDropdown(true)}
-                                                    className="w-full pl-9 pr-8 py-2 text-sm rounded-lg border border-gray-300 outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+                                                    className="w-full pl-9 pr-8 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-white/5 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600"
                                                 />
-                                                {searchProducto && <X size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 cursor-pointer hover:text-gray-500" onClick={() => { setSearchProducto(''); setFormData(p => ({ ...p, producto_id: '' })); }} />}
+                                                {searchProducto && <X size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 cursor-pointer hover:text-gray-500 dark:hover:text-gray-400" onClick={() => { setSearchProducto(''); setFormData(p => ({ ...p, producto_id: '' })); }} />}
                                             </div>
                                             {showProductoDropdown && (
                                                 <div className="relative">
                                                     <div className="fixed inset-0 z-40" onClick={() => setShowProductoDropdown(false)}></div>
-                                                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto no-scrollbar">
+                                                    <div className="absolute z-50 w-full mt-1 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl max-h-60 overflow-y-auto no-scrollbar">
                                                         {productos
                                                             .filter(p => !searchProducto || p.nombre.toLowerCase().includes(searchProducto.toLowerCase()))
                                                             .map(p => (
@@ -354,13 +354,13 @@ const FormDescuento = ({ id = null }) => {
                                                                         setSearchProducto(p.nombre);
                                                                         setShowProductoDropdown(false);
                                                                     }}
-                                                                    className="px-4 py-2.5 flex items-center justify-between cursor-pointer hover:bg-orange-50 border-b border-gray-50 group"
+                                                                    className="px-4 py-2.5 flex items-center justify-between cursor-pointer hover:bg-orange-50 dark:hover:bg-white/5 border-b border-gray-50 dark:border-white/5 group"
                                                                 >
                                                                     <div className="flex flex-col">
-                                                                        <span className="text-xs font-bold text-gray-900 group-hover:text-orange-700">{p.nombre}</span>
-                                                                        <span className="text-[10px] text-gray-400 font-bold uppercase">SKU: {p.sku || 'N/A'}</span>
+                                                                        <span className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-orange-700 dark:group-hover:text-orange-400">{p.nombre}</span>
+                                                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase">SKU: {p.sku || 'N/A'}</span>
                                                                     </div>
-                                                                    <span className="text-xs font-black text-orange-600">${parseFloat(p.precio_base).toLocaleString()}</span>
+                                                                    <span className="text-xs font-black text-orange-600 dark:text-orange-400">${parseFloat(p.precio_base).toLocaleString()}</span>
                                                                 </div>
                                                             ))}
                                                     </div>
@@ -369,36 +369,36 @@ const FormDescuento = ({ id = null }) => {
                                         </motion.div>
                                     ) : formData.aplica_a === 'categoria' ? (
                                         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} key="cat-sel">
-                                            <label className="block text-xs font-medium text-gray-700 mb-2 uppercase tracking-wider">Elegir Categoría</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wider">Elegir Categoría</label>
                                             <div className="relative">
                                                 <select
                                                     name="categoria_id"
                                                     value={formData.categoria_id}
                                                     onChange={handleChange}
                                                     required
-                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 bg-white appearance-none pr-10 font-medium"
+                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-[#111c44] dark:text-white appearance-none pr-10 font-medium"
                                                 >
                                                     <option value="">-- Seleccionar --</option>
                                                     {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                                                 </select>
-                                                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" />
                                             </div>
                                         </motion.div>
                                     ) : formData.aplica_a === 'marca' ? (
                                         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} key="marca-sel">
-                                            <label className="block text-xs font-medium text-gray-700 mb-2 uppercase tracking-wider">Elegir Marca</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wider">Elegir Marca</label>
                                             <div className="relative">
                                                 <select
                                                     name="marca_id"
                                                     value={formData.marca_id}
                                                     onChange={handleChange}
                                                     required
-                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 bg-white appearance-none pr-10 font-medium"
+                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-[#111c44] dark:text-white appearance-none pr-10 font-medium"
                                                 >
                                                     <option value="">-- Seleccionar --</option>
                                                     {marcas.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
                                                 </select>
-                                                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" />
                                             </div>
                                         </motion.div>
                                     ) : null}
@@ -408,18 +408,18 @@ const FormDescuento = ({ id = null }) => {
                     </div>
                 </div>
 
-                <div className="fixed bottom-0 right-0 w-[calc(100%-250px)] bg-white/90 backdrop-blur-md border-t border-gray-200 p-4 transition-all z-40 flex justify-end">
+                <div className="fixed bottom-0 right-0 w-[calc(100%-250px)] bg-white/90 dark:bg-[#111c44]/90 backdrop-blur-md border-t border-gray-200 dark:border-white/10 p-4 transition-all z-40 flex justify-end">
                     <div className="flex items-center gap-4">
                         <Link
                             to="/admin/descuentos"
-                            className="text-xs font-black text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-widest"
+                            className="text-xs font-black text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors uppercase tracking-widest"
                         >
                             Cancelar
                         </Link>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex items-center gap-2 px-8 py-2 bg-orange-500 text-white text-xs font-black rounded-lg hover:bg-orange-600 transition-all shadow-lg active:scale-95 disabled:opacity-50 uppercase tracking-widest"
+                            className="flex items-center gap-2 px-8 py-2 bg-orange-500 dark:bg-orange-600 text-white text-xs font-black rounded-lg hover:bg-orange-600 dark:hover:bg-orange-500 transition-all shadow-lg shadow-orange-500/20 active:scale-95 disabled:opacity-50 uppercase tracking-widest"
                         >
                             {loading ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div> : <Save size={14} />}
                             {id ? 'Actualizar' : 'Guardar'}

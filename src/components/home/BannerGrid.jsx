@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { FaArrowRight, FaMicrochip } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
+const API_URL = 'http://localhost:8000';
+
 const BannerGrid = ({ banners }) => {
     if (!banners || banners.length === 0) return null;
 
@@ -34,7 +36,7 @@ const BannerGrid = ({ banners }) => {
                             {/* Product Image (Floating on Top) */}
                             {banner.imagen && (
                                 <img
-                                    src={banner.imagen.startsWith('http') ? banner.imagen : `http://localhost:8000${banner.imagen}`}
+                                    src={banner.imagen.startsWith('http') ? banner.imagen : `${API_URL}/${banner.imagen.startsWith('/') ? banner.imagen.substring(1) : banner.imagen}`}
                                     alt={banner.titulo}
                                     className="absolute left-1 bottom-0 h-full w-[43%] object-contain object-center z-10 drop-shadow-xl transition-transform duration-700 ease-in-out group-hover:scale-110 p-1"
                                 />

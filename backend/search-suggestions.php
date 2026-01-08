@@ -30,7 +30,7 @@ try {
     );
     $db->exec("set names utf8mb4");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    // Prepare Search Tokens and Stems
+    $searchTerm = "%$query%";
     $tokens = explode(' ', $query);
     $searchORs = ["MATCH(p.nombre, p.descripcion, p.modelo, p.sku, p.etiquetas) AGAINST(? IN NATURAL LANGUAGE MODE)"];
     $allParams = [$query];
@@ -60,7 +60,6 @@ try {
     $stmt->execute($executionParams);
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Marcas relacionadas
     // Marcas relacionadas
     $stmt = $db->prepare("
         SELECT DISTINCT m.id, m.nombre

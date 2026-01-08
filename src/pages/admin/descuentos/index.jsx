@@ -112,7 +112,7 @@ const DescuentosIndex = () => {
             {/* Header Simplified */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                    <h1 className="text-sm font-bold text-gray-800 dark:text-white flex items-center gap-2">
                         <Tag size={16} className="text-orange-500" />
                         Gestión de Descuentos
                     </h1>
@@ -124,7 +124,7 @@ const DescuentosIndex = () => {
 
                 <Link
                     to="/admin/descuentos/nuevo"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white text-xs font-semibold rounded-lg hover:bg-orange-600 transition-colors shadow-sm"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 dark:bg-orange-600 text-white text-xs font-semibold rounded-lg hover:bg-orange-600 dark:hover:bg-orange-50 transition-colors shadow-sm"
                 >
                     <Plus size={14} />
                     Nuevo Descuento
@@ -134,38 +134,38 @@ const DescuentosIndex = () => {
             {/* Middle Bar: Search */}
             <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                 <div className="relative flex-1 lg:max-w-md w-full">
-                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                     <input
                         type="text"
                         placeholder="Buscar por nombre de campaña..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all shadow-sm"
+                        className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-xl text-xs focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all shadow-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600"
                     />
                 </div>
             </div>
 
             {/* Light Industrial Table Area */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div className="bg-white dark:bg-[#111c44] rounded-2xl border border-gray-200 dark:border-white/5 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] overflow-hidden">
                 <div className="overflow-x-auto no-scrollbar">
                     <table className="w-full text-left border-separate border-spacing-0">
-                        <thead className="bg-[#f8fafc]/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100">
+                        <thead className="bg-[#f8fafc]/80 dark:bg-[#0b1437]/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100 dark:border-white/5">
                             <tr>
-                                <th className="px-4 py-4 text-xs font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap">
+                                <th className="px-4 py-4 text-xs font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap">
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
                                         CAMPAÑA
                                     </div>
                                 </th>
-                                <th className="px-4 py-4 text-xs font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap text-center">TIPO</th>
-                                <th className="px-4 py-4 text-xs font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap text-center">VALOR</th>
-                                <th className="px-4 py-4 text-xs font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap">APLICACIÓN</th>
-                                <th className="px-4 py-4 text-xs font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap">VIGENCIA</th>
-                                <th className="px-4 py-4 text-xs font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 text-center whitespace-nowrap">ESTADO</th>
-                                <th className="px-4 py-4 text-xs font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 text-right whitespace-nowrap">ACCIONES</th>
+                                <th className="px-4 py-4 text-xs font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap text-center">TIPO</th>
+                                <th className="px-4 py-4 text-xs font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap text-center">VALOR</th>
+                                <th className="px-4 py-4 text-xs font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap">APLICACIÓN</th>
+                                <th className="px-4 py-4 text-xs font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap">VIGENCIA</th>
+                                <th className="px-4 py-4 text-xs font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-center whitespace-nowrap">ESTADO</th>
+                                <th className="px-4 py-4 text-xs font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-right whitespace-nowrap">ACCIONES</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-gray-50 dark:divide-white/5">
                             <AnimatePresence>
                                 {filteredDescuentos.map((d, idx) => {
                                     const badge = getEstadoBadge(d);
@@ -175,7 +175,7 @@ const DescuentosIndex = () => {
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             whileHover={{
-                                                backgroundColor: "rgba(249, 115, 22, 0.02)",
+                                                backgroundColor: "rgba(249, 115, 22, 0.04)",
                                                 transition: { duration: 0.2, ease: "easeOut" }
                                             }}
                                             transition={{
@@ -186,14 +186,14 @@ const DescuentosIndex = () => {
                                         >
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0 group-hover:border-orange-200 transition-all duration-300">
-                                                        <Tag size={12} className="text-orange-500" />
+                                                    <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-orange-200 dark:group-hover:border-orange-500 transition-all duration-300">
+                                                        <Tag size={12} className="text-orange-500 dark:text-orange-400" />
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <p className="text-sm font-black text-[#1e293b] uppercase tracking-tight truncate max-w-[180px]" title={d.nombre}>
+                                                        <p className="text-sm font-black text-[#1e293b] dark:text-gray-200 uppercase tracking-tight truncate max-w-[180px]" title={d.nombre}>
                                                             {d.nombre}
                                                         </p>
-                                                        <p className="text-xs font-bold text-gray-400 italic truncate max-w-[180px]">
+                                                        <p className="text-xs font-bold text-gray-400 dark:text-gray-500 italic truncate max-w-[180px]">
                                                             {d.descripcion || 'Sin descripción adicional'}
                                                         </p>
                                                     </div>
@@ -201,26 +201,26 @@ const DescuentosIndex = () => {
                                             </td>
 
                                             <td className="px-4 py-3 text-center">
-                                                <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded font-black text-xs uppercase tracking-widest border ${d.tipo === 'porcentaje' ? 'bg-blue-50 text-blue-600 border-blue-100/50' : 'bg-purple-50 text-purple-600 border-purple-100/50'}`}>
+                                                <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded font-black text-xs uppercase tracking-widest border ${d.tipo === 'porcentaje' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-100/50 dark:border-blue-500/20' : 'bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-100/50 dark:border-purple-500/20'}`}>
                                                     {d.tipo === 'porcentaje' ? <Percent size={10} /> : <DollarSign size={10} />}
                                                     {d.tipo.replace('_', ' ')}
                                                 </div>
                                             </td>
 
                                             <td className="px-4 py-3 text-center font-mono">
-                                                <span className="text-sm font-black text-[#1e293b]">
+                                                <span className="text-sm font-black text-[#1e293b] dark:text-gray-200">
                                                     {d.tipo === 'porcentaje' ? `${parseFloat(d.valor)}%` : `$${parseFloat(d.valor).toLocaleString()}`}
                                                 </span>
                                             </td>
 
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center gap-1.5">
-                                                    {d.aplica_a === 'producto' && <Box size={12} className="text-gray-400" />}
-                                                    {d.aplica_a === 'categoria' && <Layers size={12} className="text-gray-400" />}
-                                                    {d.aplica_a === 'marca' && <Cpu size={12} className="text-gray-400" />}
+                                                    {d.aplica_a === 'producto' && <Box size={12} className="text-gray-400 dark:text-gray-600" />}
+                                                    {d.aplica_a === 'categoria' && <Layers size={12} className="text-gray-400 dark:text-gray-600" />}
+                                                    {d.aplica_a === 'marca' && <Cpu size={12} className="text-gray-400 dark:text-gray-600" />}
                                                     <div className="flex flex-col">
-                                                        <span className="text-xs font-black text-gray-400 uppercase tracking-tighter">{d.aplica_a}</span>
-                                                        <span className="text-xs font-bold text-[#1e293b] truncate max-w-[120px]">
+                                                        <span className="text-xs font-black text-gray-400 dark:text-gray-600 uppercase tracking-tighter">{d.aplica_a}</span>
+                                                        <span className="text-xs font-bold text-[#1e293b] dark:text-gray-300 truncate max-w-[120px]">
                                                             {d.afecta_nombre || 'General'}
                                                         </span>
                                                     </div>
@@ -228,8 +228,8 @@ const DescuentosIndex = () => {
                                             </td>
 
                                             <td className="px-4 py-3">
-                                                <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
-                                                    <Calendar size={12} className="text-gray-300" />
+                                                <div className="flex items-center gap-2 text-xs font-bold text-gray-500 dark:text-gray-400">
+                                                    <Calendar size={12} className="text-gray-300 dark:text-gray-600" />
                                                     <div className="flex flex-col">
                                                         <span>{d.fecha_inicio.split(' ')[0]}</span>
                                                         <span className="text-[10px] opacity-70">hasta {d.fecha_fin.split(' ')[0]}</span>
@@ -238,10 +238,10 @@ const DescuentosIndex = () => {
                                             </td>
 
                                             <td className="px-4 py-3 text-center">
-                                                <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm font-black text-xs tracking-[0.05em] border-2 transition-all whitespace-nowrap ${badge.color}`}>
+                                                <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm font-black text-xs tracking-[0.05em] border-2 transition-all whitespace-nowrap ${badge.label === 'inactivo' ? 'dark:bg-white/5 dark:text-gray-500 dark:border-white/10' : (badge.label === 'programado' ? 'dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20' : (badge.label === 'expirado' ? 'dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20' : 'dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'))} ${badge.color}`}>
                                                     <div className="relative flex items-center justify-center">
-                                                        <div className={`w-1.5 h-1.5 rounded-full ${badge.label === 'activo' ? 'bg-emerald-500 animate-ping' : (badge.label === 'programado' ? 'bg-blue-500' : 'bg-gray-300')}`} />
-                                                        <div className={`absolute w-1.5 h-1.5 rounded-full ${badge.label === 'activo' ? 'bg-emerald-500' : (badge.label === 'programado' ? 'bg-blue-500' : 'bg-gray-300')}`} />
+                                                        <div className={`w-1.5 h-1.5 rounded-full ${badge.label === 'activo' ? 'bg-emerald-500 animate-ping' : (badge.label === 'programado' ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600')}`} />
+                                                        <div className={`absolute w-1.5 h-1.5 rounded-full ${badge.label === 'activo' ? 'bg-emerald-500' : (badge.label === 'programado' ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600')}`} />
                                                     </div>
                                                     {badge.label}
                                                 </div>
@@ -250,14 +250,14 @@ const DescuentosIndex = () => {
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center justify-end gap-1">
                                                     {[
-                                                        { to: `/admin/descuentos/editar/${d.id}`, icon: Edit, label: 'Editar', color: 'hover:text-blue-600 hover:bg-blue-50' },
-                                                        { onClick: () => handleEliminar(d.id), icon: Trash2, label: 'Baja', color: 'hover:text-red-600 hover:bg-red-50' }
+                                                        { to: `/admin/descuentos/editar/${d.id}`, icon: Edit, label: 'Editar', color: 'hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/5' },
+                                                        { onClick: () => handleEliminar(d.id), icon: Trash2, label: 'Baja', color: 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/5' }
                                                     ].map((action, i) => (
                                                         <Link
                                                             key={i}
                                                             to={action.to}
                                                             onClick={action.onClick}
-                                                            className={`p-1.5 transition-all duration-300 rounded-lg border-2 border-transparent bg-gray-50 text-[#1e293b] hover:border-[#1e293b]/10 hover:shadow-md ${action.color}`}
+                                                            className={`p-1.5 transition-all duration-300 rounded-lg border-2 border-transparent bg-gray-50 dark:bg-white/5 text-[#1e293b] dark:text-gray-400 hover:border-[#1e293b]/10 dark:hover:border-white/20 hover:shadow-md ${action.color}`}
                                                             title={action.label}
                                                         >
                                                             <action.icon size={14} strokeWidth={2.5} />

@@ -336,7 +336,7 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
         <div className="p-6 space-y-6 min-h-screen">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-gray-900">{titulo}</h1>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{titulo}</h1>
                 {breadcrumbItems && <Breadcrumb items={breadcrumbItems} />}
             </div>
 
@@ -345,13 +345,13 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                     {/* Left Column */}
                     <div className="space-y-6">
                         {/* Basic Info */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                            <h3 className="text-base font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200">
+                        <div className="bg-white dark:bg-[#111c44] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-white/5">
+                            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4 pb-3 border-b border-gray-200 dark:border-white/5">
                                 Información Básica
                             </h3>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                         Nombre del producto <span className="text-red-500">*</span>
                                     </label>
                                     <input
@@ -360,7 +360,7 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                         value={formData.nombre}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        className={`w-full px-3 py-2.5 text-sm rounded-lg border ${errors.nombre ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} outline-none transition-all`}
+                                        className={`w-full px-3 py-2.5 text-sm rounded-lg border ${errors.nombre ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 dark:border-white/10 focus:ring-blue-500 focus:border-blue-500'} outline-none transition-all bg-white dark:bg-white/5 dark:text-white`}
                                         placeholder="Introduzca el nombre del producto"
                                     />
                                     {errors.nombre && <p className="text-red-500 text-xs mt-1">{errors.nombre}</p>}
@@ -368,7 +368,7 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                             Categoría <span className="text-red-500">*</span>
                                         </label>
                                         <select
@@ -376,7 +376,7 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                             value={formData.categoria_id}
                                             onChange={handleChange}
                                             onBlur={handleBlur}
-                                            className={`w-full px-3 py-2.5 text-sm rounded-lg border ${errors.categoria_id ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} outline-none transition-all bg-white`}
+                                            className={`w-full px-3 py-2.5 text-sm rounded-lg border ${errors.categoria_id ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 dark:border-white/10 focus:ring-blue-500 focus:border-blue-500'} outline-none transition-all bg-white dark:bg-[#111c44] dark:text-white`}
                                         >
                                             <option value="">Elija categoría</option>
                                             {categorias.map(cat => (
@@ -386,7 +386,7 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                         {errors.categoria_id && <p className="text-red-500 text-xs mt-1">{errors.categoria_id}</p>}
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                             Marca <span className="text-red-500">*</span>
                                         </label>
                                         <select
@@ -394,7 +394,7 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                             value={formData.marca_id}
                                             onChange={handleChange}
                                             onBlur={handleBlur}
-                                            className={`w-full px-3 py-2.5 text-sm rounded-lg border ${errors.marca_id ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} outline-none transition-all bg-white`}
+                                            className={`w-full px-3 py-2.5 text-sm rounded-lg border ${errors.marca_id ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 dark:border-white/10 focus:ring-blue-500 focus:border-blue-500'} outline-none transition-all bg-white dark:bg-[#111c44] dark:text-white`}
                                         >
                                             <option value="">Elija marca</option>
                                             {marcas.map(marca => (
@@ -407,7 +407,7 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                             Precio Base ($) <span className="text-red-500">*</span>
                                         </label>
                                         <input
@@ -417,13 +417,13 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                             onChange={handleChange}
                                             onBlur={handleBlur}
                                             step="0.01"
-                                            className={`w-full px-3 py-2.5 text-sm rounded-lg border ${errors.precio_base ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} outline-none transition-all`}
+                                            className={`w-full px-3 py-2.5 text-sm rounded-lg border ${errors.precio_base ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 dark:border-white/10 focus:ring-blue-500 focus:border-blue-500'} outline-none transition-all bg-white dark:bg-white/5 dark:text-white`}
                                             placeholder="0.00"
                                         />
                                         {errors.precio_base && <p className="text-red-500 text-xs mt-1">{errors.precio_base}</p>}
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                             Stock Inicial <span className="text-red-500">*</span>
                                         </label>
                                         <input
@@ -432,7 +432,7 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                             value={formData.stock}
                                             onChange={handleChange}
                                             onBlur={handleBlur}
-                                            className={`w-full px-3 py-2.5 text-sm rounded-lg border ${errors.stock ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} outline-none transition-all`}
+                                            className={`w-full px-3 py-2.5 text-sm rounded-lg border ${errors.stock ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 dark:border-white/10 focus:ring-blue-500 focus:border-blue-500'} outline-none transition-all bg-white dark:bg-white/5 dark:text-white`}
                                             placeholder="0"
                                         />
                                         {errors.stock && <p className="text-red-500 text-xs mt-1">{errors.stock}</p>}
@@ -440,7 +440,7 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                         Descripción <span className="text-red-500">*</span>
                                     </label>
                                     <textarea
@@ -449,7 +449,7 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                         onChange={handleChange}
                                         onBlur={handleBlur}
                                         rows="4"
-                                        className={`w-full px-3 py-2.5 text-sm rounded-lg border ${errors.descripcion ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} outline-none transition-all resize-none`}
+                                        className={`w-full px-3 py-2.5 text-sm rounded-lg border ${errors.descripcion ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 dark:border-white/10 focus:ring-blue-500 focus:border-blue-500'} outline-none transition-all resize-none bg-white dark:bg-white/5 dark:text-white`}
                                         placeholder="Descripción del producto..."
                                     ></textarea>
                                     {errors.descripcion && <p className="text-red-500 text-xs mt-1">{errors.descripcion}</p>}
@@ -458,61 +458,61 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                         </div>
 
                         {/* SEO & Marketing */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                            <h3 className="text-base font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200 flex items-center gap-2">
-                                <i className="fas fa-search text-blue-600"></i> SEO & Marketing
+                        <div className="bg-white dark:bg-[#111c44] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-white/5">
+                            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4 pb-3 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
+                                <i className="fas fa-search text-blue-600 dark:text-blue-400"></i> SEO & Marketing
                             </h3>
                             <div className="space-y-3">
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-600 mb-1">Meta Título</label>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Meta Título</label>
                                         <input
                                             type="text"
                                             name="meta_titulo"
                                             value={formData.meta_titulo}
                                             onChange={handleChange}
-                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-600 mb-1">Slug</label>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Slug</label>
                                         <input
                                             type="text"
                                             name="slug"
                                             value={formData.slug}
                                             onChange={handleChange}
-                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                         />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Meta Descripción</label>
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Meta Descripción</label>
                                     <textarea
                                         name="meta_descripcion"
                                         value={formData.meta_descripcion}
                                         onChange={handleChange}
                                         rows="2"
-                                        className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none"
+                                        className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none bg-white dark:bg-white/5 dark:text-white"
                                     ></textarea>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Palabras Clave</label>
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Palabras Clave</label>
                                     <input
                                         type="text"
                                         name="palabras_clave"
                                         value={formData.palabras_clave}
                                         onChange={handleChange}
-                                        className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                        className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Etiquetas</label>
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Etiquetas</label>
                                     <input
                                         type="text"
                                         name="etiquetas"
                                         value={formData.etiquetas}
                                         onChange={handleChange}
-                                        className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                        className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                     />
                                 </div>
                                 <div className="flex gap-4 pt-2">
@@ -522,9 +522,9 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                             name="activo"
                                             checked={formData.activo}
                                             onChange={handleChange}
-                                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                                            className="w-4 h-4 text-blue-600 dark:text-blue-500 rounded border-gray-300 dark:border-white/10 focus:ring-blue-500 bg-white dark:bg-white/5"
                                         />
-                                        <span className="text-sm font-medium text-gray-700">Visible en tienda</span>
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Visible en tienda</span>
                                     </label>
                                     <label className="flex items-center gap-2 cursor-pointer">
                                         <input
@@ -532,9 +532,9 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                             name="destacado"
                                             checked={formData.destacado}
                                             onChange={handleChange}
-                                            className="w-4 h-4 text-blue-600 rounded"
+                                            className="w-4 h-4 text-blue-600 dark:text-blue-500 rounded border-gray-300 dark:border-white/10 focus:ring-blue-500 bg-white dark:bg-white/5"
                                         />
-                                        <span className="text-sm text-gray-700">Destacado</span>
+                                        <span className="text-sm text-gray-700 dark:text-gray-300">Destacado</span>
                                     </label>
                                     <label className="flex items-center gap-2 cursor-pointer">
                                         <input
@@ -542,83 +542,83 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                             name="nuevo"
                                             checked={formData.nuevo}
                                             onChange={handleChange}
-                                            className="w-4 h-4 text-blue-600 rounded"
+                                            className="w-4 h-4 text-blue-600 dark:text-blue-500 rounded border-gray-300 dark:border-white/10 focus:ring-blue-500 bg-white dark:bg-white/5"
                                         />
-                                        <span className="text-sm text-gray-700">Nuevo</span>
+                                        <span className="text-sm text-gray-700 dark:text-gray-300">Nuevo</span>
                                     </label>
                                 </div>
                             </div>
                         </div>
 
                         {/* Logistics */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                            <h3 className="text-base font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200 flex items-center gap-2">
-                                <i className="fas fa-truck text-blue-600"></i> Logística
+                        <div className="bg-white dark:bg-[#111c44] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-white/5">
+                            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4 pb-3 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
+                                <i className="fas fa-truck text-blue-600 dark:text-blue-400"></i> Logística
                             </h3>
                             <div className="space-y-3">
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-600 mb-1">SKU</label>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">SKU</label>
                                         <input
                                             type="text"
                                             name="sku"
                                             value={formData.sku}
                                             onChange={handleChange}
-                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-600 mb-1">Peso (kg)</label>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Peso (kg)</label>
                                         <input
                                             type="number"
                                             step="0.01"
                                             name="peso"
                                             value={formData.peso}
                                             onChange={handleChange}
-                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-600 mb-1">Stock Mín.</label>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Stock Mín.</label>
                                         <input
                                             type="number"
                                             name="stock_minimo"
                                             value={formData.stock_minimo}
                                             onChange={handleChange}
-                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-600 mb-1">Largo (cm)</label>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Largo (cm)</label>
                                         <input
                                             type="number"
                                             step="0.01"
                                             name="largo"
                                             value={formData.largo}
                                             onChange={handleChange}
-                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-600 mb-1">Ancho (cm)</label>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Ancho (cm)</label>
                                         <input
                                             type="number"
                                             step="0.01"
                                             name="ancho"
                                             value={formData.ancho}
                                             onChange={handleChange}
-                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-600 mb-1">Alto (cm)</label>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Alto (cm)</label>
                                         <input
                                             type="number"
                                             step="0.01"
                                             name="alto"
                                             value={formData.alto}
                                             onChange={handleChange}
-                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                         />
                                     </div>
                                 </div>
@@ -628,9 +628,9 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                         name="envio_gratis"
                                         checked={formData.envio_gratis}
                                         onChange={handleChange}
-                                        className="w-4 h-4 text-blue-600 rounded"
+                                        className="w-4 h-4 text-blue-600 dark:text-blue-500 rounded border-gray-300 dark:border-white/10 focus:ring-blue-500 bg-white dark:bg-white/5"
                                     />
-                                    <span className="text-sm text-gray-700">Envío Gratis</span>
+                                    <span className="text-sm text-gray-700 dark:text-gray-300">Envío Gratis</span>
                                 </label>
                             </div>
                         </div>
@@ -639,9 +639,9 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                     {/* Right Column - Images and Additional Info */}
                     <div className="space-y-6">
                         {/* Main Image */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                            <h3 className="text-base font-bold text-gray-900 mb-4">Imagen Principal</h3>
-                            <div className="relative border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-500 transition-colors bg-gray-50">
+                        <div className="bg-white dark:bg-[#111c44] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-white/5">
+                            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4">Imagen Principal</h3>
+                            <div className="relative border-2 border-dashed border-gray-300 dark:border-white/10 rounded-xl p-8 text-center hover:border-blue-500 dark:hover:border-blue-400 transition-colors bg-gray-50 dark:bg-white/5">
                                 {imagenPreview ? (
                                     <div className="relative">
                                         <img src={imagenPreview} alt="Preview" className="max-h-64 mx-auto rounded-lg" />
@@ -658,11 +658,11 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                     </div>
                                 ) : (
                                     <div className="py-12">
-                                        <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
-                                            <i className="fas fa-cloud-upload-alt text-blue-600 text-2xl"></i>
+                                        <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 dark:bg-blue-500/10 rounded-full flex items-center justify-center">
+                                            <i className="fas fa-cloud-upload-alt text-blue-600 dark:text-blue-400 text-2xl"></i>
                                         </div>
-                                        <p className="text-gray-600 font-medium mb-1">Suelta tu imagen aquí</p>
-                                        <p className="text-blue-600 font-semibold">o haz clic para buscar</p>
+                                        <p className="text-gray-600 dark:text-gray-400 font-medium mb-1">Suelta tu imagen aquí</p>
+                                        <p className="text-blue-600 dark:text-blue-400 font-semibold">o haz clic para buscar</p>
                                     </div>
                                 )}
                                 <input
@@ -675,11 +675,11 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                         </div>
 
                         {/* Gallery */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                            <h3 className="text-base font-bold text-gray-900 mb-4">Galería de Imágenes</h3>
+                        <div className="bg-white dark:bg-[#111c44] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-white/5">
+                            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4">Galería de Imágenes</h3>
                             <div className="grid grid-cols-3 gap-3">
                                 {imagenesGaleria.map((img, idx) => (
-                                    <div key={idx} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group">
+                                    <div key={idx} className="relative aspect-square bg-gray-100 dark:bg-white/5 rounded-lg overflow-hidden group">
                                         <img src={img} alt={`Galería ${idx}`} className="w-full h-full object-cover" />
                                         <button
                                             type="button"
@@ -695,9 +695,9 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                         )}
                                     </div>
                                 ))}
-                                <label className="aspect-square bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all">
-                                    <i className="fas fa-plus text-xl text-gray-400 mb-1"></i>
-                                    <span className="text-xs text-gray-500">Agregar</span>
+                                <label className="aspect-square bg-gray-50 dark:bg-white/5 rounded-lg border-2 border-dashed border-gray-300 dark:border-white/10 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
+                                    <i className="fas fa-plus text-xl text-gray-400 dark:text-gray-500 mb-1"></i>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">Agregar</span>
                                     <input
                                         type="file"
                                         accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/avif,image/svg+xml,image/bmp"
@@ -710,19 +710,19 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                         </div>
 
                         {/* Additional Info */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                            <h3 className="text-base font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200 flex items-center gap-2">
-                                <i className="fas fa-info-circle text-blue-600"></i> Información Adicional
+                        <div className="bg-white dark:bg-[#111c44] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-white/5">
+                            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4 pb-3 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
+                                <i className="fas fa-info-circle text-blue-600 dark:text-blue-400"></i> Información Adicional
                             </h3>
                             <div className="space-y-3">
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-600 mb-1">Condición</label>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Condición</label>
                                         <select
                                             name="condicion"
                                             value={formData.condicion}
                                             onChange={handleChange}
-                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-[#111c44] dark:text-white"
                                         >
                                             <option value="nuevo">Nuevo</option>
                                             <option value="usado">Usado</option>
@@ -730,39 +730,39 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-600 mb-1">Garantía (meses)</label>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Garantía (meses)</label>
                                         <input
                                             type="number"
                                             name="garantia_meses"
                                             value={formData.garantia_meses}
                                             onChange={handleChange}
-                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-600 mb-1">Modelo</label>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Modelo</label>
                                         <input
                                             type="text"
                                             name="modelo"
                                             value={formData.modelo}
                                             onChange={handleChange}
-                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-600 mb-1">Política Devolución (días)</label>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Política Devolución (días)</label>
                                         <input
                                             type="number"
                                             name="politica_devolucion_dias"
                                             value={formData.politica_devolucion_dias}
                                             onChange={handleChange}
-                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                         />
                                     </div>
 
                                     <div className="col-span-2">
-                                        <label className="block text-xs font-medium text-gray-600 mb-1">Video del Producto</label>
-                                        <div className="relative border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-blue-500 transition-colors bg-gray-50">
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Video del Producto</label>
+                                        <div className="relative border-2 border-dashed border-gray-300 dark:border-white/10 rounded-xl p-4 text-center hover:border-blue-500 dark:hover:border-blue-400 transition-colors bg-gray-50 dark:bg-white/5">
                                             {formData.video_url ? (
                                                 <div className="relative w-full bg-black rounded-lg overflow-hidden">
                                                     <video
@@ -784,11 +784,11 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                                 </div>
                                             ) : (
                                                 <div className="py-6">
-                                                    <div className="w-12 h-12 mx-auto mb-3 bg-blue-100 rounded-full flex items-center justify-center">
-                                                        <i className="fas fa-video text-blue-600 text-xl"></i>
+                                                    <div className="w-12 h-12 mx-auto mb-3 bg-blue-100 dark:bg-blue-500/10 rounded-full flex items-center justify-center">
+                                                        <i className="fas fa-video text-blue-600 dark:text-blue-400 text-xl"></i>
                                                     </div>
-                                                    <p className="text-gray-600 text-sm font-medium mb-1">Suelta tu video aquí</p>
-                                                    <p className="text-blue-600 text-sm font-semibold">o haz clic para buscar</p>
+                                                    <p className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Suelta tu video aquí</p>
+                                                    <p className="text-blue-600 dark:text-blue-400 text-sm font-semibold">o haz clic para buscar</p>
                                                 </div>
                                             )}
                                             {!formData.video_url && (
@@ -804,13 +804,13 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
 
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Fabricante</label>
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Fabricante</label>
                                     <input
                                         type="text"
                                         name="marca_fabricante"
                                         value={formData.marca_fabricante}
                                         onChange={handleChange}
-                                        className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                        className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
                                     />
                                 </div>
                             </div>
@@ -834,11 +834,11 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-white/5">
                     <button
                         type="button"
                         onClick={() => window.history.back()}
-                        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-700 border-2 border-gray-300 font-semibold rounded-xl hover:bg-gray-50 transition-all duration-200"
+                        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-white/5 text-gray-700 dark:text-gray-300 border-2 border-gray-300 dark:border-white/10 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-white/10 transition-all duration-200"
                     >
                         <i className="fas fa-times"></i>
                         <span>Cancelar</span>
@@ -846,7 +846,7 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                     <button
                         type="submit"
                         disabled={loading}
-                        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white border-2 border-blue-600 font-semibold rounded-xl hover:bg-blue-700 hover:border-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white border-2 border-blue-600 dark:border-blue-500 font-semibold rounded-xl hover:bg-blue-700 dark:hover:bg-blue-600 hover:border-blue-700 dark:hover:border-blue-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20"
                     >
                         {loading ? (
                             <>

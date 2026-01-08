@@ -14,13 +14,15 @@ import MiCuenta from './pages/MiCuenta'
 import Checkout from './pages/Checkout'
 import Chatbot from './components/Chatbot'
 import { SettingsProvider } from './context/SettingsContext'
+import { NotificationProvider } from './context/NotificationContext'
 import Nosotros from './pages/Nosotros'
 import Contacto from './pages/Contacto'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import AdminLayout from './pages/admin/AdminLayout'
 import Dashboard from './pages/admin/Dashboard'
-import MensajesAdmin from './pages/admin/MensajesAdmin'
+import MensajesIndex from './pages/admin/mensajes/index'
+import MensajeShow from './pages/admin/mensajes/show'
 import ProductosIndex from './pages/admin/productos/index'
 import ProductosNew from './pages/admin/productos/new'
 import ProductosEdit from './pages/admin/productos/edit'
@@ -72,7 +74,11 @@ function App() {
     if (!isAdmin) {
       return <Navigate to="/" />
     }
-    return children
+    return (
+      <NotificationProvider>
+        {children}
+      </NotificationProvider>
+    )
   }
 
   return (
@@ -206,7 +212,10 @@ function App() {
           </AdminRoute>
         }>
           <Route index element={<Dashboard />} />
-          <Route path="mensajes" element={<MensajesAdmin />} />
+          <Route path="mensajes">
+            <Route index element={<MensajesIndex />} />
+            <Route path="ver/:id" element={<MensajeShow />} />
+          </Route>
           <Route path="productos">
             <Route index element={<ProductosIndex />} />
             <Route path="nuevo" element={<ProductosNew />} />

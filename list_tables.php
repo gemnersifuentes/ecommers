@@ -1,7 +1,10 @@
 <?php
-require_once __DIR__ . '/backend/config/conexion.php';
-$database = new Database();
-$db = $database->getConnection();
-$stmt = $db->query("SHOW TABLES");
-print_r($stmt->fetchAll(PDO::FETCH_COLUMN));
+require 'backend/config/conexion.php';
+$tablesToDescribe = ['productos', 'producto_variantes', 'detalle_pedido', 'reservaciones_servicios'];
+foreach ($tablesToDescribe as $table) {
+    echo "--- Table: $table ---\n";
+    $stmt = $db->query("DESCRIBE $table");
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) echo "{$row['Field']} - {$row['Type']}\n";
+    echo "\n";
+}
 ?>

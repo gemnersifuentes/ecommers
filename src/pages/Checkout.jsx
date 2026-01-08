@@ -410,27 +410,32 @@ const Checkout = () => {
             const response = await tiendaService.crearPedido(formDataToSubmit);
 
             if (response.success) {
-                const dir = direcciones.find(d => d.id === direccionSeleccionada);
+                const selectedAddr = direcciones.find(d => d.id === direccionSeleccionada);
                 const provinceName = getProvincias(formData.departamento).find(p => p.id === formData.provincia)?.name || '';
                 const districtName = getDistritos(formData.provincia).find(d => d.id === formData.distrito)?.name || '';
                 const departmentName = ubigeoPeru.departamentos.find(d => d.id === formData.departamento)?.name || '';
 
                 setFinalOrderData({
                     items: [...cart],
-                    cliente: { ...formData },
+                    cliente: {
+                        ...formData,
+                        telefono: formData.telefono || selectedAddr?.telefono || usuario?.telefono || ''
+                    },
                     envío: {
                         metodo: metodoEnvio,
-                        direccion: dir || {
+                        direccion: selectedAddr || {
                             direccion: formData.direccion,
                             referencia: formData.referencia,
                             distrito: districtName,
                             provincia: provinceName,
-                            departamento: departmentName
+                            departamento: departmentName,
+                            nombre_destinatario: formData.nombre,
+                            telefono: formData.telefono
                         },
                         ubigeo: {
-                            departamento: departmentName,
-                            provincia: provinceName,
-                            distrito: districtName
+                            departamento: departmentName || selectedAddr?.departamento || '',
+                            provincia: provinceName || selectedAddr?.provincia || '',
+                            distrito: districtName || selectedAddr?.distrito || ''
                         }
                     },
                     pago: {
@@ -493,10 +498,10 @@ const Checkout = () => {
 
             {/* Step 3 */}
             <div className="flex flex-col items-center relative z-10">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white transition-colors duration-300 ${step >= 3 ? 'bg-green-500' : 'bg-gray-300'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white transition-colors duration-300 ${step >= 3 ? 'bg-orange-500' : 'bg-gray-300'}`}>
                     3
                 </div>
-                <span className={`text-xs font-medium mt-2 ${step >= 3 ? 'text-green-500' : 'text-gray-400'}`}>Éxito</span>
+                <span className={`text-xs font-medium mt-2 ${step >= 3 ? 'text-orange-500' : 'text-gray-400'}`}>Éxito</span>
             </div>
         </div>
     );
@@ -560,8 +565,8 @@ const Checkout = () => {
                         className="max-w-5xl mx-auto"
                     >
                         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 mb-8">
-                            {/* Success Header */}
-                            <div className="bg-green-500 p-8 text-center text-white">
+                            {/* Success Header Redesigned to Brand Orange */}
+                            <div className="bg-orange-600 p-8 text-center text-white">
                                 <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
@@ -571,7 +576,7 @@ const Checkout = () => {
                                     <Check className="w-8 h-8 text-white" strokeWidth={3} />
                                 </motion.div>
                                 <h1 className="text-3xl font-extrabold mb-2">¡Pedido Confirmado!</h1>
-                                <p className="text-green-50 opacity-90">
+                                <p className="text-orange-50 opacity-90">
                                     Gracias por tu compra. Tu pedido <span className="font-bold underline">#{orderNumber}</span> ha sido registrado con éxito.
                                 </p>
                             </div>
@@ -634,8 +639,10 @@ const Checkout = () => {
                                                 <p className="text-sm font-bold text-gray-900 capitalize">{finalOrderData?.envío.metodo === 'tienda' ? 'Retiro en Tienda' : 'Envio a Domicilio'}</p>
                                                 <div className="text-sm text-gray-600 space-y-0.5">
                                                     <p className="font-bold text-gray-800">{finalOrderData?.envío.direccion.direccion}</p>
-                                                    <p className="text-xs italic">{finalOrderData?.envío.direccion.referencia}</p>
-                                                    <p>{finalOrderData?.envío.ubigeo.distrito}, {finalOrderData?.envío.ubigeo.provincia}, {finalOrderData?.envío.ubigeo.departamento}</p>
+                                                    {finalOrderData?.envío.direccion.referencia && (
+                                                        <p className="text-xs italic">{finalOrderData?.envío.direccion.referencia}</p>
+                                                    )}
+                                                    <p>{finalOrderData?.envío.ubigeo.distrito || finalOrderData?.envío.direccion.distrito}, {finalOrderData?.envío.ubigeo.provincia || finalOrderData?.envío.direccion.provincia}, {finalOrderData?.envío.ubigeo.departamento || finalOrderData?.envío.direccion.departamento}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -687,7 +694,9 @@ const Checkout = () => {
                                                 </div>
                                                 <div className="min-w-0">
                                                     <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Teléfono</p>
-                                                    <p className="text-xs font-bold text-gray-900">{finalOrderData?.cliente.telefono}</p>
+                                                    <p className="text-xs font-bold text-gray-900">
+                                                        {finalOrderData?.cliente.telefono || finalOrderData?.envío.direccion.telefono || 'N/A'}
+                                                    </p>
                                                 </div>
                                             </div>
                                         </div>

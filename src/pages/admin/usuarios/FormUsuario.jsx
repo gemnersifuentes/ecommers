@@ -74,36 +74,36 @@ const FormUsuario = ({ id = null }) => {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-[#111c44] rounded-xl shadow-sm border border-gray-100 dark:border-white/5 p-6 space-y-6">
             <div className="grid grid-cols-1 gap-6">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Nombre <span className="text-red-500">*</span></label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre <span className="text-red-500">*</span></label>
                     <input
                         type="text"
                         name="nombre"
                         value={formData.nombre}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-white/5 dark:text-white"
                         placeholder="Nombre completo"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Correo <span className="text-red-500">*</span></label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo <span className="text-red-500">*</span></label>
                     <input
                         type="email"
                         name="correo"
                         value={formData.correo}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-white/5 dark:text-white"
                         placeholder="correo@ejemplo.com"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Contraseña {id && '(dejar vacío para no cambiar)'}
                         {!id && <span className="text-red-500">*</span>}
                     </label>
@@ -113,18 +113,18 @@ const FormUsuario = ({ id = null }) => {
                         value={formData.clave}
                         onChange={handleChange}
                         required={!id}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-white/5 dark:text-white"
                         placeholder="••••••••"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Rol <span className="text-red-500">*</span></label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rol <span className="text-red-500">*</span></label>
                     <select
                         name="rol"
                         value={formData.rol}
                         onChange={handleChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-[#111c44] dark:text-white"
                     >
                         <option value="cliente">Cliente</option>
                         <option value="admin">Administrador</option>
@@ -136,17 +136,17 @@ const FormUsuario = ({ id = null }) => {
                 </div>
             </div>
 
-            <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">
+            <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-100 dark:border-white/5">
                 <Link
                     to="/admin/usuarios"
-                    className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                    className="px-6 py-2.5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-400 font-medium rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                 >
                     Cancelar
                 </Link>
                 <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50"
+                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50"
                 >
                     {loading ? 'Guardando...' : (id ? 'Actualizar Usuario' : 'Crear Usuario')}
                 </button>

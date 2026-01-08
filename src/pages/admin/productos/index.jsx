@@ -138,7 +138,7 @@ const ProductosIndex = () => {
             {/* Header Simplified */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                    <h1 className="text-sm font-bold text-gray-800 dark:text-white flex items-center gap-2">
                         <Package size={16} className="text-orange-500" />
                         Inventario de Productos
                     </h1>
@@ -160,7 +160,7 @@ const ProductosIndex = () => {
             {/* Middle Bar: Tabs & Search */}
             <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                 {/* Tabs */}
-                <div className="flex bg-white p-1 rounded-xl border border-gray-200 shadow-sm w-full lg:w-auto overflow-x-auto no-scrollbar">
+                <div className="flex bg-white dark:bg-[#111c44] p-1 rounded-xl border border-gray-200 dark:border-white/5 shadow-sm w-full lg:w-auto overflow-x-auto no-scrollbar">
                     {tabs.map((tab) => {
                         const Icon = tab.icon;
                         return (
@@ -171,8 +171,8 @@ const ProductosIndex = () => {
                                     setCurrentPage(1);
                                 }}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${activeTab === tab.id
-                                    ? 'bg-orange-50 text-orange-600 shadow-sm'
-                                    : 'text-gray-500 hover:bg-gray-50'
+                                    ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 shadow-sm'
+                                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5'
                                     }`}
                             >
                                 <Icon size={14} />
@@ -185,13 +185,13 @@ const ProductosIndex = () => {
                 {/* Search & Actions */}
                 <div className="flex items-center gap-3 w-full lg:w-auto">
                     <div className="relative flex-1 lg:w-64">
-                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                         <input
                             type="text"
                             placeholder="Buscar en el catálogo..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all shadow-sm"
+                            className="w-full pl-9 pr-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-700 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all shadow-sm"
                         />
                     </div>
 
@@ -201,7 +201,7 @@ const ProductosIndex = () => {
                             setItemsPerPage(Number(e.target.value));
                             setCurrentPage(1);
                         }}
-                        className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium text-gray-600 outline-none hover:border-gray-300 transition-all cursor-pointer shadow-sm"
+                        className="px-3 py-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-xl text-xs font-medium text-gray-600 dark:text-gray-400 outline-none hover:border-gray-300 dark:hover:border-white/20 transition-all cursor-pointer shadow-sm"
                     >
                         <option value={10}>10 items</option>
                         <option value={25}>25 items</option>
@@ -211,29 +211,29 @@ const ProductosIndex = () => {
             </div>
 
             {/* Light Industrial Targeted Table Area */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div className="bg-white dark:bg-[#111c44] rounded-2xl border border-gray-200 dark:border-white/5 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] overflow-hidden">
                 <div className="overflow-x-auto no-scrollbar">
                     <table className="w-full text-left border-separate border-spacing-0">
-                        <thead className="bg-[#f8fafc]/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100">
+                        <thead className="bg-[#f8fafc]/80 dark:bg-white/5 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100 dark:border-white/5">
                             <tr>
-                                <th className="px-4 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap">
+                                <th className="px-4 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap">
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
                                         PRODUCTO
                                     </div>
                                 </th>
-                                <th className="px-4 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap">CATEGORÍA</th>
-                                <th className="px-4 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap">MARCA</th>
-                                <th className="px-4 py-4 text-[10px] font-black text-orange-600 uppercase tracking-wider border-b border-gray-100 text-center whitespace-nowrap">PRECIO</th>
-                                <th className="px-4 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 text-center whitespace-nowrap">STOCK</th>
-                                <th className="px-4 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 text-center whitespace-nowrap">ESTADO</th>
-                                <th className="px-4 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 text-center whitespace-nowrap">VAR.</th>
-                                <th className="px-4 py-4 text-[10px] font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 text-right whitespace-nowrap">ACCIONES</th>
+                                <th className="px-4 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap">CATEGORÍA</th>
+                                <th className="px-4 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap">MARCA</th>
+                                <th className="px-4 py-4 text-[10px] font-black text-orange-600 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-center whitespace-nowrap">PRECIO</th>
+                                <th className="px-4 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-center whitespace-nowrap">STOCK</th>
+                                <th className="px-4 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-center whitespace-nowrap">ESTADO</th>
+                                <th className="px-4 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-center whitespace-nowrap">VAR.</th>
+                                <th className="px-4 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-right whitespace-nowrap">ACCIONES</th>
                             </tr>
                         </thead>
                         <tbody
                             key={`${activeTab}-${currentPage}-${searchTerm}`}
-                            className="divide-y divide-gray-50"
+                            className="divide-y divide-gray-50 dark:divide-white/5"
                         >
                             <AnimatePresence>
                                 {productos.map((producto, idx) => (
@@ -242,7 +242,7 @@ const ProductosIndex = () => {
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         whileHover={{
-                                            backgroundColor: "rgba(249, 115, 22, 0.02)",
+                                            backgroundColor: "rgba(249, 115, 22, 0.04)",
                                             transition: { duration: 0.2, ease: "easeOut" }
                                         }}
                                         transition={{
@@ -256,19 +256,19 @@ const ProductosIndex = () => {
                                             <div className="absolute left-0 top-0 bottom-0 w-1 scale-y-0 group-hover:scale-y-100 transition-transform origin-top duration-300 z-10" />
 
                                             <div className="flex items-center gap-2">
-                                                <div className="relative w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:border-orange-200 transition-all duration-300">
+                                                <div className="relative w-10 h-10 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:border-orange-200 transition-all duration-300">
                                                     {producto.imagen ? (
                                                         <img src={producto.imagen} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                                     ) : (
-                                                        <Box size={14} className="text-gray-300" />
+                                                        <Box size={14} className="text-gray-300 dark:text-gray-600" />
                                                     )}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="text-[11px] font-black text-[#1e293b] uppercase tracking-tight truncate max-w-[140px]" title={producto.nombre}>
+                                                    <p className="text-[11px] font-black text-[#1e293b] dark:text-white uppercase tracking-tight truncate max-w-[140px]" title={producto.nombre}>
                                                         {producto.nombre}
                                                     </p>
                                                     <div className="flex items-center gap-1.5 mt-0.5">
-                                                        <span className="text-[9px] font-mono font-bold text-gray-400 bg-gray-50 px-1 py-0.5 rounded border border-gray-100">
+                                                        <span className="text-[9px] font-mono font-bold text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-white/5 px-1 py-0.5 rounded border border-gray-100 dark:border-white/5">
                                                             {producto.sku || 'N/A-00'}
                                                         </span>
                                                     </div>
@@ -292,7 +292,7 @@ const ProductosIndex = () => {
 
                                         <td className="px-4 py-3 text-center">
                                             <div className="flex flex-col items-center">
-                                                <span className="text-[11px] font-black text-[#1e293b] tabular-nums whitespace-nowrap">
+                                                <span className="text-[11px] font-black text-[#1e293b] dark:text-white tabular-nums whitespace-nowrap">
                                                     USD {parseFloat(producto.precio_base).toLocaleString()}
                                                 </span>
                                             </div>
@@ -301,13 +301,13 @@ const ProductosIndex = () => {
                                         <td className="px-4 py-3">
                                             <div className="flex flex-col items-center gap-1.5 min-w-[60px]">
                                                 <div className="flex items-end gap-1 font-mono">
-                                                    <span className={`text-[11px] font-black ${producto.stock <= producto.stock_minimo ? 'text-red-500' : 'text-[#1e293b]'
+                                                    <span className={`text-[11px] font-black ${producto.stock <= producto.stock_minimo ? 'text-red-500' : 'text-[#1e293b] dark:text-white'
                                                         }`}>
                                                         {producto.stock.toString().padStart(2, '0')}
                                                     </span>
-                                                    <span className="text-[8px] text-gray-400 font-bold mb-0.5 uppercase tracking-tighter">und</span>
+                                                    <span className="text-[8px] text-gray-400 dark:text-gray-500 font-bold mb-0.5 uppercase tracking-tighter">und</span>
                                                 </div>
-                                                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden max-w-[30px] border border-gray-100 p-[1px]">
+                                                <div className="h-1.5 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden max-w-[30px] border border-gray-100 dark:border-white/5 p-[1px]">
                                                     <motion.div
                                                         initial={{ width: 0 }}
                                                         animate={{ width: `${Math.min(100, (producto.stock / 50) * 100)}%` }}
@@ -335,7 +335,7 @@ const ProductosIndex = () => {
                                         </td>
 
                                         <td className="px-4 py-3 text-center">
-                                            <span className="inline-flex items-center justify-center min-w-[20px] px-1 py-0.5 bg-gray-50 text-[#1e293b] rounded-lg font-black text-[11px] border border-gray-200">
+                                            <span className="inline-flex items-center justify-center min-w-[20px] px-1 py-0.5 bg-gray-50 dark:bg-white/5 text-[#1e293b] dark:text-white rounded-lg font-black text-[11px] border border-gray-200 dark:border-white/5">
                                                 {producto.variaciones?.length || 0}
                                             </span>
                                         </td>
@@ -343,15 +343,15 @@ const ProductosIndex = () => {
                                         <td className="px-4 py-3">
                                             <div className="flex items-center justify-end gap-1">
                                                 {[
-                                                    { to: `/admin/productos/ver/${producto.id}`, icon: Eye, label: 'Vista', color: 'hover:text-orange-500 hover:bg-orange-50' },
-                                                    { to: `/admin/productos/editar/${producto.id}`, icon: Edit, label: 'Editar', color: 'hover:text-blue-600 hover:bg-blue-50' },
-                                                    { onClick: () => handleEliminar(producto.id), icon: Trash2, label: 'Baja', color: 'hover:text-red-600 hover:bg-red-50' }
+                                                    { to: `/admin/productos/ver/${producto.id}`, icon: Eye, label: 'Vista', color: 'hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-500/5' },
+                                                    { to: `/admin/productos/editar/${producto.id}`, icon: Edit, label: 'Editar', color: 'hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/5' },
+                                                    { onClick: () => handleEliminar(producto.id), icon: Trash2, label: 'Baja', color: 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/5' }
                                                 ].map((action, i) => (
                                                     <Link
                                                         key={i}
                                                         to={action.to}
                                                         onClick={action.onClick}
-                                                        className={`p-1.5 transition-all duration-300 rounded-lg border-2 border-transparent bg-gray-50 text-[#1e293b] hover:border-[#1e293b]/10 hover:shadow-md ${action.color}`}
+                                                        className={`p-1.5 transition-all duration-300 rounded-lg border-2 border-transparent bg-gray-50 dark:bg-white/5 text-[#1e293b] dark:text-gray-400 hover:border-[#1e293b]/10 dark:hover:border-white/20 hover:shadow-md ${action.color}`}
                                                         title={action.label}
                                                     >
                                                         <action.icon size={14} strokeWidth={2.5} />
@@ -396,7 +396,7 @@ const ProductosIndex = () => {
                             <button
                                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                 disabled={currentPage === 1}
-                                className="p-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-gray-600 hover:border-gray-300 transition-all shadow-sm"
+                                className="p-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-white/20 transition-all shadow-sm"
                                 title="Anterior"
                             >
                                 <ChevronLeft size={14} />
@@ -412,7 +412,7 @@ const ProductosIndex = () => {
                                                 onClick={() => setCurrentPage(n)}
                                                 className={`w-8 h-8 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${currentPage === n
                                                     ? 'bg-orange-500 text-white shadow-md'
-                                                    : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                                                    : 'bg-white dark:bg-[#111c44] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/20'
                                                     }`}
                                             >
                                                 {n}
@@ -420,7 +420,7 @@ const ProductosIndex = () => {
                                         );
                                     }
                                     if (n === currentPage - 2 || n === currentPage + 2) {
-                                        return <span key={n} className="text-gray-300 px-1">...</span>;
+                                        return <span key={n} className="text-gray-300 dark:text-gray-600 px-1">...</span>;
                                     }
                                     return null;
                                 })}
@@ -429,7 +429,7 @@ const ProductosIndex = () => {
                             <button
                                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                 disabled={currentPage === totalPages}
-                                className="p-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-gray-600 hover:border-gray-300 transition-all shadow-sm"
+                                className="p-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-white/20 transition-all shadow-sm"
                                 title="Siguiente"
                             >
                                 <ChevronRight size={14} />
@@ -437,7 +437,7 @@ const ProductosIndex = () => {
                             <button
                                 onClick={() => setCurrentPage(totalPages)}
                                 disabled={currentPage === totalPages}
-                                className="p-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-gray-600 hover:border-gray-300 transition-all shadow-sm"
+                                className="p-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-white/20 transition-all shadow-sm"
                                 title="Última página"
                             >
                                 <ChevronsRight size={14} />

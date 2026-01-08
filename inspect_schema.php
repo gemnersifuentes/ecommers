@@ -1,21 +1,30 @@
 <?php
-require_once 'backend/config/conexion.php';
+require_once __DIR__ . '/backend/config/conexion.php';
 $database = new Database();
 $db = $database->getConnection();
 
-function describe($db, $table) {
-    echo "\n--- Table: $table ---\n";
+function describeTable($db, $table) {
+    echo "--- Table: $table ---\n";
     try {
         $stmt = $db->query("DESCRIBE $table");
-        print_r($stmt->fetchAll(PDO::FETCH_ASSOC));
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            echo "{$row['Field']} - {$row['Type']}\n";
+        }
     } catch (Exception $e) {
-        echo "Error: " . $e->getMessage() . "\n";
+        echo "Error describing $table: " . $e->getMessage() . "\n";
     }
+    echo "\n";
 }
 
-describe($db, 'pedidos');
-describe($db, 'detalle_pedido');
-describe($db, 'variaciones');
-describe($db, 'producto_variantes');
-describe($db, 'productos');
+echo "=== All Tables ===\n";
+$stmt = $db->query("SHOW TABLES");
+$tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+foreach ($tables as $table) {
+    echo "- $table\n";
+}
+echo "\n";
+
+foreach ($tables as $table) {
+    describeTable($db, $table);
+}
 ?>

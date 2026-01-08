@@ -76,12 +76,24 @@ export const categoriasService = {
   },
 
   update: async (id, data) => {
+    if (data instanceof FormData) {
+      data.append('_method', 'PUT');
+      const response = await api.post(`/api/categorias.php?id=${id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return response.data;
+    }
     const response = await api.put(`/api/categorias.php?id=${id}`, data);
     return response.data;
   },
 
   delete: async (id) => {
     const response = await api.delete(`/api/categorias.php?id=${id}`);
+    return response.data;
+  },
+
+  getMarcasByCategory: async (id) => {
+    const response = await api.get(`/api/categorias.php?id=${id}&sub=marcas`);
     return response.data;
   }
 };
@@ -235,11 +247,21 @@ export const marcasService = {
   },
 
   create: async (data) => {
-    const response = await api.post('/api/marcas', data);
+    const config = data instanceof FormData
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : {};
+    const response = await api.post('/api/marcas', data, config);
     return response.data;
   },
 
   update: async (id, data) => {
+    if (data instanceof FormData) {
+      data.append('_method', 'PUT');
+      const response = await api.post(`/api/marcas?id=${id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return response.data;
+    }
     const response = await api.put(`/api/marcas/${id}`, data);
     return response.data;
   },
@@ -470,6 +492,13 @@ export const mensajesService = {
   },
   responder: async (data) => {
     const response = await api.post('/api/mensajes.php', data);
+    return response.data;
+  }
+};
+
+export const adminService = {
+  globalSearch: async (query) => {
+    const response = await api.get(`/api/admin/search.php?q=${query}`);
     return response.data;
   }
 };

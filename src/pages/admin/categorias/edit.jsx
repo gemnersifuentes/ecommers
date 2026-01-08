@@ -8,7 +8,7 @@ const CategoriasEdit = () => {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold text-gray-900">Editar Categoría</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Editar Categoría</h2>
                 <Breadcrumb items={[
                     { label: 'Inicio', link: '/admin', isHome: true },
                     { label: 'Categorías', link: '/admin/categorias' },

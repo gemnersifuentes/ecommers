@@ -96,7 +96,7 @@ const ServiciosIndex = () => {
             {/* Header Simplified */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                    <h1 className="text-sm font-bold text-gray-800 dark:text-white flex items-center gap-2">
                         <Wrench size={16} className="text-orange-500" />
                         Gestión de Servicios
                     </h1>
@@ -108,7 +108,7 @@ const ServiciosIndex = () => {
 
                 <Link
                     to="/admin/servicios/nuevo"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white text-xs font-semibold rounded-lg hover:bg-orange-600 transition-colors shadow-sm"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 dark:bg-orange-600 text-white text-xs font-semibold rounded-lg hover:bg-orange-600 dark:hover:bg-orange-500 transition-colors shadow-sm"
                 >
                     <Plus size={14} />
                     Nuevo Servicio
@@ -118,36 +118,36 @@ const ServiciosIndex = () => {
             {/* Middle Bar: Search */}
             <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                 <div className="relative flex-1 lg:max-w-md w-full">
-                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                     <input
                         type="text"
                         placeholder="Buscar por nombre de servicio..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all shadow-sm"
+                        className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-xl text-xs focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all shadow-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600"
                     />
                 </div>
             </div>
 
             {/* Light Industrial Table Area */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div className="bg-white dark:bg-[#111c44] rounded-2xl border border-gray-200 dark:border-white/5 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] overflow-hidden">
                 <div className="overflow-x-auto no-scrollbar">
                     <table className="w-full text-left border-separate border-spacing-0">
-                        <thead className="bg-[#f8fafc]/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100">
+                        <thead className="bg-[#f8fafc]/80 dark:bg-[#0b1437]/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100 dark:border-white/5">
                             <tr>
-                                <th className="px-4 py-4 text-xs font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap text-center w-16">IMG</th>
-                                <th className="px-4 py-4 text-xs font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap">
+                                <th className="px-4 py-4 text-xs font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap text-center w-16">IMG</th>
+                                <th className="px-4 py-4 text-xs font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap">
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
                                         SERVICIO
                                     </div>
                                 </th>
-                                <th className="px-4 py-4 text-xs font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap text-center">PRECIO</th>
-                                <th className="px-4 py-4 text-xs font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 whitespace-nowrap text-center">DURACIÓN</th>
-                                <th className="px-4 py-4 text-xs font-black text-[#64748b] uppercase tracking-wider border-b border-gray-100 text-right whitespace-nowrap">ACCIONES</th>
+                                <th className="px-4 py-4 text-xs font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap text-center">PRECIO</th>
+                                <th className="px-4 py-4 text-xs font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap text-center">DURACIÓN</th>
+                                <th className="px-4 py-4 text-xs font-black text-[#64748b] dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-right whitespace-nowrap">ACCIONES</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-gray-50 dark:divide-white/5">
                             <AnimatePresence>
                                 {filteredServicios.map((s, idx) => (
                                     <motion.tr
@@ -155,7 +155,7 @@ const ServiciosIndex = () => {
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         whileHover={{
-                                            backgroundColor: "rgba(249, 115, 22, 0.02)",
+                                            backgroundColor: "rgba(249, 115, 22, 0.04)",
                                             transition: { duration: 0.2, ease: "easeOut" }
                                         }}
                                         transition={{
@@ -165,7 +165,7 @@ const ServiciosIndex = () => {
                                         className="relative group cursor-default"
                                     >
                                         <td className="px-4 py-3 text-center">
-                                            <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden mx-auto group-hover:border-orange-200 transition-all duration-300">
+                                            <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center overflow-hidden mx-auto group-hover:border-orange-200 dark:group-hover:border-orange-500 transition-all duration-300">
                                                 {s.imagen ? (
                                                     <img
                                                         src={s.imagen.startsWith('http') ? s.imagen : `http://localhost:8000${s.imagen}`}
@@ -173,31 +173,31 @@ const ServiciosIndex = () => {
                                                         className="w-full h-full object-cover"
                                                     />
                                                 ) : (
-                                                    <Wrench size={14} className="text-gray-300" />
+                                                    <Wrench size={14} className="text-gray-300 dark:text-gray-600" />
                                                 )}
                                             </div>
                                         </td>
 
                                         <td className="px-4 py-3">
                                             <div className="min-w-0">
-                                                <p className="text-sm font-black text-[#1e293b] uppercase tracking-tight truncate max-w-[250px]" title={s.nombre}>
+                                                <p className="text-sm font-black text-[#1e293b] dark:text-gray-200 uppercase tracking-tight truncate max-w-[250px]" title={s.nombre}>
                                                     {s.nombre}
                                                 </p>
-                                                <p className="text-xs font-bold text-gray-400 italic truncate max-w-[250px]">
+                                                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 italic truncate max-w-[250px]">
                                                     {s.descripcion || 'Sin descripción adicional'}
                                                 </p>
                                             </div>
                                         </td>
 
                                         <td className="px-4 py-3 text-center">
-                                            <div className="inline-flex items-center gap-1 text-sm font-black text-[#1e293b]">
+                                            <div className="inline-flex items-center gap-1 text-sm font-black text-[#1e293b] dark:text-gray-200">
                                                 <DollarSign size={10} className="text-orange-500" />
                                                 {parseFloat(s.precio).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                             </div>
                                         </td>
 
                                         <td className="px-4 py-3 text-center">
-                                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-gray-50 text-gray-500 rounded border border-gray-100 text-xs font-bold transition-all">
+                                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-500 rounded border border-gray-100 dark:border-white/5 text-xs font-bold transition-all">
                                                 <Clock size={10} />
                                                 {s.duracion || 'N/A'}
                                             </div>
@@ -206,14 +206,14 @@ const ServiciosIndex = () => {
                                         <td className="px-4 py-3">
                                             <div className="flex items-center justify-end gap-1">
                                                 {[
-                                                    { to: `/admin/servicios/editar/${s.id}`, icon: Edit, label: 'Editar', color: 'hover:text-blue-600 hover:bg-blue-50' },
-                                                    { onClick: () => handleEliminar(s.id), icon: Trash2, label: 'Eliminar', color: 'hover:text-red-600 hover:bg-red-50' }
+                                                    { to: `/admin/servicios/editar/${s.id}`, icon: Edit, label: 'Editar', color: 'hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/5' },
+                                                    { onClick: () => handleEliminar(s.id), icon: Trash2, label: 'Eliminar', color: 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/5' }
                                                 ].map((action, i) => (
                                                     <Link
                                                         key={i}
                                                         to={action.to}
                                                         onClick={action.onClick}
-                                                        className={`p-1.5 transition-all duration-300 rounded-lg border-2 border-transparent bg-gray-50 text-[#1e293b] hover:border-[#1e293b]/10 hover:shadow-md ${action.color}`}
+                                                        className={`p-1.5 transition-all duration-300 rounded-lg border-2 border-transparent bg-gray-50 dark:bg-white/5 text-[#1e293b] dark:text-gray-400 hover:border-[#1e293b]/10 dark:hover:border-white/20 hover:shadow-md ${action.color}`}
                                                         title={action.label}
                                                     >
                                                         <action.icon size={14} strokeWidth={2.5} />

@@ -98,7 +98,7 @@ switch ($method) {
     case 'GET':
         if ($id) {
             try {
-                $stmt = $db->prepare("SELECT * FROM categorias WHERE id = ?");
+                $stmt = $db->prepare("SELECT c.*, (SELECT COUNT(*) FROM productos p WHERE p.categoria_id = c.id AND p.activo = 1) as total_productos FROM categorias c WHERE c.id = ?");
                 $stmt->execute([$id]);
                 $categoria = $stmt->fetch(PDO::FETCH_ASSOC);
                 
@@ -114,7 +114,8 @@ switch ($method) {
             }
         } else {
             try {
-                $stmt = $db->prepare("SELECT * FROM categorias WHERE activo = 1 ORDER BY nombre");
+                // En el panel de administración queremos ver todas las categorías (activas e inactivas)
+                $stmt = $db->prepare("SELECT * FROM categorias ORDER BY activo DESC, nombre ASC");
                 $stmt->execute();
                 $categorias = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 echo json_encode($categorias);
@@ -126,9 +127,10 @@ switch ($method) {
         break;
 
     case 'POST':
-        // Usar $_POST en lugar de $input para FormData
-        $nombre = $_POST['nombre'] ?? null;
-        $descripcion = $_POST['descripcion'] ?? null;
+        // Usar $_POST para FormData y $input para JSON
+        $nombre = $_POST['nombre'] ?? $input['nombre'] ?? null;
+        $descripcion = $_POST['descripcion'] ?? $input['descripcion'] ?? null;
+        $activo = $_POST['activo'] ?? $input['activo'] ?? 1;
         
         if (!$nombre) {
             http_response_code(400);
@@ -155,9 +157,9 @@ switch ($method) {
                 }
             }
             
-            $stmt = $db->prepare("INSERT INTO categorias (nombre, descripcion, imagen) VALUES (?, ?, ?)");
+            $stmt = $db->prepare("INSERT INTO categorias (nombre, descripcion, imagen, activo) VALUES (?, ?, ?, ?)");
             
-            if ($stmt->execute([$nombre, $descripcion, $imagenPath])) {
+            if ($stmt->execute([$nombre, $descripcion, $imagenPath, $activo])) {
                 echo json_encode([
                     'success' => true,
                     'message' => 'Categoría creada exitosamente',
@@ -180,22 +182,15 @@ switch ($method) {
             exit;
         }
 
-        // Usar $_POST para FormData
         $nombre = $_POST['nombre'] ?? $input['nombre'] ?? null;
         $descripcion = $_POST['descripcion'] ?? $input['descripcion'] ?? null;
+        $activo = isset($_POST['activo']) ? $_POST['activo'] : (isset($input['activo']) ? $input['activo'] : null);
 
         try {
             $imagenPath = null;
             
-            // DEBUG: Log para ver qué llega
-            error_log("PUT UPDATE - id: $id");
-            error_log("PUT UPDATE - nombre: $nombre");
-            error_log("PUT UPDATE - FILES: " . print_r($_FILES, true));
-            error_log("PUT UPDATE - POST: " . print_r($_POST, true));
-            
             // Manejar subida de nueva imagen
             if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
-                error_log("PUT UPDATE - Procesando imagen...");
                 $uploadDir = __DIR__ . '/../uploads/categorias/';
                 if (!file_exists($uploadDir)) {
                     mkdir($uploadDir, 0777, true);
@@ -205,26 +200,29 @@ switch ($method) {
                 $filename = uniqid('cat_') . '.' . $extension;
                 $targetPath = $uploadDir . $filename;
                 
-                error_log("PUT UPDATE - Target path: $targetPath");
-                
                 if (move_uploaded_file($_FILES['imagen']['tmp_name'], $targetPath)) {
                     $imagenPath = '/uploads/categorias/' . $filename;
-                    error_log("PUT UPDATE - Imagen guardada: $imagenPath");
-                } else {
-                    error_log("PUT UPDATE - ERROR al mover archivo");
                 }
-            } else {
-                error_log("PUT UPDATE - No hay imagen o error: " . ($_FILES['imagen']['error'] ?? 'no file'));
             }
             
-            // Si hay nueva imagen, actualizar. Si no, mantener la existente
-            if ($imagenPath) {
-                $stmt = $db->prepare("UPDATE categorias SET nombre = ?, descripcion = ?, imagen = ? WHERE id = ?");
-                $success = $stmt->execute([$nombre, $descripcion, $imagenPath, $id]);
-            } else {
-                $stmt = $db->prepare("UPDATE categorias SET nombre = ?, descripcion = ? WHERE id = ?");
-                $success = $stmt->execute([$nombre, $descripcion, $id]);
+            $sql = "UPDATE categorias SET nombre = ?, descripcion = ?";
+            $params = [$nombre, $descripcion];
+            
+            if ($activo !== null) {
+                $sql .= ", activo = ?";
+                $params[] = $activo;
             }
+            
+            if ($imagenPath) {
+                $sql .= ", imagen = ?";
+                $params[] = $imagenPath;
+            }
+            
+            $sql .= " WHERE id = ?";
+            $params[] = $id;
+            
+            $stmt = $db->prepare($sql);
+            $success = $stmt->execute($params);
             
             if ($success) {
                 echo json_encode(['success' => true, 'message' => 'Categoría actualizada exitosamente']);

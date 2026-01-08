@@ -80,10 +80,10 @@ const GestionEspecificaciones = ({ productoId, onChange }) => {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <i className="fas fa-list-ul text-blue-600"></i> Ficha Técnica
+        <div className="bg-white dark:bg-[#111c44] rounded-xl shadow-sm border border-gray-200 dark:border-white/5 overflow-hidden">
+            <div className="p-6 border-b border-gray-200 dark:border-white/5 flex justify-between items-center">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <i className="fas fa-list-ul text-blue-600 dark:text-blue-400"></i> Ficha Técnica
                 </h3>
                 {productoId && (
                     <button
@@ -103,13 +103,13 @@ const GestionEspecificaciones = ({ productoId, onChange }) => {
 
             <div className="p-6">
                 {/* Formulario Agregar */}
-                <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
-                    <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                        <i className="fas fa-plus-circle text-blue-600"></i> Nueva Especificación
+                <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-lg mb-6 border border-gray-200 dark:border-white/10">
+                    <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                        <i className="fas fa-plus-circle text-blue-600 dark:text-blue-400"></i> Nueva Especificación
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Característica</label>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Característica</label>
                             <input
                                 type="text"
                                 placeholder="Ej: Procesador, Pantalla..."
@@ -118,12 +118,12 @@ const GestionEspecificaciones = ({ productoId, onChange }) => {
                                     setNuevaSpec({ ...nuevaSpec, nombre: e.target.value });
                                     if (errors.nombre) setErrors({ ...errors, nombre: null });
                                 }}
-                                className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${errors.nombre ? 'border-red-500' : ''}`}
+                                className={`w-full px-3 py-2 bg-white dark:bg-[#0b1437] border dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${errors.nombre ? 'border-red-500' : ''}`}
                             />
                             {errors.nombre && <p className="text-red-500 text-xs mt-1">{errors.nombre}</p>}
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Valor</label>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Valor</label>
                             <input
                                 type="text"
                                 placeholder="Ej: Intel Core i7, 15.6 pulgadas..."
@@ -132,7 +132,7 @@ const GestionEspecificaciones = ({ productoId, onChange }) => {
                                     setNuevaSpec({ ...nuevaSpec, valor: e.target.value });
                                     if (errors.valor) setErrors({ ...errors, valor: null });
                                 }}
-                                className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${errors.valor ? 'border-red-500' : ''}`}
+                                className={`w-full px-3 py-2 bg-white dark:bg-[#0b1437] border dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${errors.valor ? 'border-red-500' : ''}`}
                             />
                             {errors.valor && <p className="text-red-500 text-xs mt-1">{errors.valor}</p>}
                         </div>
@@ -148,35 +148,35 @@ const GestionEspecificaciones = ({ productoId, onChange }) => {
 
                 {/* Lista de Especificaciones */}
                 {loading ? (
-                    <div className="text-center py-8 text-gray-500">Cargando especificaciones...</div>
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">Cargando especificaciones...</div>
                 ) : especificaciones.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-500 bg-gray-50 dark:bg-white/5 rounded-lg border border-dashed border-gray-300 dark:border-white/10">
                         No hay especificaciones técnicas agregadas.
                     </div>
                 ) : (
-                    <div className="overflow-x-auto rounded-lg border border-gray-200">
+                    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-white/5">
                         <table className="w-full text-sm text-left">
-                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+                            <thead className="text-xs text-gray-700 dark:text-gray-400 uppercase bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
                                 <tr>
                                     <th className="px-4 py-3 w-1/3">Característica</th>
                                     <th className="px-4 py-3 w-1/3">Valor</th>
                                     <th className="px-4 py-3 text-right w-1/6">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200">
+                            <tbody className="divide-y divide-gray-200 dark:divide-white/5">
                                 {especificaciones.map((spec, index) => (
-                                    <tr key={index} className="bg-white hover:bg-gray-50">
-                                        <td className="px-4 py-3 font-medium text-gray-900">
+                                    <tr key={index} className="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-white/5">
+                                        <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">
                                             {spec.nombre}
                                         </td>
-                                        <td className="px-4 py-3 text-gray-600">
+                                        <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
                                             {spec.valor}
                                         </td>
                                         <td className="px-4 py-3 text-right">
                                             <button
                                                 type="button"
                                                 onClick={() => handleEliminar(index)}
-                                                className="text-red-600 hover:text-red-900 transition-colors"
+                                                className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
                                                 title="Eliminar"
                                             >
                                                 <i className="fas fa-trash-alt"></i>

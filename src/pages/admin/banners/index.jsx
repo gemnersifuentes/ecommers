@@ -350,18 +350,18 @@ const AdminBanners = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#0b1437] dark:to-[#0b1437] p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                <div className="bg-white dark:bg-[#111c44] rounded-2xl shadow-sm dark:shadow-none border border-transparent dark:border-white/5 p-6 mb-6">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestión de Banners</h1>
-                            <p className="text-gray-600">Administra los banners del carrusel y laterales de tu tienda</p>
+                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Gestión de Banners</h1>
+                            <p className="text-gray-600 dark:text-gray-400">Administra los banners del carrusel y laterales de tu tienda</p>
                         </div>
                         <button
                             onClick={handleNuevo}
-                            className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                            className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl dark:shadow-blue-500/20 transform hover:-translate-y-0.5 font-bold"
                         >
                             <Plus size={20} />
                             Nuevo Banner
@@ -370,11 +370,11 @@ const AdminBanners = () => {
 
                     {/* Search */}
                     <div className="mt-6 relative">
-                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" size={20} />
                         <input
                             type="text"
                             placeholder="Buscar banners por título o subtítulo..."
-                            className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            className="w-full pl-12 pr-4 py-3 bg-white dark:bg-[#0b1437] border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -384,11 +384,11 @@ const AdminBanners = () => {
                 {/* Carrusel Banners */}
                 <div className="mb-8">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                            <Layout size={24} className="text-blue-600" />
+                        <div className="p-2 bg-blue-100 dark:bg-blue-500/10 rounded-lg">
+                            <Layout size={24} className="text-blue-600 dark:text-blue-400" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900">Carrusel Principal</h2>
-                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Carrusel Principal</h2>
+                        <span className="px-3 py-1 bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 rounded-full text-sm font-bold border border-blue-200/50 dark:border-blue-500/20">
                             {carouselBanners.length} banners
                         </span>
                     </div>
@@ -402,10 +402,10 @@ const AdminBanners = () => {
                             />
                         ))}
                         {carouselBanners.length === 0 && (
-                            <div className="col-span-full py-16 text-center bg-white rounded-2xl border-2 border-dashed border-gray-200">
-                                <ImageIcon className="mx-auto h-16 w-16 text-gray-300 mb-4" />
-                                <p className="text-gray-500 text-lg font-medium">No hay banners en el carrusel</p>
-                                <p className="text-gray-400 text-sm mt-2">Crea tu primer banner para comenzar</p>
+                            <div className="col-span-full py-16 text-center bg-white dark:bg-[#111c44] rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10">
+                                <ImageIcon className="mx-auto h-16 w-16 text-gray-300 dark:text-gray-700 mb-4" />
+                                <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">No hay banners en el carrusel</p>
+                                <p className="text-gray-400 dark:text-gray-600 text-sm mt-2">Crea tu primer banner para comenzar</p>
                             </div>
                         )}
                     </div>
@@ -414,11 +414,11 @@ const AdminBanners = () => {
                 {/* Lateral Banners */}
                 <div>
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-orange-100 rounded-lg">
-                            <Layout size={24} className="text-orange-600" />
+                        <div className="p-2 bg-orange-100 dark:bg-orange-500/10 rounded-lg">
+                            <Layout size={24} className="text-orange-600 dark:text-orange-400" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900">Banners Laterales</h2>
-                        <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-semibold">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Banners Laterales</h2>
+                        <span className="px-3 py-1 bg-orange-100 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 rounded-full text-sm font-bold border border-orange-200/50 dark:border-orange-500/20">
                             {lateralBanners.length} banners
                         </span>
                     </div>
@@ -432,10 +432,10 @@ const AdminBanners = () => {
                             />
                         ))}
                         {lateralBanners.length === 0 && (
-                            <div className="col-span-full py-16 text-center bg-white rounded-2xl border-2 border-dashed border-gray-200">
-                                <ImageIcon className="mx-auto h-16 w-16 text-gray-300 mb-4" />
-                                <p className="text-gray-500 text-lg font-medium">No hay banners laterales</p>
-                                <p className="text-gray-400 text-sm mt-2">Agrega banners laterales para complementar tu tienda</p>
+                            <div className="col-span-full py-16 text-center bg-white dark:bg-[#111c44] rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10">
+                                <ImageIcon className="mx-auto h-16 w-16 text-gray-300 dark:text-gray-700 mb-4" />
+                                <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">No hay banners laterales</p>
+                                <p className="text-gray-400 dark:text-gray-600 text-sm mt-2">Agrega banners laterales para complementar tu tienda</p>
                             </div>
                         )}
                     </div>
@@ -444,11 +444,11 @@ const AdminBanners = () => {
                 {/* Grid Banners */}
                 <div className="mb-8">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-purple-100 rounded-lg">
-                            <Layout size={24} className="text-purple-600" />
+                        <div className="p-2 bg-purple-100 dark:bg-purple-500/10 rounded-lg">
+                            <Layout size={24} className="text-purple-600 dark:text-purple-400" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900">Banners Centrales (Grid)</h2>
-                        <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Banners Centrales (Grid)</h2>
+                        <span className="px-3 py-1 bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 rounded-full text-sm font-bold border border-purple-200/50 dark:border-purple-500/20">
                             {gridBanners.length} banners
                         </span>
                     </div>
@@ -462,10 +462,10 @@ const AdminBanners = () => {
                             />
                         ))}
                         {gridBanners.length === 0 && (
-                            <div className="col-span-full py-16 text-center bg-white rounded-2xl border-2 border-dashed border-gray-200">
-                                <ImageIcon className="mx-auto h-16 w-16 text-gray-300 mb-4" />
-                                <p className="text-gray-500 text-lg font-medium">No hay banners tipo Grid</p>
-                                <p className="text-gray-400 text-sm mt-2">Estos banners aparecen debajo del carrusel</p>
+                            <div className="col-span-full py-16 text-center bg-white dark:bg-[#111c44] rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10">
+                                <ImageIcon className="mx-auto h-16 w-16 text-gray-300 dark:text-gray-700 mb-4" />
+                                <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">No hay banners tipo Grid</p>
+                                <p className="text-gray-400 dark:text-gray-600 text-sm mt-2">Estos banners aparecen debajo del carrusel</p>
                             </div>
                         )}
                     </div>
@@ -474,11 +474,11 @@ const AdminBanners = () => {
                 {/* Category Grid Banners */}
                 <div className="mb-8">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-green-100 rounded-lg">
-                            <Layout size={24} className="text-green-600" />
+                        <div className="p-2 bg-green-100 dark:bg-green-500/10 rounded-lg">
+                            <Layout size={24} className="text-green-600 dark:text-green-400" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900">Sección con Productos</h2>
-                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Sección con Productos</h2>
+                        <span className="px-3 py-1 bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 rounded-full text-sm font-bold border border-green-200/50 dark:border-green-500/20">
                             {categoryGridBanners.length} secciones
                         </span>
                     </div>
@@ -492,10 +492,10 @@ const AdminBanners = () => {
                             />
                         ))}
                         {categoryGridBanners.length === 0 && (
-                            <div className="col-span-full py-16 text-center bg-white rounded-2xl border-2 border-dashed border-gray-200">
-                                <ImageIcon className="mx-auto h-16 w-16 text-gray-300 mb-4" />
-                                <p className="text-gray-500 text-lg font-medium">No hay secciones con productos</p>
-                                <p className="text-gray-400 text-sm mt-2">Banner + productos de una categoría</p>
+                            <div className="col-span-full py-16 text-center bg-white dark:bg-[#111c44] rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10">
+                                <ImageIcon className="mx-auto h-16 w-16 text-gray-300 dark:text-gray-700 mb-4" />
+                                <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">No hay secciones con productos</p>
+                                <p className="text-gray-400 dark:text-gray-600 text-sm mt-2">Banner + productos de una categoría</p>
                             </div>
                         )}
                     </div>
@@ -509,24 +509,24 @@ const AdminBanners = () => {
                                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                                className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+                                className="bg-white dark:bg-[#111c44] rounded-2xl shadow-2xl dark:shadow-none border border-transparent dark:border-white/10 w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
                             >
                                 {/* Modal Header */}
-                                <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+                                <div className="p-6 border-b border-gray-100 dark:border-white/5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-[#0b1437] dark:to-[#0b1437]">
                                     <div className="flex justify-between items-center">
                                         <div>
-                                            <h2 className="text-2xl font-bold text-gray-900">
+                                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                                                 {bannerEdit ? 'Editar Banner' : 'Nuevo Banner'}
                                             </h2>
-                                            <p className="text-gray-600 text-sm mt-1">
+                                            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
                                                 {bannerEdit ? 'Modifica los detalles del banner' : 'Crea un nuevo banner para tu tienda'}
                                             </p>
                                         </div>
                                         <button
                                             onClick={() => setMostrarModal(false)}
-                                            className="p-2 hover:bg-white rounded-lg transition-colors"
+                                            className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-lg transition-colors"
                                         >
-                                            <X size={24} className="text-gray-500" />
+                                            <X size={24} className="text-gray-500 dark:text-gray-400" />
                                         </button>
                                     </div>
                                 </div>
@@ -535,19 +535,19 @@ const AdminBanners = () => {
                                 <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6">
                                     <div className="space-y-6">
                                         {/* Configuración Básica */}
-                                        <div className="bg-gray-50 rounded-xl p-6">
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                                <Layout size={20} className="text-blue-600" />
+                                        <div className="bg-gray-50 dark:bg-[#0b1437] rounded-xl p-6 border border-transparent dark:border-white/5">
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                                <Layout size={20} className="text-blue-600 dark:text-blue-400" />
                                                 Configuración Básica
                                             </h3>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Banner</label>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de Banner</label>
                                                     <select
                                                         name="tipo"
                                                         value={formData.tipo}
                                                         onChange={handleChange}
-                                                        className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                                        className="w-full p-3 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
                                                     >
                                                         <option value="carousel">🎠 Carrusel Principal</option>
                                                         <option value="lateral">📱 Lateral Pequeño</option>
@@ -556,98 +556,98 @@ const AdminBanners = () => {
                                                     </select>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2">Orden de Aparición</label>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Orden de Aparición</label>
                                                     <input
                                                         type="number"
                                                         name="orden"
                                                         value={formData.orden}
                                                         onChange={handleChange}
-                                                        className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                                        className="w-full p-3 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
                                                         placeholder="0"
                                                     />
                                                 </div>
                                                 <div className="md:col-span-2">
-                                                    <label className="flex items-center gap-3 cursor-pointer p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-all">
+                                                    <label className="flex items-center gap-3 cursor-pointer p-4 bg-white dark:bg-[#111c44] rounded-lg border border-gray-200 dark:border-white/10 hover:border-blue-300 dark:hover:border-blue-500/50 transition-all">
                                                         <input
                                                             type="checkbox"
                                                             name="activo"
                                                             id="activo"
                                                             checked={formData.activo == 1}
                                                             onChange={handleChange}
-                                                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                                                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 dark:bg-[#0b1437] dark:border-white/10"
                                                         />
                                                         <div className="flex-1">
-                                                            <span className="text-sm font-medium text-gray-900">Banner Activo</span>
-                                                            <p className="text-xs text-gray-500 mt-0.5">El banner se mostrará en la tienda</p>
+                                                            <span className="text-sm font-medium text-gray-900 dark:text-white">Banner Activo</span>
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">El banner se mostrará en la tienda</p>
                                                         </div>
-                                                        {formData.activo == 1 ? <Eye className="text-green-600" size={20} /> : <EyeOff className="text-gray-400" size={20} />}
+                                                        {formData.activo == 1 ? <Eye className="text-green-600 dark:text-emerald-400" size={20} /> : <EyeOff className="text-gray-400 dark:text-gray-600" size={20} />}
                                                     </label>
                                                 </div>
                                             </div>
                                         </div>
 
                                         {/* Contenido del Banner */}
-                                        <div className="bg-gray-50 rounded-xl p-6">
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                        <div className="bg-gray-50 dark:bg-[#0b1437] rounded-xl p-6 border border-transparent dark:border-white/5">
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                                                 ✏️ Contenido del Banner
                                             </h3>
                                             <div className="space-y-4">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2">Título Principal *</label>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Título Principal *</label>
                                                     <input
                                                         type="text"
                                                         name="titulo"
                                                         value={formData.titulo}
                                                         onChange={handleChange}
-                                                        className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-lg font-semibold"
+                                                        className="w-full p-3 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-lg font-bold text-gray-900 dark:text-white outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600"
                                                         placeholder="Ej: OFERTA ESPECIAL"
                                                         required
                                                     />
                                                 </div>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-2">Subtítulo / Badge</label>
+                                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Subtítulo / Badge</label>
                                                         <input
                                                             type="text"
                                                             name="subtitulo"
                                                             value={formData.subtitulo}
                                                             onChange={handleChange}
-                                                            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                                            className="w-full p-3 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600"
                                                             placeholder="Ej: NUEVO"
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-2">Texto del Botón</label>
+                                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Texto del Botón</label>
                                                         <input
                                                             type="text"
                                                             name="texto_boton"
                                                             value={formData.texto_boton}
                                                             onChange={handleChange}
-                                                            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                                            className="w-full p-3 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600"
                                                             placeholder="Ej: Ver más"
                                                         />
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Descripción</label>
                                                     <textarea
                                                         name="descripcion"
                                                         value={formData.descripcion}
                                                         onChange={handleChange}
                                                         rows="3"
-                                                        className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                                                        className="w-full p-3 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none resize-none placeholder:text-gray-400 dark:placeholder:text-gray-600"
                                                         placeholder="Descripción breve del banner..."
                                                     ></textarea>
                                                 </div>
                                                 {/* Category Selector for category_grid type */}
                                                 {formData.tipo === 'category_grid' && (
                                                     <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-2">Categoría de Productos *</label>
+                                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Categoría de Productos *</label>
                                                         <select
                                                             name="link"
                                                             value={formData.link}
                                                             onChange={handleChange}
-                                                            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                                            className="w-full p-3 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
                                                             required
                                                         >
                                                             <option value="">Seleccionar categoría...</option>
@@ -657,16 +657,16 @@ const AdminBanners = () => {
                                                                 </option>
                                                             ))}
                                                         </select>
-                                                        <p className="text-xs text-gray-500 mt-1">Los productos de esta categoría se mostrarán junto al banner</p>
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Los productos de esta categoría se mostrarán junto al banner</p>
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
 
                                         {/* Imagen */}
-                                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6">
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                                <ImageIcon size={20} className="text-blue-600" />
+                                        <div className="bg-gray-50 dark:bg-[#0b1437] rounded-xl p-6 border border-transparent dark:border-white/5">
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                                <ImageIcon size={20} className="text-blue-600 dark:text-blue-400" />
                                                 Imagen del Banner *
                                             </h3>
                                             <div className="space-y-4">
@@ -678,18 +678,18 @@ const AdminBanners = () => {
                                                             accept="image/*"
                                                             className="hidden"
                                                         />
-                                                        <div className="border-2 border-dashed border-blue-300 rounded-xl p-8 bg-white hover:bg-blue-50 transition-all text-center group-hover:border-blue-500">
-                                                            <Upload className="mx-auto h-12 w-12 text-blue-500 mb-3" />
-                                                            <p className="text-gray-700 font-medium mb-1">
+                                                        <div className="border-2 border-dashed border-gray-300 dark:border-white/10 rounded-xl p-8 bg-white dark:bg-[#111c44] hover:bg-gray-50 dark:hover:bg-white/5 transition-all text-center group-hover:border-blue-400 dark:group-hover:border-blue-500/50">
+                                                            <Upload className="mx-auto h-12 w-12 text-blue-500 dark:text-blue-400 mb-3" />
+                                                            <p className="text-gray-700 dark:text-gray-300 font-medium mb-1">
                                                                 {selectedFile ? selectedFile.name : 'Click para subir imagen'}
                                                             </p>
-                                                            <p className="text-sm text-gray-500">JPG, PNG, GIF, WEBP, SVG, AVIF (máx. 20MB)</p>
+                                                            <p className="text-sm text-gray-500 dark:text-gray-500">JPG, PNG, GIF, WEBP, SVG, AVIF (máx. 20MB)</p>
                                                         </div>
                                                     </div>
                                                 </label>
 
                                                 {previewUrl && (
-                                                    <div className="relative rounded-xl overflow-hidden border-2 border-gray-200 bg-white">
+                                                    <div className="relative rounded-xl overflow-hidden border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-[#111c44]">
                                                         <div className="aspect-video relative">
                                                             <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
                                                             {formData.gradiente && (
@@ -716,9 +716,9 @@ const AdminBanners = () => {
                                         </div>
 
                                         {/* Overlay de Estilo */}
-                                        <div className="bg-gray-50 rounded-xl p-6">
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                                <Palette size={20} className="text-purple-600" />
+                                        <div className="bg-gray-50 dark:bg-[#0b1437] rounded-xl p-6 border border-transparent dark:border-white/5">
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                                <Palette size={20} className="text-purple-600 dark:text-purple-400" />
                                                 Overlay de Estilo
                                             </h3>
                                             <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
@@ -728,12 +728,12 @@ const AdminBanners = () => {
                                                         type="button"
                                                         onClick={() => setFormData({ ...formData, gradiente: style.value })}
                                                         className={`relative p-2 rounded-lg border transition-all ${formData.gradiente === style.value
-                                                            ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-200'
-                                                            : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10 ring-1 ring-blue-200 dark:ring-blue-500/20'
+                                                            : 'border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 bg-white dark:bg-[#111c44]'
                                                             }`}
                                                     >
                                                         <div className={`h-10 rounded mb-1 ${style.preview}`}></div>
-                                                        <p className="text-[10px] font-medium text-gray-700 text-center leading-tight">{style.name}</p>
+                                                        <p className="text-[10px] font-medium text-gray-700 dark:text-gray-400 text-center leading-tight">{style.name}</p>
                                                         {formData.gradiente === style.value && (
                                                             <div className="absolute top-1 right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
                                                                 <span className="text-white text-xs">✓</span>
@@ -744,27 +744,27 @@ const AdminBanners = () => {
                                             </div>
 
                                             {/* Selector de Color Personalizado */}
-                                            <div className="mt-4 p-3 bg-white rounded-lg border border-dashed border-purple-300">
-                                                <p className="text-xs font-semibold text-gray-700 mb-2">🎨 Color Personalizado</p>
+                                            <div className="mt-4 p-3 bg-white dark:bg-[#111c44] rounded-lg border border-dashed border-purple-300 dark:border-purple-500/20">
+                                                <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">🎨 Color Personalizado</p>
                                                 <div className="flex flex-col md:flex-row gap-2 items-end">
                                                     <div className="flex-1">
-                                                        <label className="block text-xs font-medium text-gray-600 mb-2">Color</label>
+                                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">Color</label>
                                                         <div className="flex gap-2 items-center">
                                                             <input
                                                                 type="color"
                                                                 value={customColor}
                                                                 onChange={(e) => setCustomColor(e.target.value)}
-                                                                className="h-8 w-12 rounded border border-gray-300 cursor-pointer"
+                                                                className="h-8 w-12 rounded border border-gray-300 dark:border-white/10 cursor-pointer"
                                                             />
                                                             <div
-                                                                className="h-8 w-8 rounded border border-gray-300"
+                                                                className="h-8 w-8 rounded border border-gray-300 dark:border-white/10"
                                                                 style={{ backgroundColor: customColor }}
                                                             ></div>
-                                                            <span className="text-[10px] font-mono text-gray-600">{customColor}</span>
+                                                            <span className="text-[10px] font-mono text-gray-600 dark:text-gray-400">{customColor}</span>
                                                         </div>
                                                     </div>
                                                     <div className="flex-1">
-                                                        <label className="block text-xs font-medium text-gray-600 mb-2">
+                                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
                                                             Opacidad: {customColorOpacity}%
                                                         </label>
                                                         <input
@@ -773,7 +773,7 @@ const AdminBanners = () => {
                                                             max="100"
                                                             value={customColorOpacity}
                                                             onChange={(e) => setCustomColorOpacity(Number(e.target.value))}
-                                                            className="w-full h-1.5 bg-gray-200 rounded appearance-none cursor-pointer"
+                                                            className="w-full h-1.5 bg-gray-200 dark:bg-white/10 rounded appearance-none cursor-pointer"
                                                         />
                                                     </div>
                                                     <button
@@ -795,9 +795,9 @@ const AdminBanners = () => {
                                         </div>
 
                                         {/* Destino del Banner */}
-                                        <div className="bg-gray-50 rounded-xl p-6">
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                                <LinkIcon size={20} className="text-green-600" />
+                                        <div className="bg-gray-50 dark:bg-[#0b1437] rounded-xl p-6 border border-transparent dark:border-white/5">
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                                <LinkIcon size={20} className="text-green-600 dark:text-green-400" />
                                                 Destino del Banner
                                             </h3>
                                             <div className="space-y-4">
@@ -817,12 +817,12 @@ const AdminBanners = () => {
                                                                 }
                                                             }}
                                                             className={`p-4 rounded-lg border-2 transition-all ${routeType === type.value
-                                                                ? 'border-green-500 bg-green-50 ring-2 ring-green-200'
-                                                                : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                                ? 'border-green-500 bg-green-50 dark:bg-emerald-500/10 ring-2 ring-green-200 dark:ring-emerald-500/20'
+                                                                : 'border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 bg-white dark:bg-[#111c44]'
                                                                 }`}
                                                         >
-                                                            <type.icon className={`mx-auto mb-2 ${routeType === type.value ? 'text-green-600' : 'text-gray-400'}`} size={24} />
-                                                            <p className="text-sm font-medium text-gray-700 text-center">{type.name}</p>
+                                                            <type.icon className={`mx-auto mb-2 ${routeType === type.value ? 'text-green-600 dark:text-emerald-400' : 'text-gray-400 dark:text-gray-600'}`} size={24} />
+                                                            <p className={`text-sm font-bold text-center ${routeType === type.value ? 'text-green-700 dark:text-emerald-400' : 'text-gray-700 dark:text-gray-400'}`}>{type.name}</p>
                                                         </button>
                                                     ))}
                                                 </div>
@@ -833,7 +833,7 @@ const AdminBanners = () => {
                                                         name="link"
                                                         value={formData.link}
                                                         onChange={handleChange}
-                                                        className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                                                        className="w-full p-3 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-gray-900 dark:text-white outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600"
                                                         placeholder="/ruta-personalizada"
                                                     />
                                                 )}
@@ -842,7 +842,7 @@ const AdminBanners = () => {
                                                     <select
                                                         value={selectedRouteId}
                                                         onChange={(e) => setSelectedRouteId(e.target.value)}
-                                                        className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                                                        className="w-full p-3 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-gray-900 dark:text-white outline-none"
                                                     >
                                                         <option value="">Selecciona una categoría</option>
                                                         {categorias.map(cat => (
@@ -855,7 +855,7 @@ const AdminBanners = () => {
                                                     <select
                                                         value={selectedRouteId}
                                                         onChange={(e) => setSelectedRouteId(e.target.value)}
-                                                        className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                                                        className="w-full p-3 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-gray-900 dark:text-white outline-none"
                                                     >
                                                         <option value="">Selecciona una marca</option>
                                                         {marcas.map(marca => (
@@ -875,10 +875,10 @@ const AdminBanners = () => {
                                                             }}
                                                             onFocus={() => setShowProductDropdown(true)}
                                                             placeholder="Buscar producto..."
-                                                            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                                                            className="w-full p-3 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-gray-900 dark:text-white outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600"
                                                         />
                                                         {showProductDropdown && (
-                                                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                                            <div className="absolute z-10 w-full mt-1 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-lg shadow-lg dark:shadow-none max-h-60 overflow-y-auto">
                                                                 {productos
                                                                     .filter(prod => prod.nombre.toLowerCase().includes(productSearch.toLowerCase()))
                                                                     .slice(0, 50)
@@ -891,16 +891,16 @@ const AdminBanners = () => {
                                                                                 setProductSearch(prod.nombre);
                                                                                 setShowProductDropdown(false);
                                                                             }}
-                                                                            className="w-full text-left px-4 py-2 hover:bg-green-50 transition-colors border-b border-gray-100 last:border-b-0"
+                                                                            className="w-full text-left px-4 py-2 hover:bg-green-50 dark:hover:bg-emerald-500/10 transition-colors border-b border-gray-100 dark:border-white/5 last:border-b-0 group"
                                                                         >
-                                                                            <p className="font-medium text-gray-900">{prod.nombre}</p>
+                                                                            <p className="font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{prod.nombre}</p>
                                                                             {prod.precio && (
-                                                                                <p className="text-sm text-gray-500">Precio: ${prod.precio}</p>
+                                                                                <p className="text-sm text-gray-500 dark:text-gray-400">Precio: ${prod.precio}</p>
                                                                             )}
                                                                         </button>
                                                                     ))}
                                                                 {productos.filter(prod => prod.nombre.toLowerCase().includes(productSearch.toLowerCase())).length === 0 && (
-                                                                    <div className="px-4 py-3 text-gray-500 text-center">
+                                                                    <div className="px-4 py-3 text-gray-500 dark:text-gray-600 text-center">
                                                                         No se encontraron productos
                                                                     </div>
                                                                 )}
@@ -914,17 +914,17 @@ const AdminBanners = () => {
                                 </form>
 
                                 {/* Modal Footer */}
-                                <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                                <div className="p-6 border-t border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-[#0b1437] flex justify-end gap-3">
                                     <button
                                         type="button"
                                         onClick={() => setMostrarModal(false)}
-                                        className="px-6 py-3 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all font-medium"
+                                        className="px-6 py-3 text-gray-700 dark:text-gray-300 bg-white dark:bg-[#111c44] border border-gray-200 dark:border-white/10 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-all font-bold"
                                     >
                                         Cancelar
                                     </button>
                                     <button
                                         onClick={handleSubmit}
-                                        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all flex items-center gap-2 font-medium shadow-lg hover:shadow-xl"
+                                        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all flex items-center gap-2 font-bold shadow-lg hover:shadow-xl dark:shadow-blue-500/20"
                                     >
                                         <Save size={20} />
                                         Guardar Banner
@@ -949,9 +949,9 @@ const BannerCard = ({ banner, onEdit, onDelete }) => {
             layout
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all group"
+            className="bg-white dark:bg-[#111c44] rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-white/5 overflow-hidden hover:shadow-lg dark:hover:shadow-blue-500/5 transition-all group"
         >
-            <div className="h-48 relative bg-gradient-to-br from-gray-100 to-gray-200 group-hover:scale-105 transition-transform duration-300">
+            <div className="h-48 relative bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#0b1437] dark:to-[#0b1437] group-hover:scale-105 transition-transform duration-300">
                 {imageUrl ? (
                     <>
                         <img
@@ -968,7 +968,7 @@ const BannerCard = ({ banner, onEdit, onDelete }) => {
                     </>
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                        <ImageIcon className="text-gray-300" size={64} />
+                        <ImageIcon className="text-gray-300 dark:text-gray-700" size={64} />
                     </div>
                 )}
 
@@ -976,13 +976,13 @@ const BannerCard = ({ banner, onEdit, onDelete }) => {
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                     <button
                         onClick={onEdit}
-                        className="p-3 bg-white rounded-xl hover:bg-blue-50 text-blue-600 transform hover:scale-110 transition-all shadow-lg"
+                        className="p-3 bg-white dark:bg-[#111c44] rounded-xl hover:bg-blue-50 dark:hover:bg-blue-500/10 text-blue-600 dark:text-blue-400 transform hover:scale-110 transition-all shadow-lg font-bold"
                     >
                         <Edit2 size={20} />
                     </button>
                     <button
                         onClick={onDelete}
-                        className="p-3 bg-white rounded-xl hover:bg-red-50 text-red-600 transform hover:scale-110 transition-all shadow-lg"
+                        className="p-3 bg-white dark:bg-[#111c44] rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-red-600 dark:text-red-400 transform hover:scale-110 transition-all shadow-lg font-bold"
                     >
                         <Trash2 size={20} />
                     </button>
@@ -991,8 +991,8 @@ const BannerCard = ({ banner, onEdit, onDelete }) => {
                 {/* Badge de estado */}
                 <div className="absolute top-3 right-3">
                     <span className={`px-3 py-1.5 rounded-full text-xs font-bold shadow-lg ${banner.activo
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-500 text-white'
+                        ? 'bg-emerald-500 text-white dark:bg-emerald-600'
+                        : 'bg-gray-500 text-white dark:bg-gray-700'
                         }`}>
                         {banner.activo ? '✓ Activo' : '✕ Inactivo'}
                     </span>
@@ -1000,7 +1000,7 @@ const BannerCard = ({ banner, onEdit, onDelete }) => {
 
                 {/* Badge de orden */}
                 <div className="absolute top-3 left-3">
-                    <span className="px-2 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-xs font-mono font-bold text-gray-700">
+                    <span className="px-2 py-1 bg-white/90 dark:bg-[#111c44]/90 backdrop-blur-sm rounded-lg text-xs font-mono font-bold text-gray-700 dark:text-gray-300 border border-transparent dark:border-white/5">
                         #{banner.orden}
                     </span>
                 </div>
@@ -1009,23 +1009,23 @@ const BannerCard = ({ banner, onEdit, onDelete }) => {
             <div className="p-5">
                 <div className="mb-3">
                     {banner.subtitulo && (
-                        <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1.5">
+                        <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1.5">
                             {banner.subtitulo}
                         </p>
                     )}
-                    <h3 className="font-bold text-gray-900 text-lg leading-tight line-clamp-2">
+                    <h3 className="font-bold text-gray-900 dark:text-white text-lg leading-tight line-clamp-2">
                         {banner.titulo}
                     </h3>
                 </div>
 
                 {banner.descripcion && (
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
                         {banner.descripcion}
                     </p>
                 )}
 
                 {banner.link && (
-                    <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
+                    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500 bg-gray-50 dark:bg-[#0b1437] px-3 py-2 rounded-lg border border-transparent dark:border-white/5">
                         <LinkIcon size={14} />
                         <span className="truncate">{banner.link}</span>
                     </div>
