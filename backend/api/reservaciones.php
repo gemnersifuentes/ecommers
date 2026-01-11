@@ -129,13 +129,23 @@ switch ($method) {
         }
 
         try {
+            $sql = "UPDATE reservaciones_servicios SET estado = ?";
+            $params = [$input['estado']];
+
             if (isset($input['costo_final'])) {
-                $stmt = $db->prepare("UPDATE reservaciones_servicios SET estado = ?, costo_final = ? WHERE id = ?");
-                $success = $stmt->execute([$input['estado'], $input['costo_final'], $id]);
-            } else {
-                $stmt = $db->prepare("UPDATE reservaciones_servicios SET estado = ? WHERE id = ?");
-                $success = $stmt->execute([$input['estado'], $id]);
+                $sql .= ", costo_final = ?";
+                $params[] = $input['costo_final'];
             }
+            if (isset($input['costo_insumos'])) {
+                $sql .= ", costo_insumos = ?";
+                $params[] = $input['costo_insumos'];
+            }
+
+            $sql .= " WHERE id = ?";
+            $params[] = $id;
+
+            $stmt = $db->prepare($sql);
+            $success = $stmt->execute($params);
 
             if ($success) {
                 echo json_encode(['success' => true, 'message' => 'Actualización exitosa']);

@@ -339,8 +339,15 @@ switch ($method) {
                     $producto['tiene_descuento'] = intval($producto['tiene_descuento']);
                     $producto['stock'] = intval($producto['stock']);
                     
-                    // Cargar variantes básicas
-                    $stmtVar = $db->prepare("SELECT id, precio, stock, sku FROM producto_variantes WHERE producto_id = ? AND activo = 1");
+                    // Cargar variantes detalladas para el buscador del administrador
+                    $stmtVar = $db->prepare("
+                        SELECT v.id, v.precio, v.precio_compra, v.stock, v.sku, v.imagen,
+                               CONCAT(a.nombre, ': ', av.valor) as atributo
+                        FROM producto_variantes v
+                        JOIN atributo_valores av ON v.atributo_valor_id = av.id
+                        JOIN atributos a ON av.atributo_id = a.id
+                        WHERE v.producto_id = ? AND v.activo = 1
+                    ");
                     $stmtVar->execute([$producto['id']]);
                     $producto['variaciones'] = $stmtVar->fetchAll(PDO::FETCH_ASSOC);
                 }
@@ -391,16 +398,16 @@ switch ($method) {
 
             $stmt = $db->prepare("
                 INSERT INTO productos (
-                    nombre, descripcion, marca_id, imagen, galeria_imagenes, categoria_id, precio_base, stock,
+                    nombre, descripcion, marca_id, imagen, galeria_imagenes, categoria_id, precio_base, precio_compra, stock,
                     meta_titulo, meta_descripcion, palabras_clave, slug, destacado, nuevo, etiquetas,
                     sku, peso, largo, ancho, alto, envio_gratis, stock_minimo,
                     condicion, garantia_meses, marca_fabricante, modelo, video_url, politica_devolucion_dias, activo
                 ) 
                 VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?,
                     ?, ?, ?, ?, ?, ?, ?,
                     ?, ?, ?, ?, ?, ?, ?,
-                    ?, ?, ?, ?, ?, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?
                 )
             ");
             
@@ -412,6 +419,7 @@ switch ($method) {
                 $galeria,
                 $categoriaId,
                 $input['precio_base'],
+                $input['precio_compra'] ?? 0,
                 $input['stock'] ?? 0,
                 // SEO
                 $metaTitulo,
@@ -448,7 +456,7 @@ switch ($method) {
 
                 // --- INSERTAR VARIANTES ---
                 if (!empty($input['variantes']) && is_array($input['variantes'])) {
-                    $stmtVar = $db->prepare("INSERT INTO producto_variantes (producto_id, precio, stock, sku, activo) VALUES (?, ?, ?, ?, 1)");
+                    $stmtVar = $db->prepare("INSERT INTO producto_variantes (producto_id, precio, precio_compra, stock, sku, activo) VALUES (?, ?, ?, ?, ?, 1)");
                     $stmtVal = $db->prepare("INSERT INTO variante_valores (variante_id, atributo_valor_id) VALUES (?, ?)");
 
                     foreach ($input['variantes'] as $var) {
@@ -456,11 +464,12 @@ switch ($method) {
                         if (empty($var['stock']) || empty($var['valores'])) continue;
                         
                         $precioVar = !empty($var['precio']) ? $var['precio'] : null;
+                        $precioCompraVar = !empty($var['precio_compra']) ? $var['precio_compra'] : null;
                         // Usar SKU del producto para generar SKU de variante
                         $productoSku = !empty($sku) && strpos($sku, 'TEMP-') === false ? $sku : 'PROD-' . str_pad($lastId, 6, '0', STR_PAD_LEFT);
                         $skuVar = !empty($var['sku']) ? $var['sku'] : $productoSku . '-' . uniqid();
 
-                        $stmtVar->execute([$lastId, $precioVar, $var['stock'], $skuVar]);
+                        $stmtVar->execute([$lastId, $precioVar, $precioCompraVar, $var['stock'], $skuVar]);
                         $varianteId = $db->lastInsertId();
 
                         foreach ($var['valores'] as $val) {
@@ -576,6 +585,7 @@ switch ($method) {
                     galeria_imagenes = ?, 
                     categoria_id = ?, 
                     precio_base = ?, 
+                    precio_compra = ?,
                     stock = ?,
                     meta_titulo = ?,
                     meta_descripcion = ?,
@@ -609,6 +619,7 @@ switch ($method) {
                 $galeria,
                 $categoriaId,
                 $input['precio_base'],
+                $input['precio_compra'] ?? 0,
                 $input['stock'] ?? 0,
                 // SEO
                 $metaTitulo,

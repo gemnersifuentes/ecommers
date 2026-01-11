@@ -12,6 +12,7 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
         atributo_id: '',
         valor_id: '',
         precio: '',
+        precio_compra: '',
         stock: '',
         sku: '',
         imagen: ''
@@ -125,6 +126,7 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
                 valor_id: nuevaVariante.valor_id,
                 valor_nombre: valorSeleccionado ? valorSeleccionado.valor : 'Desconocido',
                 precio: precioFinal,
+                precio_compra: nuevaVariante.precio_compra || null,
                 stock: parseInt(nuevaVariante.stock),
                 sku: nuevaVariante.sku,
                 imagen: nuevaVariante.imagen,
@@ -136,7 +138,7 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
             };
 
             setVariantes([...variantes, nueva]);
-            setNuevaVariante(prev => ({ ...prev, valor_id: '', stock: '', precio: '', sku: '', imagen: '' }));
+            setNuevaVariante(prev => ({ ...prev, valor_id: '', stock: '', precio: '', precio_compra: '', sku: '', imagen: '' }));
             return;
         }
 
@@ -145,6 +147,7 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
             const dataToSend = {
                 producto_id: productoId,
                 precio: precioFinal || null,
+                precio_compra: nuevaVariante.precio_compra || null,
                 stock: parseInt(nuevaVariante.stock),
                 sku: nuevaVariante.sku,
                 imagen: nuevaVariante.imagen,
@@ -282,17 +285,31 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
 
                         {/* Precio (condicional) */}
                         {atributoSeleccionado?.permite_precio == 1 && (
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Precio (Opcional)</label>
-                                <input
-                                    type="number"
-                                    placeholder="Igual al base"
-                                    value={nuevaVariante.precio}
-                                    onChange={(e) => setNuevaVariante({ ...nuevaVariante, precio: e.target.value })}
-                                    className="w-full px-3 py-2 bg-white dark:bg-[#0b1437] border dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                                    min="0"
-                                    step="0.01"
-                                />
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">P. Venta</label>
+                                    <input
+                                        type="number"
+                                        placeholder="Venta"
+                                        value={nuevaVariante.precio}
+                                        onChange={(e) => setNuevaVariante({ ...nuevaVariante, precio: e.target.value })}
+                                        className="w-full px-3 py-2 bg-white dark:bg-[#0b1437] border dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                        min="0"
+                                        step="0.01"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">P. Compra</label>
+                                    <input
+                                        type="number"
+                                        placeholder="Costo"
+                                        value={nuevaVariante.precio_compra}
+                                        onChange={(e) => setNuevaVariante({ ...nuevaVariante, precio_compra: e.target.value })}
+                                        className="w-full px-3 py-2 bg-white dark:bg-[#0b1437] border dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                        min="0"
+                                        step="0.01"
+                                    />
+                                </div>
                             </div>
                         )}
 
@@ -412,11 +429,16 @@ const GestionVariantes = ({ productoId, onClose, onSave, onChange, embedded = fa
                                             )) || '—'}
                                         </td>
                                         <td className="px-4 py-3">
-                                            {variante.precio ? (
-                                                <span className="text-green-600 dark:text-green-400 font-semibold">${parseFloat(variante.precio).toFixed(2)}</span>
-                                            ) : (
-                                                <span className="text-gray-500 dark:text-gray-500 italic">Base</span>
-                                            )}
+                                            <div className="flex flex-col">
+                                                {variante.precio ? (
+                                                    <span className="text-green-600 dark:text-green-400 font-semibold">V: S/ {parseFloat(variante.precio).toFixed(2)}</span>
+                                                ) : (
+                                                    <span className="text-gray-500 dark:text-gray-500 italic">V: Base</span>
+                                                )}
+                                                {variante.precio_compra && (
+                                                    <span className="text-xs text-gray-500 dark:text-gray-400">C: S/ {parseFloat(variante.precio_compra).toFixed(2)}</span>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
                                             <span className={variante.stock > 0 ? 'text-gray-700 dark:text-gray-300' : 'text-red-500 dark:text-red-400 font-semibold'}>

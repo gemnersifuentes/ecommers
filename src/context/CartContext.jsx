@@ -15,9 +15,22 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }) => {
   const [items, setItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cart_selected_items');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const { isAuthenticated, usuario, loading: authLoading } = useAuth();
+
+  // Guardar selección en localStorage
+  useEffect(() => {
+    localStorage.setItem('cart_selected_items', JSON.stringify(selectedItems));
+  }, [selectedItems]);
 
   // Cargar carrito al iniciar (solo cuando auth está listo)
   useEffect(() => {
@@ -76,6 +89,21 @@ export const CartProvider = ({ children }) => {
       // Recargar carrito desde backend
       const updatedCart = await carritoService.getCarrito();
       setItems(updatedCart || []);
+
+      // Auto-seleccionar el item recién agregado
+      if (updatedCart && updatedCart.length > 0) {
+        // Buscamos el item que acabamos de agregar (o el más reciente)
+        // Normalmente es el que coincide con producto_id y variacion_id
+        const newItem = updatedCart.find(it =>
+          it.producto_id === producto.id &&
+          (!variacion || it.variacion_id === variacion.id)
+        );
+
+        if (newItem && !selectedItems.includes(newItem.id)) {
+          setSelectedItems(prev => [...prev, newItem.id]);
+        }
+      }
+
       console.log('✓ Item agregado y sincronizado con backend');
     } catch (error) {
       console.error('Error al agregar item:', error);
@@ -100,6 +128,10 @@ export const CartProvider = ({ children }) => {
       await carritoService.removeItem(itemId);
       const updatedCart = await carritoService.getCarrito();
       setItems(updatedCart || []);
+
+      // Quitar de seleccionados si estaba
+      setSelectedItems(prev => prev.filter(id => id !== itemId));
+
       console.log('✓ Item eliminado');
     } catch (error) {
       console.error('Error al eliminar item:', error);
@@ -149,6 +181,7 @@ export const CartProvider = ({ children }) => {
     try {
       await carritoService.clearCart();
       setItems([]);
+      setSelectedItems([]);
       console.log('🗑️ Carrito vaciado');
     } catch (error) {
       console.error('Error al vaciar carrito:', error);
@@ -175,6 +208,8 @@ export const CartProvider = ({ children }) => {
     clearCart,
     getTotal,
     getItemsCount,
+    selectedItems,
+    setSelectedItems,
     loading,
     syncing
   };

@@ -527,7 +527,7 @@ const Header = () => {
                     <div className="flex flex-col leading-tight">
                       <span className="text-xs text-gray-500 font-normal">Bienvenido</span>
                       <span className="text-sm font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
-                        {isAuthenticated ? usuario.nombre : "Entrar / Registro"}
+                        {isAuthenticated ? (usuario.nombre?.split(' ').slice(0, 2).join(' ') || '') : "Entrar / Registro"}
                       </span>
                     </div>
                   </button>
@@ -615,7 +615,7 @@ const Header = () => {
               </div>
 
               {/* Mobile Action Icons */}
-              <div className="flex md:hidden items-center gap-3 ml-auto">
+              <div className="flex md:hidden items-center gap-4 ml-auto pr-2">
                 {/* User Mobile - Show name when authenticated */}
                 <button
                   onClick={() => {
@@ -624,11 +624,11 @@ const Header = () => {
                     else navigate('/login');
                     setTimeout(hideLoader, 500);
                   }}
-                  className="flex items-center gap-2 transition-colors max-w-[140px]"
+                  className="flex items-center gap-2 transition-colors max-w-[120px]"
                 >
                   <User className="w-5 h-5 text-gray-700 flex-shrink-0" strokeWidth={2} />
-                  <span className="text-sm font-medium text-gray-700 truncate">
-                    {isAuthenticated ? usuario.nombre : 'Entrar'}
+                  <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                    {isAuthenticated ? (usuario.nombre?.split(' ')[0] || '') : 'Entrar'}
                   </span>
                 </button>
 

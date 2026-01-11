@@ -326,7 +326,7 @@ const ProductoDetalle = () => {
     const tieneStock = stockActual > 0;
 
     return (
-        <div className="min-h-screen bg-gray-50 w-full pt-32 md:pt-60">
+        <div className="min-h-screen bg-gray-50 w-full pt-36 md:pt-48">
             <div className="container mx-auto px-4 py-4 md:py-8 max-w-7xl">
                 {/* Header with Back, Title, SKU */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -30,9 +30,11 @@ import { useLoader } from '../context/LoaderContext';
 import { formatDeliveryEstimate, getDeliveryLabel } from '../utils/dateUtils';
 
 const Checkout = () => {
-    const { items: cart, getTotal, clearCart } = useCart();
+    const { items: fullCart, clearCart, removeItem } = useCart();
     const { usuario } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+
     const [step, setStep] = useState(1); // 1: Envío, 2: Pago, 3: Éxito
     const [loading, setLoading] = useState(false);
     const [orderNumber, setOrderNumber] = useState('');
@@ -41,6 +43,48 @@ const Checkout = () => {
     const [comprobante, setComprobante] = useState(null);
     const [mpPreferenceId, setMpPreferenceId] = useState(null);
     const { showLoader, hideLoader } = useLoader();
+
+    // Filtramos los items basándonos en la selección previa en el Carrito (si existe)
+    const selectedItemsIds = location.state?.selectedItems;
+    const cart = selectedItemsIds
+        ? (fullCart || []).filter(item => selectedItemsIds.includes(item.id))
+        : (fullCart || []);
+
+    const getCartTotal = (items = cart) => {
+        if (!items) return 0;
+        return items.reduce((acc, item) => acc + (parseFloat(item.precio) * item.cantidad), 0);
+    };
+
+    const getSubtotal = (items = cart) => {
+        if (!items) return 0;
+        return items.reduce((acc, item) => {
+            const precioRegular = item.precio_regular || item.precio;
+            return acc + (parseFloat(precioRegular) * item.cantidad);
+        }, 0);
+    };
+
+    const getTotalDiscount = (items = cart) => {
+        if (!items) return 0;
+        return items.reduce((acc, item) => {
+            if (item.descuento && item.descuento.ahorro) {
+                return acc + parseFloat(item.descuento.ahorro);
+            }
+            if (item.precio_regular && item.precio) {
+                const ahorroUnitario = parseFloat(item.precio_regular) - parseFloat(item.precio);
+                if (ahorroUnitario > 0) {
+                    return acc + (ahorroUnitario * item.cantidad);
+                }
+            }
+            return acc;
+        }, 0);
+    };
+
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('es-PE', {
+            style: 'currency',
+            currency: 'PEN'
+        }).format(amount);
+    };
 
     useEffect(() => {
         // Cargar SDK de Mercado Pago
@@ -335,7 +379,7 @@ const Checkout = () => {
             const baseOrderData = {
                 usuario_id: usuario ? usuario.id : '',
                 correo: formData.correo,
-                total: getTotal() * 1.18,
+                total: getCartTotal() * 1.18,
                 metodo_envio: metodoEnvio,
                 metodo_pago: metodoPago,
                 items: cart.map(item => ({
@@ -345,9 +389,7 @@ const Checkout = () => {
                     precio: item.precio, // Enviar precio base (sin IGV adicional aquí, el email calculará o mostrará base)
                     precio_regular: item.precio_regular || item.precio,
                     variacion_id: item.variacion ? item.variacion.id : null,
-                    variacion_nombre: item.variacion?.atributos?.[0]
-                        ? `${item.variacion.atributos[0].atributo_nombre}: ${item.variacion.atributos[0].valor}`
-                        : null,
+                    variacion_nombre: item.variacion?.atributos?.map(a => `${a.atributo_nombre}: ${a.valor}`).join(' / ') || null,
                 })),
                 shipping: shippingData,
                 direccion_id: (metodoEnvio === 'domicilio' && direccionSeleccionada && !usarOtraDireccion) ? direccionSeleccionada : null,
@@ -442,14 +484,21 @@ const Checkout = () => {
                         metodo: metodoPago,
                         subtotal: getSubtotal(),
                         descuento: getTotalDiscount(),
-                        total: getTotal() * 1.18
+                        total: getCartTotal() * 1.18
                     },
                     orderNumber: response.numero_pedido
                 });
 
                 setOrderNumber(response.numero_pedido);
+                // Limpiar solo los items comprados
+                if (selectedItemsIds) {
+                    for (const id of selectedItemsIds) {
+                        await removeItem(id);
+                    }
+                } else {
+                    clearCart();
+                }
                 setStep(3);
-                clearCart();
             } else {
                 Swal.fire({
                     icon: 'error',
@@ -506,37 +555,6 @@ const Checkout = () => {
         </div>
     );
 
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('es-PE', {
-            style: 'currency',
-            currency: 'PEN'
-        }).format(amount);
-    };
-
-    const getSubtotal = () => {
-        if (!cart) return 0;
-        return cart.reduce((acc, item) => {
-            const precioRegular = item.precio_regular || item.precio;
-            return acc + (parseFloat(precioRegular) * item.cantidad);
-        }, 0);
-    };
-
-    const getTotalDiscount = () => {
-        if (!cart) return 0;
-        return cart.reduce((acc, item) => {
-            if (item.descuento && item.descuento.ahorro) {
-                return acc + parseFloat(item.descuento.ahorro);
-            }
-            if (item.precio_regular && item.precio) {
-                const ahorroUnitario = parseFloat(item.precio_regular) - parseFloat(item.precio);
-                if (ahorroUnitario > 0) {
-                    return acc + (ahorroUnitario * item.cantidad);
-                }
-            }
-            return acc;
-        }, 0);
-    };
-
     if (!cart || (cart.length === 0 && step !== 3)) {
         return (
             <div className="min-h-screen bg-gray-50 pt-24 pb-12 flex flex-col items-center justify-center">
@@ -552,7 +570,7 @@ const Checkout = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pt-44 pb-12 md:pt-60">
+        <div className="min-h-screen bg-gray-50 pt-36 pb-12 md:pt-48">
             <div className="container mx-auto px-4 max-w-6xl">
 
                 {renderStepIndicator()}
@@ -616,7 +634,7 @@ const Checkout = () => {
                                                         <h4 className="text-sm font-bold text-gray-900 line-clamp-1">{item.producto?.nombre}</h4>
                                                         {item.variacion && (
                                                             <p className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-sm inline-block mt-1">
-                                                                {item.variacion.atributos?.map(a => a.valor).join(' - ')}
+                                                                {item.variacion.atributos?.map(a => `${a.atributo_nombre}: ${a.valor}`).join(' / ')}
                                                             </p>
                                                         )}
                                                         <div className="flex justify-between items-center mt-2">
@@ -705,25 +723,20 @@ const Checkout = () => {
                                     <div className="bg-white rounded-2xl p-6 border-2 border-gray-50 shadow-sm">
                                         <h3 className="text-sm font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100">Resumen Económico</h3>
                                         <div className="space-y-3">
-                                            <div className="flex justify-between text-xs text-gray-500">
-                                                <span>Subtotal</span>
-                                                <span className="font-bold">{formatCurrency(finalOrderData?.pago.subtotal)}</span>
-                                            </div>
-                                            <div className="flex justify-between text-xs text-gray-500">
-                                                <span>Envío</span>
-                                                <span className="font-bold text-green-600">GRATIS</span>
-                                            </div>
-                                            {finalOrderData?.pago.descuento > 0 && (
-                                                <div className="flex justify-between text-xs text-red-500">
-                                                    <span>Descuento</span>
-                                                    <span className="font-bold">-{formatCurrency(finalOrderData?.pago.descuento)}</span>
+                                            <div className="pt-3 border-t border-gray-100 mt-3 space-y-2">
+                                                <div className="flex justify-between text-xs text-gray-500">
+                                                    <span>Base Imponible (Neto)</span>
+                                                    <span className="font-bold">{formatCurrency(finalOrderData?.pago.total / 1.18)}</span>
                                                 </div>
-                                            )}
-                                            <div className="pt-3 border-t border-gray-100 flex justify-between items-center mt-3">
-                                                <span className="text-sm font-extrabold text-gray-900">Total Final</span>
-                                                <span className="text-xl font-extrabold text-orange-500">{formatCurrency(finalOrderData?.pago.total)}</span>
+                                                <div className="flex justify-between text-xs text-orange-600">
+                                                    <span>IGV (18%)</span>
+                                                    <span className="font-bold">+{formatCurrency(finalOrderData?.pago.total - (finalOrderData?.pago.total / 1.18))}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center pt-2 border-t border-gray-50">
+                                                    <span className="text-sm font-extrabold text-gray-900">Total Pagado</span>
+                                                    <span className="text-xl font-extrabold text-orange-500">{formatCurrency(finalOrderData?.pago.total)}</span>
+                                                </div>
                                             </div>
-                                            <p className="text-[9px] text-gray-400 text-center mt-4">Incluye IGV (18%)</p>
                                         </div>
                                     </div>
 
@@ -742,7 +755,7 @@ const Checkout = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                         {/* Main Column */}
-                        <div className="lg:col-span-2 space-y-6">
+                        <div className="lg:col-span-2 space-y-8">
 
                             {/* Step 1: Shipping */}
                             {step === 1 && (
@@ -1195,11 +1208,11 @@ const Checkout = () => {
                                                                 </div>
                                                                 <div>
                                                                     <p className="text-[8px] font-black text-purple-400 uppercase tracking-widest">Monto a pagar</p>
-                                                                    <p className="text-sm font-black text-purple-900">{formatCurrency(getTotal())}</p>
+                                                                    <p className="text-sm font-black text-purple-900">{formatCurrency(getCartTotal(cart))}</p>
                                                                 </div>
                                                             </div>
                                                             <button
-                                                                onClick={() => handleCopy(getTotal(), 'Monto')}
+                                                                onClick={() => handleCopy(getCartTotal(cart), 'Monto')}
                                                                 className="p-2 hover:bg-purple-50 rounded-lg text-purple-400 hover:text-purple-600 transition-colors"
                                                             >
                                                                 <Copy size={16} />
@@ -1276,11 +1289,11 @@ const Checkout = () => {
                                                                 </div>
                                                                 <div>
                                                                     <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest">Monto a pagar</p>
-                                                                    <p className="text-sm font-black text-blue-900">{formatCurrency(getTotal())}</p>
+                                                                    <p className="text-sm font-black text-blue-900">{formatCurrency(getCartTotal(cart))}</p>
                                                                 </div>
                                                             </div>
                                                             <button
-                                                                onClick={() => handleCopy(getTotal(), 'Monto')}
+                                                                onClick={() => handleCopy(getCartTotal(cart), 'Monto')}
                                                                 className="p-2 hover:bg-blue-50 rounded-lg text-blue-400 hover:text-blue-600 transition-colors"
                                                             >
                                                                 <Copy size={16} />
@@ -1363,8 +1376,8 @@ const Checkout = () => {
                                                             <p className="text-[9px] text-indigo-400 mt-1 uppercase tracking-tighter italic">Envía tu comprobante a pagos@redhard.com.pe</p>
                                                         </div>
                                                         <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-indigo-100 shadow-inner">
-                                                            <p className="text-xs font-black text-indigo-900">{formatCurrency(getTotal())}</p>
-                                                            <button onClick={() => handleCopy(getTotal(), 'Monto')} className="text-indigo-400 hover:text-indigo-600"><Copy size={12} /></button>
+                                                            <p className="text-xs font-black text-indigo-900">{formatCurrency(getCartTotal(cart))}</p>
+                                                            <button onClick={() => handleCopy(getCartTotal(cart), 'Monto')} className="text-indigo-400 hover:text-indigo-600"><Copy size={12} /></button>
                                                         </div>
                                                     </div>
 
@@ -1521,33 +1534,34 @@ const Checkout = () => {
                         {/* Order Summary Sidebar */}
                         <div className="lg:col-span-1">
                             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-24">
-                                <h3 className="text-lg font-bold text-gray-900 mb-6">Resumen del Pedido</h3>
-                                <div className="space-y-4 mb-6 max-h-[300px] overflow-y-auto pr-1">
+                                <h3 className="text-lg font-bold text-gray-900 mb-6 border-b border-gray-50 pb-4">Resumen del Pedido</h3>
+
+                                <div className="space-y-4 mb-6">
                                     {cart.map((item) => (
-                                        <div key={`${item.id}-${JSON.stringify(item.variacion)}`} className="flex gap-3">
-                                            <div className="w-16 h-16 bg-gray-50 rounded-lg overflow-hidden border border-gray-100 flex-shrink-0">
+                                        <div key={`${item.id}-${JSON.stringify(item.variacion)}`} className="flex gap-3 pb-3 border-b border-gray-50 last:border-0 last:pb-0">
+                                            <div className="w-14 h-14 bg-gray-50 rounded-lg overflow-hidden border border-gray-100 flex-shrink-0">
                                                 <img
                                                     src={item.producto?.imagen}
                                                     alt={item.producto?.nombre}
                                                     className="w-full h-full object-cover"
                                                 />
                                             </div>
-                                            <div className="flex-1">
-                                                <p className="text-xs font-medium text-gray-800 line-clamp-2 mb-1">{item.producto?.nombre}</p>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-[11px] font-bold text-gray-900 line-clamp-1 mb-0.5">{item.producto?.nombre}</p>
                                                 {item.variacion && (
-                                                    <p className="text-xs text-blue-600 bg-blue-50 inline-block px-2 py-1 rounded mb-2">
-                                                        {item.variacion.atributos?.map(a => a.valor).join(' - ')}
+                                                    <p className="text-[9px] text-blue-600 bg-blue-50 inline-block px-1.5 py-0.5 rounded mb-1 font-medium">
+                                                        {item.variacion.atributos?.map(a => `${a.atributo_nombre}: ${a.valor}`).join(' / ')}
                                                     </p>
                                                 )}
                                                 <div className="flex justify-between items-end">
-                                                    <span className="text-xs text-gray-500">Cant: {item.cantidad}</span>
+                                                    <span className="text-[10px] text-gray-500">Cant: {item.cantidad}</span>
                                                     <div className="text-right">
                                                         {(item.precio_regular && parseFloat(item.precio) < parseFloat(item.precio_regular)) && (
-                                                            <span className="text-xs text-gray-400 line-through block">
+                                                            <p className="text-[9px] text-gray-400 line-through">
                                                                 {formatCurrency(parseFloat(item.precio_regular) * item.cantidad)}
-                                                            </span>
+                                                            </p>
                                                         )}
-                                                        <span className={`text-sm font-bold ${item.precio_regular && parseFloat(item.precio) < parseFloat(item.precio_regular) ? 'text-orange-600' : 'text-gray-900'}`}>
+                                                        <span className="text-xs font-black text-gray-900">
                                                             {formatCurrency(parseFloat(item.precio) * item.cantidad)}
                                                         </span>
                                                     </div>
@@ -1557,7 +1571,7 @@ const Checkout = () => {
                                     ))}
                                 </div>
 
-                                <div className="space-y-3 pt-6 border-t border-gray-100">
+                                <div className="space-y-2.5 pt-4 border-t border-gray-100">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">Subtotal</span>
                                         <span className="font-medium text-gray-900">{formatCurrency(getSubtotal())}</span>
@@ -1572,14 +1586,23 @@ const Checkout = () => {
                                             <span className="font-medium text-red-500">-{formatCurrency(getTotalDiscount())}</span>
                                         </div>
                                     )}
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">IGV (18%)</span>
-                                        <span className="font-medium text-gray-900">{formatCurrency(getTotal() * 0.18)}</span>
+
+                                    <div className="flex justify-between text-sm text-gray-900 font-bold border-t border-gray-100 pt-2">
+                                        <span>Neto (Base Imponible)</span>
+                                        <span>{formatCurrency(getCartTotal())}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm text-orange-600">
+                                        <span>IGV (18%)</span>
+                                        <span className="font-medium">+{formatCurrency(getCartTotal() * 0.18)}</span>
                                     </div>
 
-                                    <div className="flex justify-between text-xl font-bold pt-3 border-t border-gray-100">
-                                        <span className="text-gray-900">Total</span>
-                                        <span className="text-orange-500">{formatCurrency(getTotal() * 1.18)}</span>
+                                    <div className="flex justify-between text-xl font-bold pt-3 border-t-2 border-orange-100">
+                                        <div className="w-full">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-900">Total a Pagar</span>
+                                                <span className="text-orange-500">{formatCurrency(getCartTotal() * 1.18)}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 

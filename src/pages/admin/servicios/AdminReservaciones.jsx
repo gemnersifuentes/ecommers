@@ -49,10 +49,12 @@ const AdminReservaciones = () => {
     };
 
     const [costoFinal, setCostoFinal] = useState('');
+    const [costoInsumos, setCostoInsumos] = useState('');
 
     useEffect(() => {
         if (selectedReservacion) {
             setCostoFinal(selectedReservacion.costo_final || '');
+            setCostoInsumos(selectedReservacion.costo_insumos || '');
         }
     }, [selectedReservacion]);
 
@@ -60,7 +62,8 @@ const AdminReservaciones = () => {
         try {
             await reservacionesService.update(id, {
                 estado: nuevoEstado,
-                costo_final: costoFinal || null
+                costo_final: costoFinal || null,
+                costo_insumos: costoInsumos || null
             });
             Swal.fire({
                 icon: 'success',
@@ -71,7 +74,7 @@ const AdminReservaciones = () => {
             });
             cargarReservaciones();
             if (selectedReservacion && selectedReservacion.id === id) {
-                setSelectedReservacion({ ...selectedReservacion, estado: nuevoEstado, costo_final: costoFinal });
+                setSelectedReservacion({ ...selectedReservacion, estado: nuevoEstado, costo_final: costoFinal, costo_insumos: costoInsumos });
             }
         } catch (error) {
             Swal.fire('Error', 'No se pudo actualizar el estado', 'error');
@@ -246,6 +249,16 @@ const AdminReservaciones = () => {
                                                         type="number"
                                                         value={costoFinal}
                                                         onChange={(e) => setCostoFinal(e.target.value)}
+                                                        className="w-full bg-gray-800 dark:bg-[#111c44] text-white border-2 border-gray-700 dark:border-white/10 rounded-lg px-3 py-2 text-sm font-black focus:border-orange-600 dark:focus:border-orange-500 outline-none transition-all"
+                                                        placeholder="0.00"
+                                                    />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase mb-1">Costo Insumos (S/)</p>
+                                                    <input
+                                                        type="number"
+                                                        value={costoInsumos}
+                                                        onChange={(e) => setCostoInsumos(e.target.value)}
                                                         className="w-full bg-gray-800 dark:bg-[#111c44] text-white border-2 border-gray-700 dark:border-white/10 rounded-lg px-3 py-2 text-sm font-black focus:border-orange-600 dark:focus:border-orange-500 outline-none transition-all"
                                                         placeholder="0.00"
                                                     />

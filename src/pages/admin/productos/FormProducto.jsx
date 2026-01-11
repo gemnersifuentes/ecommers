@@ -15,6 +15,7 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
         categoria_id: '',
         marca_id: '',
         precio_base: '',
+        precio_compra: '',
         stock: '',
 
         // SEO & Marketing
@@ -70,6 +71,7 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                 categoria_id: initialData.categoria_id || '',
                 marca_id: initialData.marca_id || '',
                 precio_base: initialData.precio_base || '',
+                precio_compra: initialData.precio_compra || '',
                 stock: initialData.stock !== undefined ? initialData.stock : '',
                 // SEO
                 meta_titulo: initialData.meta_titulo || '',
@@ -405,10 +407,10 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-3 gap-3">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                            Precio Base ($) <span className="text-red-500">*</span>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Venta (S/) <span className="text-red-500">*</span>
                                         </label>
                                         <input
                                             type="number"
@@ -417,14 +419,29 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                             onChange={handleChange}
                                             onBlur={handleBlur}
                                             step="0.01"
-                                            className={`w-full px-3 py-2.5 text-sm rounded-lg border ${errors.precio_base ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 dark:border-white/10 focus:ring-blue-500 focus:border-blue-500'} outline-none transition-all bg-white dark:bg-white/5 dark:text-white`}
+                                            className={`w-full px-3 py-2 text-sm rounded-lg border ${errors.precio_base ? 'border-red-500' : 'border-gray-300 dark:border-white/10'} outline-none transition-all bg-white dark:bg-white/5 dark:text-white`}
                                             placeholder="0.00"
                                         />
-                                        {errors.precio_base && <p className="text-red-500 text-xs mt-1">{errors.precio_base}</p>}
+                                        {errors.precio_base && <p className="text-red-500 text-[10px] mt-0.5">{errors.precio_base}</p>}
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                            Stock Inicial <span className="text-red-500">*</span>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Compra (S/)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            name="precio_compra"
+                                            value={formData.precio_compra}
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            step="0.01"
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 outline-none transition-all bg-white dark:bg-white/5 dark:text-white"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Stock <span className="text-red-500">*</span>
                                         </label>
                                         <input
                                             type="number"
@@ -432,10 +449,10 @@ const FormProducto = ({ initialData, onSubmit, titulo, subtitulo, buttonText = '
                                             value={formData.stock}
                                             onChange={handleChange}
                                             onBlur={handleBlur}
-                                            className={`w-full px-3 py-2.5 text-sm rounded-lg border ${errors.stock ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 dark:border-white/10 focus:ring-blue-500 focus:border-blue-500'} outline-none transition-all bg-white dark:bg-white/5 dark:text-white`}
+                                            className={`w-full px-3 py-2 text-sm rounded-lg border ${errors.stock ? 'border-red-500' : 'border-gray-300 dark:border-white/10'} outline-none transition-all bg-white dark:bg-white/5 dark:text-white`}
                                             placeholder="0"
                                         />
-                                        {errors.stock && <p className="text-red-500 text-xs mt-1">{errors.stock}</p>}
+                                        {errors.stock && <p className="text-red-500 text-[10px] mt-0.5">{errors.stock}</p>}
                                     </div>
                                 </div>
 

@@ -147,11 +147,33 @@ const ProductosShow = () => {
                             )}
                         </div>
                         <div className="p-6 border-t border-gray-100 dark:border-white/5">
-                            <div className="flex items-center justify-between mb-4">
-                                <span className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">${parseFloat(producto.precio_base).toFixed(2)}</span>
-                                <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${producto.stock > 0 ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' : 'bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20'}`}>
-                                    {producto.stock > 0 ? 'En Stock' : 'Agotado'}
-                                </span>
+                            <div className="flex flex-col gap-2 mb-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex flex-col">
+                                        <span className="text-[8px] font-black text-emerald-600 uppercase tracking-widest">Precio Venta (S/)</span>
+                                        <span className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">S/ {parseFloat(producto.precio_base).toFixed(2)}</span>
+                                    </div>
+                                    <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${producto.stock > 0 ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' : 'bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20'}`}>
+                                        {producto.stock > 0 ? 'En Stock' : 'Agotado'}
+                                    </span>
+                                </div>
+                                {producto.precio_compra && (
+                                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-[#0b1437] rounded-xl border border-gray-100 dark:border-white/5">
+                                        <div>
+                                            <span className="text-[8px] font-black text-orange-600 uppercase tracking-widest block mb-0.5">Precio Compra</span>
+                                            <span className="text-sm font-black text-gray-700 dark:text-gray-300">S/ {parseFloat(producto.precio_compra).toFixed(2)}</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest block mb-0.5">Utilidad Estimada</span>
+                                            <div className="flex items-center gap-2 justify-end">
+                                                <span className="text-xs font-black text-emerald-600">S/ {(producto.precio_base - producto.precio_compra).toFixed(2)}</span>
+                                                <span className="px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded text-[9px] font-black">
+                                                    +{(((producto.precio_base - producto.precio_compra) / producto.precio_base) * 100).toFixed(1)}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Quick Stock Update */}
@@ -229,7 +251,14 @@ const ProductosShow = () => {
                                                     </div>
                                                 </td>
                                                 <td className="py-4 pr-4 font-mono font-bold text-gray-400 dark:text-gray-500">{v.sku}</td>
-                                                <td className="py-4 pr-4 font-black text-gray-900 dark:text-white uppercase tracking-tight">${parseFloat(v.precio).toFixed(2)}</td>
+                                                <td className="py-4 pr-4">
+                                                    <div className="flex flex-col">
+                                                        <span className="font-black text-gray-900 dark:text-white uppercase tracking-tight text-xs">V: S/ {parseFloat(v.precio).toFixed(2)}</span>
+                                                        {v.precio_compra && (
+                                                            <span className="font-medium text-gray-400 dark:text-gray-500 text-[9px]">C: S/ {parseFloat(v.precio_compra).toFixed(2)}</span>
+                                                        )}
+                                                    </div>
+                                                </td>
                                                 <td className="py-4 w-32">
                                                     <input
                                                         type="number"

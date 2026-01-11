@@ -253,12 +253,12 @@ const PedidosShow = () => {
                         <div className="p-8 bg-[#f8fafc]/50 dark:bg-[#0b1437]/30 border-t border-gray-50 dark:border-white/5">
                             <div className="flex flex-col items-end gap-2">
                                 <div className="flex items-center gap-8 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                                    <span>Subtotal</span>
+                                    <span>Neto (Base Imponible)</span>
                                     <span className="w-24 text-right text-gray-600 dark:text-gray-400">S/ {(parseFloat(pedido.total) / 1.18).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                                 </div>
                                 <div className="flex items-center gap-8 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
                                     <span>IGV (18%)</span>
-                                    <span className="w-24 text-right text-gray-600 dark:text-gray-400">S/ {(parseFloat(pedido.total) - (parseFloat(pedido.total) / 1.18)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                    <span className="w-24 text-right text-orange-600 dark:text-orange-400 font-black">+ S/ {(parseFloat(pedido.total) - (parseFloat(pedido.total) / 1.18)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                                 </div>
                                 {pedido.items?.reduce((acc, item) => acc + (parseFloat(item.precio_regular || item.precio_unitario) - parseFloat(item.precio_unitario)) * item.cantidad, 0) > 0 && (
                                     <div className="flex items-center gap-8 text-[10px] font-black text-emerald-500 dark:text-emerald-400 uppercase tracking-widest">
@@ -268,8 +268,8 @@ const PedidosShow = () => {
                                         </span>
                                     </div>
                                 )}
-                                <div className="flex items-center gap-8 mt-2 pt-2 border-t border-gray-200 dark:border-white/10">
-                                    <span className="text-xs font-black text-[#1e293b] dark:text-white uppercase tracking-tighter">Total Final</span>
+                                <div className="flex items-center gap-8 mt-2 pt-2 border-t-2 border-orange-500/20">
+                                    <span className="text-xs font-black text-[#1e293b] dark:text-white uppercase tracking-tighter">Total Pagado</span>
                                     <span className="w-24 text-right text-xl font-black text-orange-600 dark:text-orange-500 tabular-nums">
                                         S/ {parseFloat(pedido.total).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </span>

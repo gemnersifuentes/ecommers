@@ -63,7 +63,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed right-0 top-0 h-full w-96 max-w-md bg-white shadow-2xl z-[60] flex flex-col"
+                        className="fixed right-0 top-0 h-full w-full sm:w-96 sm:max-w-md bg-white shadow-2xl z-[60] flex flex-col"
                     >
                         {/* LOADER */}
                         {syncing && <Loading message="Actualizando..." />}
@@ -151,7 +151,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                                                                 <h3 className="font-bold text-xs text-gray-900 line-clamp-2 leading-tight">{nombre}</h3>
                                                                 {variacion && (
                                                                     <p className="text-xs text-gray-500 ">
-                                                                        {variacion.atributos?.map(a => a.valor).join(' - ')}
+                                                                        {variacion.atributos?.map(a => `${a.atributo_nombre}: ${a.valor}`).join(' / ')}
                                                                     </p>
                                                                 )}
                                                             </div>
@@ -173,14 +173,16 @@ const CartSidebar = ({ isOpen, onClose }) => {
                                                         <div className="flex justify-between items-end">
                                                             {/* Price */}
                                                             <div>
-                                                                <p className="text-sm font-bold text-orange-500 leading-none">
-                                                                    ${parseFloat(item.precio).toFixed(2)}
-                                                                </p>
-                                                                {item.precio_regular && parseFloat(item.precio) < parseFloat(item.precio_regular) && (
-                                                                    <p className="text-xs text-gray-400 line-through mt-0.5">
-                                                                        ${parseFloat(item.precio_regular).toFixed(2)}
+                                                                <div className="flex items-center gap-2">
+                                                                    <p className="text-sm font-bold text-orange-500 leading-none">
+                                                                        ${parseFloat(item.precio).toFixed(2)}
                                                                     </p>
-                                                                )}
+                                                                    {item.precio_regular && parseFloat(item.precio) < parseFloat(item.precio_regular) && (
+                                                                        <p className="text-xs text-gray-400 line-through">
+                                                                            ${parseFloat(item.precio_regular).toFixed(2)}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
                                                             </div>
 
                                                             {/* Quantity */}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import DatePicker from '../../components/ui/DatePicker';
 
 const AdminReportes = () => {
   const [fechaInicio, setFechaInicio] = useState('');
@@ -15,24 +16,18 @@ const AdminReportes = () => {
       <div className="bg-white dark:bg-[#111c44] rounded-xl shadow-sm border border-transparent dark:border-white/5 p-6">
         <h3 className="font-bold text-gray-900 dark:text-white mb-4">Filtros de Fecha</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fecha Inicio</label>
-            <input
-              type="date"
-              value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white dark:bg-[#0b1437] border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fecha Fin</label>
-            <input
-              type="date"
-              value={fechaFin}
-              onChange={(e) => setFechaFin(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white dark:bg-[#0b1437] border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
-            />
-          </div>
+          <DatePicker
+            label="Fecha Inicio"
+            value={fechaInicio}
+            onChange={setFechaInicio}
+            className="flex-1"
+          />
+          <DatePicker
+            label="Fecha Fin"
+            value={fechaFin}
+            onChange={setFechaFin}
+            className="flex-1"
+          />
           <div className="flex items-end">
             <button className="w-full px-4 py-2.5 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl dark:shadow-blue-500/20 transition-all flex items-center justify-center">
               <i className="fas fa-search mr-2"></i>Generar Reporte

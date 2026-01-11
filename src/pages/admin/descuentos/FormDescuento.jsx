@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { descuentosService, productosService, categoriasService, marcasService } from '../../../services';
 import Breadcrumb from '../../../components/Breadcrumb';
+import DatePicker from '../../../components/ui/DatePicker';
+
 
 const FormDescuento = ({ id = null }) => {
     const navigate = useNavigate();
@@ -220,28 +222,17 @@ const FormDescuento = ({ id = null }) => {
                             <Calendar size={16} className="text-blue-600 dark:text-blue-400" /> Periodo de Validez
                         </h3>
                         <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wider">Fecha Inicio <span className="text-red-500">*</span></label>
-                                <input
-                                    type="date"
-                                    name="fecha_inicio"
-                                    value={formData.fecha_inicio}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wider">Fecha Fin <span className="text-red-500">*</span></label>
-                                <input
-                                    type="date"
-                                    name="fecha_fin"
-                                    value={formData.fecha_fin}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-white/10 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white dark:bg-white/5 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
-                                />
-                            </div>
+                            <DatePicker
+                                label="Fecha Inicio *"
+                                value={formData.fecha_inicio}
+                                onChange={(val) => setFormData(prev => ({ ...prev, fecha_inicio: val }))}
+                            />
+                            <DatePicker
+                                label="Fecha Fin *"
+                                value={formData.fecha_fin}
+                                onChange={(val) => setFormData(prev => ({ ...prev, fecha_fin: val }))}
+                            />
+
                         </div>
                     </div>
                 </div>

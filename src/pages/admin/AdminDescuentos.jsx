@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Swal from 'sweetalert2'
 import { descuentosService, productosService, categoriasService, marcasService } from '../../services'
+import DatePicker from '../../components/ui/DatePicker'
+
 
 export default function AdminDescuentos() {
     const [descuentos, setDescuentos] = useState([])
@@ -379,32 +381,18 @@ export default function AdminDescuentos() {
 
                                     {/* Fechas */}
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Fecha Inicio *
-                                            </label>
-                                            <input
-                                                type="date"
-                                                name="fecha_inicio"
-                                                value={formData.fecha_inicio}
-                                                onChange={handleInputChange}
-                                                required
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Fecha Fin *
-                                            </label>
-                                            <input
-                                                type="date"
-                                                name="fecha_fin"
-                                                value={formData.fecha_fin}
-                                                onChange={handleInputChange}
-                                                required
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                                            />
-                                        </div>
+                                        <DatePicker
+                                            label="Fecha Inicio *"
+                                            value={formData.fecha_inicio}
+                                            onChange={(val) => setFormData(prev => ({ ...prev, fecha_inicio: val }))}
+                                            className="w-full"
+                                        />
+                                        <DatePicker
+                                            label="Fecha Fin *"
+                                            value={formData.fecha_fin}
+                                            onChange={(val) => setFormData(prev => ({ ...prev, fecha_fin: val }))}
+                                            className="w-full"
+                                        />
                                     </div>
 
                                     {/* Aplica a */}
@@ -504,9 +492,10 @@ export default function AdminDescuentos() {
                                 </form>
                             </div>
                         </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    </motion.div >
+                )
+                }
+            </AnimatePresence >
         </>
     )
 }

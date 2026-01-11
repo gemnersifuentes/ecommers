@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Swal from 'sweetalert2';
 import {
@@ -33,7 +33,8 @@ const ProductosIndex = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [totalProductos, setTotalProductos] = useState(0);
-    const [activeTab, setActiveTab] = useState('todos');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'todos');
 
     const tabs = [
         { id: 'todos', label: 'Todos', icon: List },
@@ -87,6 +88,20 @@ const ProductosIndex = () => {
         }, 300);
         return () => clearTimeout(timeoutId);
     }, [currentPage, itemsPerPage, searchTerm, activeTab]);
+
+    // Sincronizar el tab activo con los searchParams para persistencia y navegación externa
+    useEffect(() => {
+        const tab = searchParams.get('tab');
+        if (tab && tab !== activeTab) {
+            setActiveTab(tab);
+        }
+    }, [searchParams]);
+
+    const handleTabChange = (tabId) => {
+        setActiveTab(tabId);
+        setCurrentPage(1);
+        setSearchParams({ tab: tabId }, { replace: true });
+    };
 
     const handleEliminar = async (id) => {
         const result = await Swal.fire({
@@ -166,10 +181,7 @@ const ProductosIndex = () => {
                         return (
                             <button
                                 key={tab.id}
-                                onClick={() => {
-                                    setActiveTab(tab.id);
-                                    setCurrentPage(1);
-                                }}
+                                onClick={() => handleTabChange(tab.id)}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${activeTab === tab.id
                                     ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 shadow-sm'
                                     : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5'
@@ -224,7 +236,8 @@ const ProductosIndex = () => {
                                 </th>
                                 <th className="px-4 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap">CATEGORÍA</th>
                                 <th className="px-4 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 whitespace-nowrap">MARCA</th>
-                                <th className="px-4 py-4 text-[10px] font-black text-orange-600 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-center whitespace-nowrap">PRECIO</th>
+                                <th className="px-4 py-4 text-[10px] font-black text-orange-600 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-center whitespace-nowrap">VALORES</th>
+                                <th className="px-4 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-center whitespace-nowrap">MARGEN</th>
                                 <th className="px-4 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-center whitespace-nowrap">STOCK</th>
                                 <th className="px-4 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-center whitespace-nowrap">ESTADO</th>
                                 <th className="px-4 py-4 text-[10px] font-black text-[#64748b] dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-white/5 text-center whitespace-nowrap">VAR.</th>
@@ -291,11 +304,38 @@ const ProductosIndex = () => {
                                         </td>
 
                                         <td className="px-4 py-3 text-center">
-                                            <div className="flex flex-col items-center">
-                                                <span className="text-[11px] font-black text-[#1e293b] dark:text-white tabular-nums whitespace-nowrap">
-                                                    USD {parseFloat(producto.precio_base).toLocaleString()}
-                                                </span>
+                                            <div className="flex flex-col items-center gap-0.5">
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-[7px] font-black text-emerald-600 uppercase">venta:</span>
+                                                    <span className="text-[11px] font-black text-[#1e293b] dark:text-white tabular-nums">
+                                                        S/ {parseFloat(producto.precio_base).toLocaleString()}
+                                                    </span>
+                                                </div>
+                                                {producto.precio_compra && (
+                                                    <div className="flex items-center gap-1 opacity-60">
+                                                        <span className="text-[7px] font-black text-orange-600 uppercase">compra:</span>
+                                                        <span className="text-[9px] font-bold text-gray-500 dark:text-gray-400 tabular-nums">
+                                                            S/ {parseFloat(producto.precio_compra).toLocaleString()}
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
+                                        </td>
+
+                                        <td className="px-4 py-3 text-center">
+                                            {producto.precio_compra ? (
+                                                <div className="flex flex-col items-center">
+                                                    <div className={`px-2 py-0.5 rounded-full text-[9px] font-black border ${((producto.precio_base - producto.precio_compra) / producto.precio_base) * 100 > 30
+                                                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                                        : 'bg-amber-50 text-amber-600 border-amber-100'
+                                                        }`}>
+                                                        {(((producto.precio_base - producto.precio_compra) / producto.precio_base) * 100).toFixed(1)}%
+                                                    </div>
+                                                    <span className="text-[8px] font-bold text-gray-400 mt-0.5 uppercase">utilidad</span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-[10px] text-gray-300">---</span>
+                                            )}
                                         </td>
 
                                         <td className="px-4 py-3">

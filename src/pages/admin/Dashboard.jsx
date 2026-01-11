@@ -136,11 +136,13 @@ const Dashboard = () => {
         },
         callbacks: {
           title: () => '',
-          label: (context) => {
-            const value = context.parsed.y;
-            return value >= 1000
-              ? `S/ ${(value / 1000).toFixed(1)}k`
-              : `S/ ${value.toFixed(0)}`;
+          label: function (context) {
+            let label = context.dataset.label || '';
+            if (label) label += ': ';
+            if (context.parsed.y !== null) {
+              label += new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(context.parsed.y);
+            }
+            return label;
           }
         }
       }
@@ -639,49 +641,40 @@ const Dashboard = () => {
   // BI Stats Cards (Strategic Perspective)
   const statsCards = [
     {
-      title: "Ganancia Estimada",
-      value: `S/ ${(data?.estadisticas?.margenEstimado || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
-      trend: "25% de lo vendido",
+      title: "Ingresos Totales",
+      value: `S/ ${(data?.estadisticas?.totalVentasMes || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+      trend: "Ventas + Servicios",
+      trendUp: true,
+      icon: "fas fa-cash-register",
+      iconColor: "text-blue-500",
+      iconBg: "bg-blue-100",
+      chartColor: "#3B82F6",
+      link: "/admin/reportes",
+      chartData: (data?.ventasPorDia || []).map(v => parseFloat(v.total))
+    },
+    {
+      title: "Gastos Totales",
+      value: `S/ ${(data?.estadisticas?.totalGastosMes || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+      trend: "Costos + Operación",
+      trendUp: false,
+      icon: "fas fa-wallet",
+      iconColor: "text-orange-500",
+      iconBg: "bg-orange-100",
+      chartColor: "#F97316",
+      link: "/admin/reportes",
+      chartData: (data?.ventasPorDia || []).map(v => parseFloat(v.total) * 0.75) // Mock trend for now
+    },
+    {
+      title: "Utilidad Real",
+      value: `S/ ${(data?.estadisticas?.utilidadReal || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+      trend: "Ganancia Neta",
       trendUp: true,
       icon: "fas fa-chart-line",
-      iconColor: "text-purple-500",
-      iconBg: "bg-purple-100",
-      chartColor: "#A855F7",
+      iconColor: "text-green-500",
+      iconBg: "bg-green-100",
+      chartColor: "#10B981",
       link: "/admin/reportes",
       chartData: (data?.ventasPorDia || []).map(v => parseFloat(v.total) * 0.25)
-    },
-    {
-      title: "Promedio por Venta",
-      value: `S/ ${(data?.estadisticas?.ticketPromedio || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-      trend: "Monto promedio por compra",
-      trendUp: true,
-      icon: "fas fa-receipt",
-      iconColor: "text-indigo-500",
-      iconBg: "bg-indigo-100",
-      chartColor: "#6366F1",
-      link: "/admin/reportes",
-      // Cambiamos a tendencia MENSUAL para que la forma sea distinta al Margen (que es diario)
-      chartData: (data?.ventasPorMes || []).slice(-6).map(v => {
-        const ped = parseInt(v.pedidos) || 1;
-        return parseFloat(v.total) / ped;
-      })
-    },
-    {
-      title: "Clientes que Regresan",
-      value: `${(data?.estadisticas?.tasaRetencion || 0).toFixed(1)}%`,
-      trend: "Compraron +1 vez",
-      trendUp: (data?.estadisticas?.tasaRetencion || 0) > 20,
-      icon: "fas fa-sync-alt",
-      iconColor: "text-teal-500",
-      iconBg: "bg-teal-100",
-      chartColor: "#14B8A6",
-      link: "/admin/clientes",
-      // Cambiamos a usar tendencia mensual para que se vea DIFERENTE (curva más suave)
-      chartData: (data?.clientesTrend || []).map(v => {
-        const total = parseInt(v.total_usuarios) || 1;
-        const rec = parseInt(v.recurrentes) || 0;
-        return (rec / total) * 100;
-      })
     },
     {
       title: "Crecimiento del Mes",
@@ -1232,8 +1225,8 @@ const Dashboard = () => {
                     <td className="py-4 text-xs font-bold text-right text-gray-900 dark:text-white">S/ {parseFloat(pedido.total).toFixed(2)}</td>
                     <td className="py-4 text-center">
                       <span className={`px-2 py-1 rounded-lg text-[9px] font-bold ${pedido.estado === 'pagado' || pedido.estado === 'Completado' ? 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-500' :
-                          pedido.estado === 'en_preparacion' || pedido.estado === 'En proceso' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-500' :
-                            'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-500'
+                        pedido.estado === 'en_preparacion' || pedido.estado === 'En proceso' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-500' :
+                          'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-500'
                         }`}>
                         {pedido.estado === 'en_preparacion' ? 'En proceso' : pedido.estado}
                       </span>
@@ -1282,8 +1275,8 @@ const Dashboard = () => {
                     <td className="py-4 text-xs font-bold text-right text-gray-900 dark:text-white">S/ {parseFloat(ticket.total).toFixed(2)}</td>
                     <td className="py-4 text-center">
                       <span className={`px-2 py-1 rounded-lg text-[9px] font-bold ${ticket.estado === 'Completado' ? 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-500' :
-                          ticket.estado === 'En proceso' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-500' :
-                            'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-500'
+                        ticket.estado === 'En proceso' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-500' :
+                          'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-500'
                         }`}>
                         {ticket.estado}
                       </span>

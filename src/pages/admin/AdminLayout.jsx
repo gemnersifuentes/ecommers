@@ -84,18 +84,176 @@ const Icons = {
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
     </svg>
   ),
+  Finance: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="1" x2="12" y2="23"></line>
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+    </svg>
+  ),
   SubItem: () => (
     <svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" strokeWidth="1.5">
       <rect x="2.5" y="2.5" width="3" height="3" transform="rotate(45 4 4)" />
     </svg>
+  ),
+  Truck: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1" y="3" width="15" height="13"></rect>
+      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+      <circle cx="5.5" cy="18.5" r="2.5"></circle>
+      <circle cx="18.5" cy="18.5" r="2.5"></circle>
+    </svg>
+  ),
+  Purchase: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+      <path d="M3 6h18"></path>
+      <path d="M16 10a4 4 0 0 1-8 0"></path>
+    </svg>
   )
+};
+
+const menuGroups = [
+  {
+    title: "PRINCIPAL",
+    items: [
+      { id: 'dashboard', path: '/admin', icon: Icons.Dashboard, label: 'Dashboard' },
+      { id: 'messages', path: '/admin/mensajes', icon: Icons.Message, label: 'Mensajes' }
+    ]
+  },
+  {
+    title: "PÁGINAS",
+    items: [
+      {
+        id: 'ecommerce', label: 'Ecommerce', icon: Icons.Ecommerce,
+        subItems: [
+          { path: '/admin/productos', label: 'Productos' },
+          { path: '/admin/pedidos', label: 'Pedidos' },
+        ]
+      },
+      {
+        id: 'category', label: 'Categorías', icon: Icons.Category,
+        subItems: [
+          { path: '/admin/categorias', label: 'Lista de Categorías' },
+          { path: '/admin/categorias/nuevo', label: 'Nueva Categoría' }
+        ]
+      },
+      {
+        id: 'attributes', label: 'Atributos', icon: Icons.Attributes,
+        subItems: [
+          { path: '/admin/marcas', label: 'Marcas' },
+          { path: '/admin/descuentos', label: 'Descuentos' }
+        ]
+      },
+      { id: 'banners', path: '/admin/banners', icon: Icons.Gallery, label: 'Banners' },
+      {
+        id: 'abastecimiento', label: 'Abastecimiento', icon: Icons.Truck,
+        subItems: [
+          { path: '/admin/compras', label: 'Compras' },
+          { path: '/admin/proveedores', label: 'Proveedores' }
+        ]
+      },
+      {
+        id: 'servicios', label: 'Servicios', icon: Icons.Order,
+        subItems: [
+          { path: '/admin/servicios', label: 'Lista de Servicios' },
+          { path: '/admin/servicios/reservaciones', label: 'Reservaciones' }
+        ]
+      },
+      {
+        id: 'usuarios', label: 'Usuarios', icon: Icons.User,
+        subItems: [
+          { path: '/admin/usuarios', label: 'Gestión de Usuarios' },
+          { path: '/admin/clientes', label: 'Clientes' }
+        ]
+      },
+      { id: 'gastos', path: '/admin/gastos', icon: Icons.Finance, label: 'Gastos' },
+      { id: 'report', path: '/admin/reportes', icon: Icons.Report, label: 'Reportes' },
+      { id: 'ajustes', path: '/admin/ajustes', icon: Icons.Settings, label: 'Ajustes' }
+    ]
+  }
+];
+
+const NavItem = ({
+  item,
+  openMenus,
+  sidebarOpen,
+  mobileMenuOpen,
+  toggleMenu,
+  isActive,
+  isGroupActive,
+  isPathMatch
+}) => {
+  const hasSubItems = item.subItems && item.subItems.length > 0;
+  const active = item.path ? isActive(item.path) : false;
+  const groupActive = hasSubItems && isGroupActive(item.subItems);
+  const isOpen = openMenus[item.id];
+  const Icon = item.icon;
+
+  const parentClasses = `
+    relative flex items-center gap-3 px-4 py-3 transition-all duration-200 group cursor-pointer select-none
+    ${active ? 'bg-orange-600 text-white shadow-sm' : (groupActive ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600' : 'text-gray-500 dark:text-gray-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-500/10')}
+    rounded-xl
+  `;
+
+  return (
+    <div className="mb-1">
+      {hasSubItems ? (
+        <div onClick={() => toggleMenu(item.id)} className={parentClasses}>
+          <div className={`w-6 flex justify-center transition-colors ${active ? 'text-white' : (groupActive ? 'text-orange-600' : 'text-gray-400 dark:text-gray-500 group-hover:text-orange-600')}`}>
+            <Icon />
+          </div>
+          {(sidebarOpen || mobileMenuOpen) && (
+            <>
+              <span className={`text-xs font-bold tracking-tight flex-1 ${active ? 'text-white' : (groupActive ? 'text-orange-600' : 'text-gray-700 dark:text-gray-200')}`}>{item.label}</span>
+              <i className={`fas fa-chevron-${isOpen ? 'up' : 'right'} text-[9px] transition-transform duration-200 ${active ? 'text-white' : (groupActive ? 'text-orange-600' : 'text-gray-400 dark:text-gray-500')}`}></i>
+            </>
+          )}
+        </div>
+      ) : (
+        <Link to={item.path} className={parentClasses}>
+          <div className={`w-6 flex justify-center transition-colors ${active ? 'text-white' : 'text-gray-400 dark:text-gray-500 group-hover:text-orange-600'}`}>
+            <Icon />
+          </div>
+          {(sidebarOpen || mobileMenuOpen) && <span className={`text-xs font-bold tracking-tight flex-1 ${active ? 'text-white' : 'text-gray-700 dark:text-gray-200'}`}>{item.label}</span>}
+        </Link>
+      )}
+      <AnimatePresence>
+        {hasSubItems && isOpen && (sidebarOpen || mobileMenuOpen) && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+            <div className="pt-1 pb-2 pl-4 space-y-1">
+              {item.subItems.map((subItem, idx) => {
+                const isSubActive = isPathMatch(subItem.path) &&
+                  !item.subItems.some(s => s.path !== subItem.path && s.path.startsWith(subItem.path) && isPathMatch(s.path));
+
+                return (
+                  <Link
+                    key={idx}
+                    to={subItem.path}
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-xs tracking-tight ${isSubActive
+                      ? 'text-orange-600 bg-orange-100/50 dark:bg-orange-500/20 font-black shadow-sm'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-orange-600 hover:bg-gray-50 dark:hover:bg-white/5 font-medium'
+                      }`}
+                  >
+                    <div className={`w-4 flex justify-center ${isSubActive ? 'text-orange-600' : 'text-gray-300 dark:text-gray-600 group-hover:text-orange-600'}`}>
+                      <Icons.SubItem />
+                    </div>
+                    <span>{subItem.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 };
 
 const AdminLayout = () => {
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { notifications, hasNew, setHasNew, latestToast } = useNotifications();
+  const { notifications, hasNew, setHasNew, latestToast, markAsSeen, markAllAsSeen } = useNotifications();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -261,125 +419,6 @@ const AdminLayout = () => {
     setIsDarkMode(!isDarkMode);
   };
 
-  const menuGroups = [
-    {
-      title: "PRINCIPAL",
-      items: [
-        { id: 'dashboard', path: '/admin', icon: Icons.Dashboard, label: 'Dashboard' },
-        { id: 'messages', path: '/admin/mensajes', icon: Icons.Message, label: 'Mensajes' }
-      ]
-    },
-    {
-      title: "PÁGINAS",
-      items: [
-        {
-          id: 'ecommerce', label: 'Ecommerce', icon: Icons.Ecommerce,
-          subItems: [
-            { path: '/admin/productos', label: 'Productos' },
-            { path: '/admin/pedidos', label: 'Pedidos' },
-          ]
-        },
-        {
-          id: 'category', label: 'Categorías', icon: Icons.Category,
-          subItems: [
-            { path: '/admin/categorias', label: 'Lista de Categorías' },
-            { path: '/admin/categorias/nuevo', label: 'Nueva Categoría' }
-          ]
-        },
-        {
-          id: 'attributes', label: 'Atributos', icon: Icons.Attributes,
-          subItems: [
-            { path: '/admin/marcas', label: 'Marcas' },
-            { path: '/admin/descuentos', label: 'Descuentos' }
-          ]
-        },
-        { id: 'banners', path: '/admin/banners', icon: Icons.Gallery, label: 'Banners' },
-        {
-          id: 'servicios', label: 'Servicios', icon: Icons.Order,
-          subItems: [
-            { path: '/admin/servicios', label: 'Lista de Servicios' },
-            { path: '/admin/servicios/reservaciones', label: 'Reservaciones' }
-          ]
-        },
-        {
-          id: 'usuarios', label: 'Usuarios', icon: Icons.User,
-          subItems: [
-            { path: '/admin/usuarios', label: 'Gestión de Usuarios' },
-            { path: '/admin/clientes', label: 'Clientes' }
-          ]
-        },
-        { id: 'report', path: '/admin/reportes', icon: Icons.Report, label: 'Reportes' },
-        { id: 'ajustes', path: '/admin/ajustes', icon: Icons.Settings, label: 'Ajustes' }
-      ]
-    }
-  ];
-
-  const NavItem = ({ item }) => {
-    const hasSubItems = item.subItems && item.subItems.length > 0;
-    const active = item.path ? isActive(item.path) : false;
-    const groupActive = hasSubItems && isGroupActive(item.subItems);
-    const isOpen = openMenus[item.id];
-    const Icon = item.icon;
-
-    const parentClasses = `
-      relative flex items-center gap-3 px-4 py-3 transition-all duration-200 group cursor-pointer select-none
-      ${active ? 'bg-orange-600 text-white shadow-sm' : (groupActive ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600' : 'text-gray-500 dark:text-gray-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-500/10')}
-      rounded-xl
-    `;
-
-    return (
-      <div className="mb-1">
-        {hasSubItems ? (
-          <div onClick={() => toggleMenu(item.id)} className={parentClasses}>
-            <div className={`w-6 flex justify-center transition-colors ${active ? 'text-white' : (groupActive ? 'text-orange-600' : 'text-gray-400 dark:text-gray-500 group-hover:text-orange-600')}`}>
-              <Icon />
-            </div>
-            {(sidebarOpen || mobileMenuOpen) && (
-              <>
-                <span className={`text-xs font-bold tracking-tight flex-1 ${active ? 'text-white' : (groupActive ? 'text-orange-600' : 'text-gray-700 dark:text-gray-200')}`}>{item.label}</span>
-                <i className={`fas fa-chevron-${isOpen ? 'up' : 'right'} text-[9px] transition-transform duration-200 ${active ? 'text-white' : (groupActive ? 'text-orange-600' : 'text-gray-400 dark:text-gray-500')}`}></i>
-              </>
-            )}
-          </div>
-        ) : (
-          <Link to={item.path} className={parentClasses}>
-            <div className={`w-6 flex justify-center transition-colors ${active ? 'text-white' : 'text-gray-400 dark:text-gray-500 group-hover:text-orange-600'}`}>
-              <Icon />
-            </div>
-            {(sidebarOpen || mobileMenuOpen) && <span className={`text-xs font-bold tracking-tight flex-1 ${active ? 'text-white' : 'text-gray-700 dark:text-gray-200'}`}>{item.label}</span>}
-          </Link>
-        )}
-        <AnimatePresence>
-          {hasSubItems && isOpen && (sidebarOpen || mobileMenuOpen) && (
-            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-              <div className="pt-1 pb-2 pl-4 space-y-1">
-                {item.subItems.map((subItem, idx) => {
-                  const isSubActive = isPathMatch(subItem.path) &&
-                    !item.subItems.some(s => s.path !== subItem.path && s.path.startsWith(subItem.path) && isPathMatch(s.path));
-
-                  return (
-                    <Link
-                      key={idx}
-                      to={subItem.path}
-                      className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-xs tracking-tight ${isSubActive
-                        ? 'text-orange-600 bg-orange-100/50 dark:bg-orange-500/20 font-black shadow-sm'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-orange-600 hover:bg-gray-50 dark:hover:bg-white/5 font-medium'
-                        }`}
-                    >
-                      <div className={`w-4 flex justify-center ${isSubActive ? 'text-orange-600' : 'text-gray-300 dark:text-gray-600 group-hover:text-orange-600'}`}>
-                        <Icons.SubItem />
-                      </div>
-                      <span>{subItem.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    );
-  };
 
   return (
     <div className="h-screen bg-[#F4F7FE] dark:bg-[#0b1437] flex font-['Public_Sans'] overflow-hidden selection:bg-orange-100 selection:text-orange-600 transition-colors duration-300">
@@ -414,7 +453,21 @@ const AdminLayout = () => {
           {menuGroups.map((group, index) => (
             <div key={index} className="mb-6">
               {(sidebarOpen || mobileMenuOpen) && group.title && <div className="px-4 mb-3 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] dark:text-gray-500">{group.title}</div>}
-              <div className="space-y-0.5">{group.items.map(item => <NavItem key={item.id || item.path} item={item} />)}</div>
+              <div className="space-y-0.5">
+                {group.items.map(item => (
+                  <NavItem
+                    key={item.id || item.path}
+                    item={item}
+                    openMenus={openMenus}
+                    sidebarOpen={sidebarOpen}
+                    mobileMenuOpen={mobileMenuOpen}
+                    toggleMenu={toggleMenu}
+                    isActive={isActive}
+                    isGroupActive={isGroupActive}
+                    isPathMatch={isPathMatch}
+                  />
+                ))}
+              </div>
             </div>
           ))}
         </nav>
@@ -569,7 +622,7 @@ const AdminLayout = () => {
                       />
                     )}
                     <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-600 rounded-full border-2 border-white dark:border-[#111c44] text-[9px] text-white flex items-center justify-center font-bold px-0.5 shadow-sm z-10">
-                      {notifications.counts.total_alertas > 99 ? '99+' : notifications.counts.total_alertas}
+                      {notifications.counts.total_alertas}
                     </span>
                   </>
                 )}
@@ -579,7 +632,17 @@ const AdminLayout = () => {
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute right-0 mt-3 w-80 bg-white dark:bg-[#111c44] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/5 overflow-hidden z-50 text-left">
                     <div className="p-4 border-b border-gray-50 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
                       <h3 className="font-bold text-gray-900 dark:text-white text-sm">Notificaciones</h3>
-                      <span className="text-[10px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded-full uppercase">{notifications.counts.total_alertas} Recientes</span>
+                      <div className="flex items-center gap-3">
+                        {notifications.counts.total_alertas > 0 && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); markAllAsSeen('global'); }}
+                            className="text-[10px] font-extrabold text-orange-600 hover:text-orange-700 uppercase tracking-tight transition-colors hover:underline"
+                          >
+                            Limpiar todo
+                          </button>
+                        )}
+                        <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{notifications.counts.total_alertas} Totales</span>
+                      </div>
                     </div>
                     <div className="max-h-96 overflow-y-auto main-scrollbar">
                       {notifications.recent.pedidos.length === 0 &&
@@ -594,9 +657,14 @@ const AdminLayout = () => {
                         )}
                       {notifications.recent.pedidos.length > 0 && (
                         <div className="p-2">
-                          <p className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-2 mb-1">Pedidos</p>
+                          <div className="flex justify-between items-center px-2 mb-1">
+                            <p className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Pedidos ({notifications.counts.pedidos})</p>
+                            {notifications.counts.pedidos > 4 && (
+                              <Link to="/admin/pedidos" onClick={() => setActiveDropdown(null)} className="text-[9px] font-bold text-orange-600 hover:underline">Ver todos</Link>
+                            )}
+                          </div>
                           {notifications.recent.pedidos.slice(0, 4).map(p => (
-                            <Link key={p.id} to={`/admin/pedidos/ver/${p.id}`} onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 p-2 hover:bg-orange-50 dark:hover:bg-white/5 rounded-xl transition-colors text-left">
+                            <Link key={p.id} to={`/admin/pedidos/ver/${p.id}`} onClick={() => { setActiveDropdown(null); markAsSeen('pedido', p.id); }} className="flex items-center gap-3 p-2 hover:bg-orange-50 dark:hover:bg-white/5 rounded-xl transition-colors text-left">
                               <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-500/10 flex items-center justify-center text-orange-600 flex-shrink-0"><i className="fas fa-shopping-cart text-xs"></i></div>
                               <div className="flex-1 min-w-0"><p className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate">{p.numero_pedido}</p><p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{p.cliente}</p></div>
                               <span className="text-[10px] font-bold text-gray-900 dark:text-white">S/ {p.total}</span>
@@ -606,9 +674,14 @@ const AdminLayout = () => {
                       )}
                       {notifications.recent.servicios.length > 0 && (
                         <div className="p-2 border-t border-gray-50 dark:border-white/5">
-                          <p className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-2 mb-1">Servicios</p>
+                          <div className="flex justify-between items-center px-2 mb-1">
+                            <p className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Servicios ({notifications.counts.servicios})</p>
+                            {notifications.counts.servicios > 4 && (
+                              <Link to="/admin/servicios/reservaciones" onClick={() => setActiveDropdown(null)} className="text-[9px] font-bold text-orange-600 hover:underline">Ver todos</Link>
+                            )}
+                          </div>
                           {notifications.recent.servicios.slice(0, 4).map(s => (
-                            <Link key={s.id} to="/admin/servicios/reservaciones" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 p-2 hover:bg-indigo-50 dark:hover:bg-white/5 rounded-xl transition-colors text-left">
+                            <Link key={s.id} to="/admin/servicios/reservaciones" onClick={() => { setActiveDropdown(null); markAsSeen('servicio', s.id); }} className="flex items-center gap-3 p-2 hover:bg-indigo-50 dark:hover:bg-white/5 rounded-xl transition-colors text-left">
                               <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 flex-shrink-0"><i className="fas fa-calendar-alt text-xs"></i></div>
                               <div className="flex-1 min-w-0"><p className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate">{s.servicio_nombre}</p><p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{s.nombre_cliente}</p></div>
                             </Link>
@@ -617,9 +690,14 @@ const AdminLayout = () => {
                       )}
                       {notifications.recent.stock.length > 0 && (
                         <div className="p-2 border-t border-gray-50 dark:border-white/5">
-                          <p className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-2 mb-1">Stock Bajo</p>
-                          {notifications.recent.stock.slice(0, 4).map(st => (
-                            <Link key={st.real_id} to={`/admin/productos/ver/${st.id}`} onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 p-2 hover:bg-red-50 dark:hover:bg-white/5 rounded-xl transition-colors text-left">
+                          <div className="flex justify-between items-center px-2 mb-1">
+                            <p className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Stock Bajo ({notifications.counts.stock_bajo})</p>
+                            {notifications.counts.stock_bajo > 0 && (
+                              <Link to="/admin/productos?tab=bajo_stock" onClick={() => setActiveDropdown(null)} className="text-[9px] font-bold text-orange-600 hover:underline">Ver todos</Link>
+                            )}
+                          </div>
+                          {notifications.recent.stock.slice(0, 20).map(st => (
+                            <Link key={st.real_id} to={`/admin/productos/ver/${st.id}`} onClick={() => { setActiveDropdown(null); markAsSeen('stock', st.real_id); }} className="flex items-center gap-3 p-2 hover:bg-red-50 dark:hover:bg-white/5 rounded-xl transition-colors text-left">
                               <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-500/10 flex items-center justify-center text-red-600 flex-shrink-0"><i className="fas fa-exclamation-triangle text-xs"></i></div>
                               <div className="flex-1 min-w-0"><p className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate">{st.nombre}</p><p className="text-[10px] text-red-500 font-bold">Quedan: {st.stock}</p></div>
                             </Link>
@@ -649,7 +727,7 @@ const AdminLayout = () => {
                       />
                     )}
                     <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-600 rounded-full border-2 border-white dark:border-[#111c44] text-[9px] text-white flex items-center justify-center font-bold px-0.5 shadow-sm z-10">
-                      {notifications.counts.mensajes > 99 ? '99+' : notifications.counts.mensajes}
+                      {notifications.counts.mensajes}
                     </span>
                   </>
                 )}
@@ -659,6 +737,17 @@ const AdminLayout = () => {
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute right-0 mt-3 w-80 bg-white dark:bg-[#111c44] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/5 overflow-hidden z-50 text-left">
                     <div className="p-4 border-b border-gray-50 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
                       <h3 className="font-bold text-gray-900 dark:text-white text-sm">Mensajes</h3>
+                      <div className="flex items-center gap-3">
+                        {notifications.counts.mensajes > 0 && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); markAllAsSeen('mensaje'); }}
+                            className="text-[10px] font-extrabold text-orange-600 hover:text-orange-700 uppercase tracking-tight transition-colors hover:underline"
+                          >
+                            Limpiar todo
+                          </button>
+                        )}
+                        <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{notifications.counts.mensajes} Pendientes</span>
+                      </div>
                     </div>
                     <div className="max-h-96 overflow-y-auto main-scrollbar">
                       {notifications.recent.mensajes.length === 0 ? (
@@ -673,7 +762,7 @@ const AdminLayout = () => {
                           <Link
                             key={msg.id}
                             to={`/admin/mensajes/ver/${msg.id}`}
-                            onClick={() => setActiveDropdown(null)}
+                            onClick={() => { setActiveDropdown(null); markAsSeen('mensaje', msg.id); }}
                             className="w-full flex items-start gap-4 p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border-b border-gray-50 dark:border-white/5 last:border-0"
                           >
                             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/10 text-blue-600 rounded-xl flex items-center justify-center font-black flex-shrink-0">

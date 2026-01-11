@@ -221,6 +221,30 @@ export const usuariosService = {
   }
 };
 
+export const gastosService = {
+  getAll: () => api.get('/api/gastos.php').then(res => res.data),
+  getById: (id) => api.get(`/api/gastos.php?id=${id}`).then(res => res.data),
+  create: (data) => api.post('/api/gastos.php', data).then(res => res.data),
+  update: (id, data) => api.put(`/api/gastos.php?id=${id}`, data).then(res => res.data),
+  delete: (id) => api.delete(`/api/gastos.php?id=${id}`).then(res => res.data)
+};
+
+export const proveedoresService = {
+  getAll: () => api.get('/api/proveedores.php').then(res => res.data),
+  getById: (id) => api.get(`/api/proveedores.php?id=${id}`).then(res => res.data),
+  create: (data) => api.post('/api/proveedores.php', data).then(res => res.data),
+  update: (id, data) => api.put(`/api/proveedores.php?id=${id}`, data).then(res => res.data),
+  delete: (id) => api.delete(`/api/proveedores.php?id=${id}`).then(res => res.data)
+};
+
+export const comprasService = {
+  getAll: () => api.get('/api/compras.php').then(res => res.data),
+  getById: (id) => api.get(`/api/compras.php?id=${id}`).then(res => res.data),
+  create: (data) => api.post('/api/compras.php', data).then(res => res.data),
+  update: (id, data) => api.put(`/api/compras.php?id=${id}`, data).then(res => res.data),
+  delete: (id) => api.delete(`/api/compras.php?id=${id}`).then(res => res.data)
+};
+
 export const reportesService = {
   getDashboard: async (periodo = '12M') => {
     const response = await api.get(`/api/reportes/dashboard?periodo=${periodo}`);

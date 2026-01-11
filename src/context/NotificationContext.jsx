@@ -114,6 +114,89 @@ export const NotificationProvider = ({ children }) => {
         }
     }, [usuario]);
 
+    const markAsSeen = useCallback(async (type, id) => {
+        try {
+            const response = await api.post('/api/mark_seen.php', { type, id });
+            if (response.data.success) {
+                // Actualizar inmediatamente el estado local para un feedback instantáneo
+                setNotifications(prev => {
+                    const newRecent = { ...prev.recent };
+                    const categoryKey = type === 'stock' ? 'stock' :
+                        type === 'pedido' ? 'pedidos' :
+                            type === 'mensaje' ? 'mensajes' :
+                                type === 'servicio' ? 'servicios' : null;
+
+                    if (categoryKey && newRecent[categoryKey]) {
+                        newRecent[categoryKey] = newRecent[categoryKey].filter(item =>
+                            (item.id === id || item.real_id === id) === false
+                        );
+                    }
+
+                    // Decrementar los contadores si corresponde
+                    const newCounts = { ...prev.counts };
+                    if (type === 'pedido') newCounts.pedidos = Math.max(0, newCounts.pedidos - 1);
+                    if (type === 'mensaje') newCounts.mensajes = Math.max(0, newCounts.mensajes - 1);
+                    if (type === 'servicio') newCounts.servicios = Math.max(0, newCounts.servicios - 1);
+                    if (type === 'stock') newCounts.stock_bajo = Math.max(0, newCounts.stock_bajo - 1);
+
+                    newCounts.total_alertas = newCounts.pedidos + newCounts.mensajes + newCounts.servicios + newCounts.stock_bajo;
+
+                    return {
+                        ...prev,
+                        counts: newCounts,
+                        recent: newRecent
+                    };
+                });
+            }
+        } catch (error) {
+            console.error('Error marking as seen:', error);
+        }
+    }, []);
+
+    const markAllAsSeen = useCallback(async (type = 'global') => {
+        try {
+            const response = await api.post('/api/mark_seen.php', { type, id: 'all' });
+            if (response.data.success) {
+                setNotifications(prev => {
+                    const newCounts = { ...prev.counts };
+                    const newRecent = { ...prev.recent };
+
+                    if (type === 'global') {
+                        newCounts.pedidos = 0;
+                        newCounts.mensajes = 0;
+                        newCounts.servicios = 0;
+                        newCounts.stock_bajo = 0;
+                        newCounts.total_alertas = 0;
+                        newRecent.pedidos = [];
+                        newRecent.mensajes = [];
+                        newRecent.servicios = [];
+                        newRecent.stock = [];
+                    } else if (type === 'pedido') {
+                        newCounts.total_alertas -= newCounts.pedidos;
+                        newCounts.pedidos = 0;
+                        newRecent.pedidos = [];
+                    } else if (type === 'mensaje') {
+                        newCounts.total_alertas -= newCounts.mensajes;
+                        newCounts.mensajes = 0;
+                        newRecent.mensajes = [];
+                    } else if (type === 'servicio') {
+                        newCounts.total_alertas -= newCounts.servicios;
+                        newCounts.servicios = 0;
+                        newRecent.servicios = [];
+                    } else if (type === 'stock') {
+                        newCounts.total_alertas -= newCounts.stock_bajo;
+                        newCounts.stock_bajo = 0;
+                        newRecent.stock = [];
+                    }
+
+                    return { ...prev, counts: newCounts, recent: newRecent };
+                });
+            }
+        } catch (error) {
+            console.error('Error marking all as seen:', error);
+        }
+    }, []);
+
     useEffect(() => {
         if (usuario && usuario.rol === 'admin') {
             fetchNotifications(true);
@@ -130,6 +213,8 @@ export const NotificationProvider = ({ children }) => {
             hasNew,
             latestToast,
             setHasNew,
+            markAsSeen,
+            markAllAsSeen,
             refreshNotifications: () => fetchNotifications(true)
         }}>
             {children}

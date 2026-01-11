@@ -54,6 +54,12 @@ import UsuariosEdit from './pages/admin/usuarios/edit'
 import AdminBanners from './pages/admin/banners/index'
 import AdminReportes from './pages/admin/AdminReportes'
 import AdminReservaciones from './pages/admin/servicios/AdminReservaciones'
+import GastosIndex from './pages/admin/gastos/index'
+import FormGasto from './pages/admin/gastos/FormGasto'
+import ProveedoresIndex from './pages/admin/proveedores/index'
+import ComprasIndex from './pages/admin/compras/index'
+import FormCompra from './pages/admin/compras/FormCompra'
+import ComprasShow from './pages/admin/compras/show'
 import AjustesDetalle from './pages/admin/AjustesDetalle'
 import './App.css'
 
@@ -262,6 +268,18 @@ function App() {
             <Route path="editar/:id" element={<UsuariosEdit />} />
           </Route>
           <Route path="banners" element={<AdminBanners />} />
+          <Route path="proveedores" element={<ProveedoresIndex />} />
+          <Route path="compras">
+            <Route index element={<ComprasIndex />} />
+            <Route path="nuevo" element={<FormCompra />} />
+            <Route path="editar/:id" element={<FormCompra />} />
+            <Route path="ver/:id" element={<ComprasShow />} />
+          </Route>
+          <Route path="gastos">
+            <Route index element={<GastosIndex />} />
+            <Route path="nuevo" element={<FormGasto />} />
+            <Route path="editar/:id" element={<FormGasto />} />
+          </Route>
           <Route path="reportes" element={<AdminReportes />} />
           <Route path="ajustes" element={<AjustesDetalle />} />
         </Route>

@@ -50,7 +50,7 @@ switch ($method) {
             // Ventas del mes actual (Tarjeta Principal) - INCLUYE SERVICIOS COMPLETADOS
             $stmtVentasMes = $pdo->prepare("
                 SELECT (
-                    SELECT SUM(total) FROM pedidos WHERE estado != 'cancelado' AND MONTH(fecha) = MONTH(NOW()) AND YEAR(fecha) = YEAR(NOW())
+                    SELECT COALESCE(SUM(total), 0) FROM pedidos WHERE estado != 'cancelado' AND MONTH(fecha) = MONTH(NOW()) AND YEAR(fecha) = YEAR(NOW())
                 ) + (
                     SELECT COALESCE(SUM(costo_final), 0) FROM reservaciones_servicios WHERE estado = 'Completado' AND MONTH(fecha_registro) = MONTH(NOW()) AND YEAR(fecha_registro) = YEAR(NOW())
                 ) as total
@@ -58,16 +58,45 @@ switch ($method) {
             $stmtVentasMes->execute();
             $ventasMes = $stmtVentasMes->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
-            // Ventas Históricas - INCLUYE SERVICIOS COMPLETADOS
+            // Gastos del mes actual (COGS + Insumos + Gastos Operativos)
+            $stmtGastosMes = $pdo->prepare("
+                SELECT (
+                    SELECT COALESCE(SUM(precio_compra * cantidad), 0) FROM detalle_pedido dp JOIN pedidos p ON dp.pedido_id = p.id WHERE p.estado != 'cancelado' AND MONTH(p.fecha) = MONTH(NOW()) AND YEAR(p.fecha) = YEAR(NOW())
+                ) + (
+                    SELECT COALESCE(SUM(costo_insumos), 0) FROM reservaciones_servicios WHERE estado = 'Completado' AND MONTH(fecha_registro) = MONTH(NOW()) AND YEAR(fecha_registro) = YEAR(NOW())
+                ) + (
+                    SELECT COALESCE(SUM(monto), 0) FROM gastos_operativos WHERE MONTH(fecha) = MONTH(NOW()) AND YEAR(fecha) = YEAR(NOW())
+                ) as total
+            ");
+            $stmtGastosMes->execute();
+            $gastosMes = $stmtGastosMes->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+
+            // Ventas Históricas Totales
             $stmtVentasTotal = $pdo->prepare("
                 SELECT (
-                    SELECT SUM(total) FROM pedidos WHERE estado != 'cancelado'
+                    SELECT COALESCE(SUM(total), 0) FROM pedidos WHERE estado != 'cancelado'
                 ) + (
                     SELECT COALESCE(SUM(costo_final), 0) FROM reservaciones_servicios WHERE estado = 'Completado'
                 ) as total
             ");
             $stmtVentasTotal->execute();
             $totalVentasBase = $stmtVentasTotal->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+
+            // Gastos Históricos Totales
+            $stmtGastosTotal = $pdo->prepare("
+                SELECT (
+                    SELECT COALESCE(SUM(precio_compra * cantidad), 0) FROM detalle_pedido dp JOIN pedidos p ON dp.pedido_id = p.id WHERE p.estado != 'cancelado'
+                ) + (
+                    SELECT COALESCE(SUM(costo_insumos), 0) FROM reservaciones_servicios WHERE estado = 'Completado'
+                ) + (
+                    SELECT COALESCE(SUM(monto), 0) FROM gastos_operativos
+                ) as total
+            ");
+            $stmtGastosTotal->execute();
+            $totalGastosBase = $stmtGastosTotal->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+            
+            // Utilidad Real
+            $totalUtilidadReal = $totalVentasBase - $totalGastosBase;
             
             // Pedidos del mes actual (Solo pedidos físicos)
             $stmtPedidosMes = $pdo->prepare("SELECT COUNT(*) as total FROM pedidos WHERE MONTH(fecha) = MONTH(NOW()) AND YEAR(fecha) = YEAR(NOW())");
@@ -327,8 +356,8 @@ switch ($method) {
             $totalClientesUnicos = $stmtTotalClientes->fetch(PDO::FETCH_ASSOC)['total'] ?? 1;
             $tasaRetencion = ($clientesRepetidores / $totalClientesUnicos) * 100;
 
-            // 3. Margen de Ganancia Estimado
-            $margenEstimado = $totalVentasBase * 0.25;
+            // 3. Utilidad Real (Basada en costos)
+            $utilidadReal = $totalVentasBase - $totalGastosBase;
 
             // 4. Top Clientes (Spenders)
             $stmtTopClientes = $pdo->prepare("
@@ -418,6 +447,9 @@ switch ($method) {
                 'estadisticas' => [
                     'totalVentas' => floatval($totalVentasBase),
                     'totalVentasMes' => floatval($ventasMes),
+                    'totalGastos' => floatval($totalGastosBase),
+                    'totalGastosMes' => floatval($gastosMes),
+                    'utilidadReal' => floatval($totalUtilidadReal),
                     'totalPedidos' => intval($totalPedidos),
                     'totalPedidosMes' => intval($totalPedidosMes),
                     'totalProductos' => intval($totalProductos),
@@ -428,7 +460,7 @@ switch ($method) {
                     'ventasTrend' => number_format($crecimientoMoM, 2) . '%',
                     'ticketPromedio' => floatval($ticketPromedio),
                     'tasaRetencion' => floatval($tasaRetencion),
-                    'margenEstimado' => floatval($margenEstimado)
+                    'margenEstimado' => floatval($totalUtilidadReal) // Para mantener compatibilidad si el front aún usa este nombre
                 ],
                 'ventasPorMes' => $ventasPorMes,
                 'ventasPorDia' => array_map(function($d) { return ['dia' => $d['dia'], 'total' => $d['total']]; }, $datosDiariosArr),
